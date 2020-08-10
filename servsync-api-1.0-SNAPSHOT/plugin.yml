@@ -1,0 +1,3 @@
+name: "serversync-api"
+main: net.pengtul.servsync_api.Main
+version: 0.0.1
