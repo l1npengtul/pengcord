@@ -1,0 +1,26 @@
+#
+enable-sync: true
+
+world-to-track: "world"
+# Discord Bot Token (NOTE: Replace with your own)
+client-token: "who is rem, i love emilia"
+# Discord Bot Prefix
+bot-prefix: "mc!"
+# Enables the "Verify" feature, tying a discord account to an in game account
+enable-verify: false
+# The SQL Driver to use. Currently Supported is MySQL(mysql) and PostgreSQL(postgresql)
+# Allowed Values : "postgresql", "mysql"
+sql-driver: "postgresql"
+# IP of Database, format `[ip]:[port]`
+sql-ip: "localhost:3306"
+sql-database: "ServVerify"
+sql-username: ""
+sql-password: ""
+server-sys: "[Server]: "
+server-name: "boomer"
+system-sys: "[System]: "
+
+bot-sync-channel: ""
+bot-command-channel: ""
+bot-admin-channel: ""
+bot-server: ""
