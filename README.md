@@ -1,1 +1,0 @@
-# servsync-api
