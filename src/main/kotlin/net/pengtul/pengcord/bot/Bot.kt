@@ -91,7 +91,7 @@ class Bot {
                         webhookUpdater = webhookUpdater.setName("cly de")
                     }
                     else {
-                        webhookUpdater = webhookUpdater.setName(usrname)
+                        webhookUpdater = webhookUpdater.setName(regex.replace(usrname, ""))
                     }
                     try {
                         webhookUpdater.setAvatar(File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${player.uniqueId}.png"))
