@@ -23,7 +23,8 @@ import net.pengtul.pengcord.main.Main
 
 data class Config(val es: Boolean, val saesang: String?, val discordkey: String?, val verienable: Boolean, val serv: String?,
                   val sys: String?, val servname: String?, val bpf: String?, var bind_sync: String?, val bind_cmd: String?, val bind_admin: String?,
-                  val servtrak: String?, val webid: String?, val webtok: String?, val admins: List<String>?) {
+                  val servtrak: String?, val webid: String?, val webtok: String?, val adnr: Boolean, val admins: List<String>?,
+                  val bwenable: Boolean, val bw: List<String>?, val bwmsg: String?, val bwdisc: Boolean) {
     var enableSync: Boolean = es
     var worldToTrack: String? = saesang
     val discordApiKey: String? = discordkey
@@ -36,6 +37,11 @@ data class Config(val es: Boolean, val saesang: String?, val discordkey: String?
     var adminChannel: String? = bind_admin
     var serverBind: String? = servtrak
     var adminList: List<String>? = admins
+    var adminNoRole: Boolean = adnr
+    var bannedWords: List<String>? = bw
+    var bannedWordsEnable: Boolean = bwenable
+    var bannedWordMessage: String? = bwmsg
+    var bannedWordDiscord: Boolean = bwdisc
     var usersList: HashMap<String, String>? = getListOfUsers();
 
     fun writeValues(){
@@ -50,6 +56,7 @@ data class Config(val es: Boolean, val saesang: String?, val discordkey: String?
         Main.ServerRawConfig.set("webhook-id", this.serverBind)
         Main.ServerRawConfig.set("webhook-token", this.serverBind)
         Main.ServerRawConfig.set("server-admin-roles", this.adminList)
+
         this.saveUsersList()
     }
 

@@ -21,22 +21,22 @@ package net.pengtul.pengcord.main
 // If you're reviewing this, or have to read this
 // I'm sorry.
 
+import net.luckperms.api.LuckPerms
 import net.pengtul.pengcord.bot.Bot
 import net.pengtul.pengcord.commands.Verify
 import net.pengtul.pengcord.config.Config
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandExecutor
-import org.bukkit.event.Listener
-import org.bukkit.plugin.java.JavaPlugin
-import java.util.logging.Logger
-import net.pengtul.pengcord.config.*
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
+import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
+import org.bukkit.plugin.RegisteredServiceProvider
+import org.bukkit.plugin.java.JavaPlugin
 import java.awt.image.BufferedImage
 import java.io.File
-import java.lang.Exception
 import java.net.URL
+import java.util.logging.Logger
 import javax.imageio.ImageIO
 
 class Main : JavaPlugin(), Listener, CommandExecutor{
@@ -49,7 +49,8 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         //public lateinit var discordApi: DiscordApi;
         lateinit var dFolder: File
         lateinit var discordBot: Bot
-        var playersToVerify = HashMap<String,String>()
+        lateinit var luckPerms: LuckPerms
+        var playersToVerify = HashMap<String, String>()
         var doSyncDiscord: Boolean = true
         // lateinit var sqlClass: SQLClass
 
@@ -58,13 +59,12 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
             val usrUUID: String = usr.uniqueId.toString()
             currentPlugin?.let {
                 Bukkit.getScheduler().runTaskAsynchronously(currentPlugin, Runnable {
-                    try{
+                    try {
                         val newPngFile = File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${usrUUID}.png")
                         newPngFile.mkdirs()
                         val image: BufferedImage = ImageIO.read(URL("https://minotar.net/helm/${usrUUID}/100.png"))
-                        ImageIO.write(image,"png",newPngFile)
-                    }
-                    catch (e: Exception){
+                        ImageIO.write(image, "png", newPngFile)
+                    } catch (e: Exception) {
                         println("Exception $e")
                     }
                 })
@@ -81,27 +81,33 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         this.saveDefaultConfig()
 
         // Register the Events
-        Bukkit.getPluginManager().registerEvents(Event(),this)
+        Bukkit.getPluginManager().registerEvents(Event(), this)
 
         // Read the `config.yml` and set a dataclass
         val cfgfile = this.config
         ServerRawConfig = cfgfile
+
         ServerConfig = Config(
-                    cfgfile.getBoolean("enable-sync"),
-                    cfgfile.getString("world-to-track"),
-                    cfgfile.getString("client-token"),
-                    cfgfile.getBoolean("enable-verify"),
-                    cfgfile.getString("server-sys"),
-                    cfgfile.getString("server-name"),
-                    cfgfile.getString("system-sys"),
-                    cfgfile.getString("bot-prefix"),
-                    cfgfile.getString("bot-sync-channel"),
-                    cfgfile.getString("bot-command-channel"),
-                    cfgfile.getString("bot-admin-channel"),
-                    cfgfile.getString("bot-server"),
-                    cfgfile.getString("webhook-id"),
-                    cfgfile.getString("webhook-token"),
-                    cfgfile.getStringList("server-admin-roles")
+                es = cfgfile.getBoolean("enable-sync"),
+                saesang = cfgfile.getString("world-to-track"),
+                discordkey = cfgfile.getString("client-token"),
+                verienable = cfgfile.getBoolean("enable-verify"),
+                serv = cfgfile.getString("server-sys"),
+                sys = cfgfile.getString("system-sys"),
+                servname = cfgfile.getString("server-name"),
+                bpf = cfgfile.getString("bot-prefix"),
+                bind_sync = cfgfile.getString("bot-sync-channel"),
+                bind_cmd = cfgfile.getString("bot-command-channel"),
+                bind_admin = cfgfile.getString("bot-admin-channel"),
+                servtrak = cfgfile.getString("bot-server"),
+                webid = cfgfile.getString("webhook-id"),
+                webtok = cfgfile.getString("webhook-token"),
+                admins = cfgfile.getStringList("server-admin-roles"),
+                adnr = cfgfile.getBoolean("server-non-adminrole-admin"),
+                bwenable = cfgfile.getBoolean("banned-words-enabled"),
+                bw = cfgfile.getStringList("banned-words"),
+                bwdisc = cfgfile.getBoolean("banned-word-discord"),
+                bwmsg = cfgfile.getString("banned-word-message")
         )
 
         dFolder = dataFolder
@@ -118,10 +124,14 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
             "[Pengcord] Sucessfully Started!"
         }
 
-        discordBot.sendMessageToDiscord("Server Started! Join ${ServerConfig.serverName} now!")
+        discordBot.sendMessageToDiscord("Server Started!")
         this.getCommand("verify")?.setExecutor(Verify())
 
         //sqlClass = SQLClass();
+
+        // Load LuckPerms
+        val provider: RegisteredServiceProvider<LuckPerms> = Bukkit.getServicesManager().getRegistration(LuckPerms::class.java)!!
+        luckPerms = provider.provider
     }
 
     override fun onDisable() {

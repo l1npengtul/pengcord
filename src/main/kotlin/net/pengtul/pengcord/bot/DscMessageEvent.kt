@@ -34,7 +34,7 @@ public class DscMessageEvent: MessageCreateListener {
         val msg: Message? = event?.message;
         msg?.let {
             if (msg.content.startsWith(Main.ServerConfig.botPrefix.toString())){
-                Main.ServerLogger.info("Inc CMD");
+                Main.ServerLogger.info("Inc CMD: In text channel ${msg.channel.idAsString} by user ${msg.author.idAsString}");
                 val messageAsList: List<String> = msg.content.split(" ");
                 when (messageAsList[0]){
                     "${Main.ServerConfig.botPrefix}bind" -> {
@@ -45,6 +45,16 @@ public class DscMessageEvent: MessageCreateListener {
                     "${Main.ServerConfig.botPrefix}verify" -> {
                         if(msg.author.asUser().isPresent){
                             command.verifyCommand(msg.content.toString(), msg.author.asUser().get(), msg)
+                        }
+                    }
+                    "${Main.ServerConfig.botPrefix}whois" -> {
+                        if(msg.author.asUser().isPresent){
+                            command.whoIs(msg.content.toString(), msg.author.asUser().get(), msg)
+                        }
+                    }
+                    "${Main.ServerConfig.botPrefix}stop" -> {
+                        if(msg.author.asUser().isPresent){
+                            command.stop(msg.content.toString(), msg.author.asUser().get(), msg)
                         }
                     }
                 }
