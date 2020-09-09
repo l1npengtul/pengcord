@@ -74,7 +74,9 @@ class Bot {
 
     fun sendMessageToDiscord(message: String){
         discordApi.getTextChannelById(Main.ServerConfig.syncChannel).ifPresent { channel ->
-            channel.sendMessage("${Main.ServerConfig.serverPrefix}${regex.replace(message,"")}")
+            if (!regex.replace(message,"").startsWith("[DSC]")){
+                channel.sendMessage("${Main.ServerConfig.serverPrefix}${regex.replace(message,"")}")
+            }
         }
     }
 
@@ -85,12 +87,11 @@ class Bot {
             currentPlugin?.let {
                 Bukkit.getScheduler().runTaskAsynchronously(currentPlugin, Runnable {
                     var msg: String = message
-                    if (!usrname.toLowerCase().equals("clyde")){
+                    if (usrname.toLowerCase().equals("clyde")){
                         webhookUpdater = webhookUpdater.setName("cly de")
                     }
-                    else{
-                        webhookUpdater = webhookUpdater.setName("DSC-SYNC")
-                        msg = "<${usrname}>" + message
+                    else {
+                        webhookUpdater = webhookUpdater.setName(usrname)
                     }
                     try {
                         webhookUpdater.setAvatar(File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${player.uniqueId}.png"))

@@ -25,17 +25,29 @@ class Command {
                     when (mArray[1]) {
                         "sync" -> {
                             Main.ServerConfig.syncChannel = message.channel.idAsString
-                            Main.ServerConfig.serverBind = message.server.ifPresent { }.toString()
+                            message.server.ifPresent { server ->
+                                Main.ServerConfig.serverBind = server.idAsString
+                                Main.ServerLogger.info(Main.ServerConfig.serverBind)
+                            }
+                            Main.ServerLogger.info(Main.ServerConfig.serverBind)
                             CommandHelper.deleteAfterSend("Successfully set this channel as the `sync` channel.", 8, message)
                         }
                         "command" -> {
                             Main.ServerConfig.commandChannel = message.channel.idAsString
-                            Main.ServerConfig.serverBind = message.server.ifPresent { }.toString()
+                            message.server.ifPresent { server ->
+                                Main.ServerConfig.serverBind = server.idAsString
+                                Main.ServerLogger.info(Main.ServerConfig.serverBind)
+                            }
+                            Main.ServerLogger.info(Main.ServerConfig.serverBind)
                             CommandHelper.deleteAfterSend("Successfully set this channel as the `command` channel.", 8, message)
                         }
                         "admin" -> {
                             Main.ServerConfig.adminChannel = message.channel.idAsString
-                            Main.ServerConfig.serverBind = message.server.ifPresent { }.toString()
+                            message.server.ifPresent { server ->
+                                Main.ServerConfig.serverBind = server.idAsString
+                                Main.ServerLogger.info(Main.ServerConfig.serverBind)
+                            }
+                            Main.ServerLogger.info(Main.ServerConfig.serverBind)
                             CommandHelper.deleteAfterSend("Successfully set this channel as the `admin` channel.", 8, message)
                         }
                         else -> {
@@ -47,19 +59,28 @@ class Command {
                     when (mArray[1]) {
                         "sync" -> {
                             Main.ServerConfig.syncChannel = message.channel.idAsString
-                            message.server.ifPresent { server -> Main.ServerConfig.serverBind = server.idAsString }
+                            message.server.ifPresent { server ->
+                                Main.ServerConfig.serverBind = server.idAsString
+                                Main.ServerLogger.info(Main.ServerConfig.serverBind)
+                            }
                             Main.ServerLogger.info(Main.ServerConfig.serverBind)
                             CommandHelper.deleteAfterSend("Successfully set this channel as the `sync` channel.", 8, message)
                         }
                         "command" -> {
                             Main.ServerConfig.commandChannel = message.channel.idAsString
-                            message.server.ifPresent { server -> Main.ServerConfig.serverBind = server.idAsString }
+                            message.server.ifPresent { server ->
+                                Main.ServerConfig.serverBind = server.idAsString
+                                Main.ServerLogger.info(Main.ServerConfig.serverBind)
+                            }
                             Main.ServerLogger.info(Main.ServerConfig.serverBind)
                             CommandHelper.deleteAfterSend("Successfully set this channel as the `command` channel.", 8, message)
                         }
                         "admin" -> {
                             Main.ServerConfig.adminChannel = message.channel.idAsString
-                            message.server.ifPresent { server -> Main.ServerConfig.serverBind = server.idAsString }
+                            message.server.ifPresent { server ->
+                                Main.ServerConfig.serverBind = server.idAsString
+                                Main.ServerLogger.info(Main.ServerConfig.serverBind)
+                            }
                             Main.ServerLogger.info(Main.ServerConfig.serverBind)
                             CommandHelper.deleteAfterSend("Successfully set this channel as the `admin` channel.", 8, message)
                         }
