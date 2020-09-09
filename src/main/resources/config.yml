@@ -1,26 +1,46 @@
-#
+# Enable syncing between Discord <-> MC
 enable-sync: true
 
-world-to-track: "world"
+# World to sync to discord. Currently unused
+world-to-track: ""
 # Discord Bot Token (NOTE: Replace with your own)
 client-token: "who is rem, i love emilia"
 # Discord Bot Prefix
 bot-prefix: "mc!"
 # Enables the "Verify" feature, tying a discord account to an in game account
 enable-verify: false
-# The SQL Driver to use. Currently Supported is MySQL(mysql) and PostgreSQL(postgresql)
-# Allowed Values : "postgresql", "mysql"
-sql-driver: "postgresql"
-# IP of Database, format `[ip]:[port]`
-sql-ip: "localhost:3306"
-sql-database: "ServVerify"
-sql-username: ""
-sql-password: ""
+
 server-sys: "[Server]: "
 server-name: "boomer"
 system-sys: "[System]: "
 
+# Channels for the bot, do not edit (unless you know what you are doing)
 bot-sync-channel: ""
 bot-command-channel: ""
 bot-admin-channel: ""
 bot-server: ""
+
+# Webhook ID to manage. Do not edit, managed by bot
+webhook-id: ""
+webhook-token: ""
+
+# A list of admin roles on the Discord Server. Managed by bot.
+# Usage: admins add <ping role here>
+# e.g.: admins add @Admins
+server-admin-roles:
+    - ""
+
+# A chat filter. Case insensitive. Any message s
+banned-words:
+  - ""
+# Message to send to the user when the chat filter is triggered
+banned-word-message: "§c§oSorry, but you are not allowed to say that as it violates our rules."
+# Track banned words on discord?
+# Note: Only set to true if you do not have a word filter on the channel and want one
+# Also note that the bot only listens to the track channel
+banned-word-discord: false
+
+# Verified Users, goes discord UUID (string): "<minecraft_username>"
+# e.g. 1234567890: "20fc82-29128930-2391923-s292n"
+verified-users:
+  0: "0"
