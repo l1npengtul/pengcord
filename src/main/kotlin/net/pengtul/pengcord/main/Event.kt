@@ -66,7 +66,8 @@ class Event : Listener{
     public fun onPlayerMoveEvent(event: PlayerMoveEvent){
         if (Main.ServerConfig.verienable){
             if (!Main.ServerConfig.usersList?.containsValue(event.player.uniqueId.toString())!!){
-                event.player.sendMessage("§cYou are not verified! Do `/verify ${event.player.name}` to start!")
+                event.player.sendMessage("§cYou are not verified! Do `/verify <discord tag>` to start!")
+                event.player.sendMessage("§ce.g. /verify clyde#0000 (replace clyde#0000 with your own discord username and tag)")
                 if (!event.player.isInvulnerable){
                     event.player.isInvulnerable = true
                 }
