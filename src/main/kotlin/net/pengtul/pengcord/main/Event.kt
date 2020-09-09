@@ -12,21 +12,30 @@ class Event : Listener{
     fun onPlayerJoin(event: PlayerJoinEvent){
         //Main.ServerLogger.info("[${Main.ServerConfig.ServerName}]: ${event.joinMessage}");
         if (Main.ServerConfig.enableSync){
-            Main.discordBot.sendMessageToDiscord("${Main.ServerConfig.serverPrefix}: ${event.joinMessage?.replace("§e","")}")
+            Main.discordBot.sendMessageToDiscord("${event.joinMessage?.replace("§e","")}")
             Main.downloadSkin(event.player)
+            if (event.player.hasPermission("pengcord.verify.bypass")){
+                if (Main.ServerConfig.usersList?.containsValue(event.player.uniqueId.toString())!!){
+                    event.player.sendMessage("§aCongratulations! You have super bypass powers!")
+                }
+                else {
+                    Main.ServerConfig.usersList?.put("", event.player.uniqueId.toString())
+                    event.player.sendMessage("§aCongratulations! You have super bypass powers!")
+                }
+            }
         }
     }
     @EventHandler
     fun onPlayerLeave(event: PlayerQuitEvent){
         //Main.ServerLogger.info("[${Main.ServerConfig.ServerName}]: ${event.quitMessage}");
         if(Main.ServerConfig.enableSync) {
-            Main.discordBot.sendMessageToDiscord("${Main.ServerConfig.serverPrefix}: ${event.quitMessage?.replace("§e", "")}")
+            Main.discordBot.sendMessageToDiscord("${event.quitMessage?.replace("§e", "")}")
         }
     }
     @EventHandler
     fun onPlayerKickEvent(event: PlayerKickEvent){
         if(Main.ServerConfig.enableSync) {
-            Main.discordBot.sendMessageToDiscord("${Main.ServerConfig.serverPrefix}: ${event.leaveMessage.replace("§e", "")}. Reason: ${event.reason.replace("§e", "")}")
+            Main.discordBot.sendMessageToDiscord("${event.leaveMessage.replace("§e", "")}. Reason: ${event.reason.replace("§e", "")}")
         }
     }
 
@@ -39,8 +48,8 @@ class Event : Listener{
     }
     @EventHandler
     fun onBroadcastChatEvent(event: BroadcastMessageEvent){
-        if (!event.message.startsWith("§7[DSC]") && Main.ServerConfig.enableSync){
-            Main.discordBot.sendMessageToDiscord("${Main.ServerConfig.serverPrefix}: ${event.message}")
+        if (Main.ServerConfig.enableSync){
+            Main.discordBot.sendMessageToDiscord(event.message)
         }
     }
 
@@ -48,7 +57,7 @@ class Event : Listener{
     @EventHandler
     fun onPlayerDeathEvent(event: PlayerDeathEvent){
         if(Main.ServerConfig.enableSync) {
-            Main.discordBot.sendMessageToDiscord("${Main.ServerConfig.serverPrefix}: ${event.deathMessage}")
+            Main.discordBot.sendMessageToDiscord("${event.deathMessage}")
         }
     }
 

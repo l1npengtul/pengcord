@@ -74,14 +74,10 @@ class Bot {
 
     fun sendMessageToDiscord(message: String){
         discordApi.getTextChannelById(Main.ServerConfig.syncChannel).ifPresent { channel ->
-            if (Main.ServerConfig.serverPrefix != null){
-                channel.sendMessage(regex.replace("${Main.ServerConfig.serverPrefix} $message", ""))
-            }
-            else {
-                channel.sendMessage(regex.replace(message, ""))
-            }
+            channel.sendMessage("${Main.ServerConfig.serverPrefix}${regex.replace(message,"")}")
         }
     }
+
 
     fun sendMessagetoWebhook(message: String, usrname: String, pfp: String?, player: org.bukkit.entity.Player){
         if(webhookInit){

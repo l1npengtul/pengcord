@@ -24,13 +24,19 @@ bot-server: ""
 webhook-id: ""
 webhook-token: ""
 
+# Enable admin commands of people who has the "Administrator" permission. Recommended to disable
+server-non-adminrole-admin: false
+
 # A list of admin roles on the Discord Server. Managed by bot.
 # Usage: admins add <ping role here>
 # e.g.: admins add @Admins
 server-admin-roles:
     - ""
 
-# A chat filter. Case insensitive. Any message s
+# Enable chat filter
+banned-words-enabled: true
+
+# A chat filter. Case insensitive. Any message
 banned-words:
   - ""
 # Message to send to the user when the chat filter is triggered

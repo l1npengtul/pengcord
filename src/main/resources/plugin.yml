@@ -1,6 +1,8 @@
 name: "pengcord"
 main: net.pengtul.pengcord.main.Main
 version: 0.0.1
+depend:
+  - LuckPerms
 commands:
   verify:
     description: Verifies Players
