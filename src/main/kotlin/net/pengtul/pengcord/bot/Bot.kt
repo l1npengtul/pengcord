@@ -1,10 +1,27 @@
 package net.pengtul.pengcord.bot
 
+/*
+*   Discord bot initialization
+*    Copyright (C) 2020  Lewis Rho
+*
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+
 import club.minnced.discord.webhook.WebhookClient
-import net.pengtul.pengcord.config.DiscordConfig
 import net.pengtul.pengcord.error.DiscordLoginFailException
 import net.pengtul.pengcord.main.Main
-import net.pengtul.pengcord.main.Player
 import org.bukkit.Bukkit
 import org.bukkit.plugin.Plugin
 import org.javacord.api.DiscordApi
@@ -17,23 +34,22 @@ import java.io.File
 import java.lang.Exception
 
 
-public class Bot {
-    public var discordApi: DiscordApi;
-    public var webhookInit: Boolean;
-    public lateinit var webhook: Webhook;
-    public lateinit var webhookUpdater: WebhookUpdater;
-    public lateinit var webhookSender: WebhookClient;
-    companion object{
-        public lateinit var config: DiscordConfig;
-    }
+class Bot {
+    var discordApi: DiscordApi
+    var webhookInit: Boolean
+    lateinit var webhook: Webhook
+    lateinit var webhookUpdater: WebhookUpdater
+    lateinit var webhookSender: WebhookClient
+    private val regex: Regex = """(§.)""".toRegex()
+
     init {
         discordApi = DiscordApiBuilder()
-                .setToken(Main.ServerConfig.DiscordBot)
+                .setToken(Main.ServerConfig.discordApiKey)
                 .login()
                 .exceptionally {
-                    throw DiscordLoginFailException("Failed to log into discord!");
+                    throw DiscordLoginFailException("Failed to log into discord!")
                 }
-                .join();
+                .join()
 
 
         discordApi.getServerTextChannelById(Main.ServerConfig.syncChannel).ifPresent { serverTextChannel: ServerTextChannel ->
@@ -41,57 +57,54 @@ public class Bot {
                     .setName("DSC-SYNC")
                     .create()
                     .join()
-            this.webhookUpdater = webhook.createUpdater();
+            this.webhookUpdater = webhook.createUpdater()
             webhook.token.ifPresent { s: String ->
-                this.webhookSender = WebhookClient.withId(webhook.id,s);
+                this.webhookSender = WebhookClient.withId(webhook.id,s)
             }
-        };
+        }
         webhookInit = this::webhook.isInitialized && this::webhookSender.isInitialized && this::webhookUpdater.isInitialized
-        this.onSucessfulConnect();
-        discordApi.addListener(DscMessageEvent());
+        this.onSucessfulConnect()
+        discordApi.addListener(DscMessageEvent())
     }
 
-
-
-    public fun disconnectApi() {
-        this.discordApi.disconnect();
-    }
-
-    public fun onSucessfulConnect() {
-        Main.ServerLogger.info("Sucessfully connected to Discord! Invite to server using:");
+    private fun onSucessfulConnect() {
+        Main.ServerLogger.info("Sucessfully connected to Discord! Invite to server using:")
         Main.ServerLogger.info(discordApi.createBotInvite())
     }
 
-    public fun sendMessageToDiscord(message: String){
+    fun sendMessageToDiscord(message: String){
         discordApi.getTextChannelById(Main.ServerConfig.syncChannel).ifPresent { channel ->
-            channel.sendMessage(message)
-        };
+            if (Main.ServerConfig.serverPrefix != null){
+                channel.sendMessage(regex.replace("${Main.ServerConfig.serverPrefix} $message", ""))
+            }
+            else {
+                channel.sendMessage(regex.replace(message, ""))
+            }
+        }
     }
 
-    public fun sendMessagetoWebhook(message: String, usrname: String, pfp: String?, player: org.bukkit.entity.Player){
+    fun sendMessagetoWebhook(message: String, usrname: String, pfp: String?, player: org.bukkit.entity.Player){
         if(webhookInit){
-            val currentPlugin: Plugin? = Bukkit.getServer().pluginManager.getPlugin("pengcord");
+            val currentPlugin: Plugin? = Bukkit.getServer().pluginManager.getPlugin("pengcord")
             currentPlugin?.let {
                 Bukkit.getScheduler().runTaskAsynchronously(currentPlugin, Runnable {
-                    var msg: String = message;
+                    var msg: String = message
                     if (!usrname.toLowerCase().equals("clyde")){
-                        webhookUpdater = webhookUpdater.setName(usrname);
-                    }
-                    else if (usrname.equals(webhook.name.get())){
-
+                        webhookUpdater = webhookUpdater.setName("cly de")
                     }
                     else{
-                        webhookUpdater = webhookUpdater.setName("DSC-SYNC");
-                        msg = "<${usrname}>" + message;
+                        webhookUpdater = webhookUpdater.setName("DSC-SYNC")
+                        msg = "<${usrname}>" + message
                     }
                     try {
-                        webhookUpdater.setAvatar(File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${player.uniqueId}.png"));
+                        webhookUpdater.setAvatar(File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${player.uniqueId}.png"))
                     }
                     catch (e: Exception){
-                        Main.ServerLogger.severe("Failed to get PlayerIcon for player ${player.displayName}: Exception $e");
+                        Main.ServerLogger.severe("Failed to get PlayerIcon for player ${player.displayName}: Exception $e")
                     }
-                    webhook = webhookUpdater.update().join();
-                    this.webhookSender.send(msg);
+                    webhook = webhookUpdater.update().join()
+
+                    this.webhookSender.send(msg)
                 })
             }
         }

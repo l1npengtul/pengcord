@@ -1,5 +1,3 @@
 package net.pengtul.pengcord.error
 
-public class DiscordLoginFailException(message: String): Exception(message) {
-
-}
+class DiscordLoginFailException(message: String): Exception(message)

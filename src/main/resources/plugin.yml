@@ -1,3 +1,18 @@
 name: "pengcord"
 main: net.pengtul.pengcord.main.Main
 version: 0.0.1
+commands:
+  verify:
+    description: Verifies Players
+    usage: /verify <Discord Tag>
+    permission: pengcord.verify.command
+permissions:
+  pengcord.verify:
+    description: Everything related to the verify commands
+    children:
+      pengcord.verify.command:
+        description: Allows the running of /verify, etc
+        default: true
+      pengcord.verify.bypass:
+        description: Allows these players to bypass the verification system
+        default: false

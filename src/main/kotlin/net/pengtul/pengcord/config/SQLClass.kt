@@ -1,114 +1,97 @@
-package net.pengtul.servsync_api.config
+package net.pengtul.pengcord.config
+
+/*
+*    SQL DB Connection object
+*    Copyright (C) 2020  Lewis Rho
+*
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 
 import java.sql.*
 import net.pengtul.pengcord.main.Main
-import net.pengtul.pengcord.main.Player
+import org.bukkit.Bukkit
+import org.bukkit.plugin.Plugin
+import java.io.File
 
-public class SQLClass (val drive: String?, val ip: String?, val db: String?, val usr: String?, val pswd: String?){
+// NOTE: Currently Unused.
 
-    // SQL Vars
-    private lateinit var Driver: SQLDriver;
-    private lateinit var SQLIp: String;
-    private lateinit var SQLDatabase: String;
-    private lateinit var SQLUsername: String;
-    private lateinit var SQLPassword: String;
-    private var unNull:  Int = 0;
-
-    // DB Object
-    private lateinit var connection: Connection;
-    private lateinit var SqlStatement: Statement;
-
+class SQLClass {
+    private var dbConnection: Connection
+    private var dbStatement: Statement
+    private var currentPlugin: Plugin = Bukkit.getServer().pluginManager.getPlugin("pengcord")!!
 
     init {
-        // get the sql driver type
+        // get plugin
+        // establish connection to DB
+        Class.forName("org.h2.Driver")
+        dbConnection = DriverManager.getConnection("jdbc:h2:plugins${File.separator}pengcord${File.separator}", "pengcord", "")
+        dbStatement = dbConnection.createStatement()
+
+        // Create table if it doesnt exist
+        val sql: String = "CREATE TABLE IF NOT EXISTS player_data (\n" +
+                "PlayerUUID VARCHAR(255)," +
+                "PlayerDiscordUUID BIGINT(255)," +
+                "PlayerVerified BIT," +
+                "PlayerJoinDate BIGINT(255)," +
+                "PlayerRole VARCHAR(255)," +
+                "\n);"
+
         try {
-            drive?.let {
-                this.Driver = SQLDriver.valueOf(drive);
-                unNull++;
+            val createTable: PreparedStatement = dbConnection.prepareStatement(sql)
+            createTable.executeUpdate()
+        }
+        catch (e: SQLException){
+            Main.ServerLogger.severe("Could not create SQL table!")
+            Bukkit.getPluginManager().getPlugin("pengcord")?.let {
+                Bukkit.getServer().pluginManager.disablePlugin(it)
             }
-            ip?.let {
-                this.SQLIp = ip;
-                unNull++;
-            }
-            db?.let {
-                this.SQLDatabase = db;
-                unNull++;
-            }
-            usr?.let {
-                this.SQLUsername = usr;
-                unNull++;
-            }
-            pswd?.let {
-                this.SQLPassword = pswd;
-                unNull++;
-            }
-            if (unNull == 5){
-                Main.ServerLogger.info("Attempting connection to Database...");
-
-            }
-            else{
-                Main.ServerLogger.warning("Skipping Database Connection...");
-            }
-        } catch (e: IllegalArgumentException){
 
         }
     }
 
-    public fun attemptOpenDB(){
-        if(connection != null && !connection.isClosed()){
-            return;
-        }
-        synchronized(this){
-            if(connection != null && !connection.isClosed()){
-                return;
-            }
-            when(Driver){
-                SQLDriver.MYSQL -> {
-                    connection = DriverManager.getConnection("jdbc:mysql://" + this.SQLIp + "/" + this.SQLDatabase, this.SQLUsername, this.SQLPassword);
-                    if (connection != null){
-                        Main.ServerLogger.info("Sucessfully Connected to MySQL!");
-                        SqlStatement = connection.createStatement();
-                    }
-                    else{
-                        Main.ServerLogger.severe("Could not connect to MYSQL!");
-
+    fun updatePlayerVerified(uuid: String){
+        currentPlugin.let {
+            Bukkit.getScheduler().runTaskAsynchronously(it, Runnable {
+                val stmt: PreparedStatement = dbConnection.prepareStatement("SELECT PlayerVerified FROM player_data WHERE PlayerUUID='${uuid}'")
+                val resultSet: ResultSet = stmt.executeQuery()
+                if(resultSet.next()){
+                    if (resultSet.getBoolean("PlayerVerified")){
+                        //Main.verifiedPlayerList.add(uuid)
                     }
                 }
-                SQLDriver.POSTGRESQL -> {
-                    connection = DriverManager.getConnection("jdbc:postgresql://" + this.SQLIp + "/" + this.SQLDatabase, this.SQLUsername, this.SQLPassword);
-                    if (connection != null){
-                        Main.ServerLogger.info("Sucessfully Connected to PostgreSQL!");
-                        SqlStatement = connection.createStatement();
-                    }
-                    else{
-                        Main.ServerLogger.severe("Could not connect to PostgreSQL!");
-                    }
-                }
-                else -> {
-                    Main.ServerLogger.severe("Could Not Connect to Database!");
-                }
+            })
+        }
+    }
+
+    fun onPlayerVerified(uuid: String, discordId: String, rank: String){
+        Bukkit.getScheduler().runTaskAsynchronously(currentPlugin, Runnable {
+            val stmt: PreparedStatement = dbConnection.prepareStatement("INSERT INTO player_data ON DUPLICATE KEY UPDATE VALUES" +
+                    "('${uuid}', ${discordId.toLong()}, 1, ${System.currentTimeMillis() / 1000L}), '${rank}'")
+            stmt.executeUpdate()
+        })
+    }
+
+    fun isPlayerVerified(uuid: String): Boolean{
+        var rt = false
+        Bukkit.getScheduler().runTaskAsynchronously(currentPlugin, Runnable {
+            val stmt: PreparedStatement = dbConnection.prepareStatement("SELECT PlayerVerified FROM player_data WHERE PlayerUUID='${uuid}'")
+            val resultSet: ResultSet = stmt.executeQuery()
+            if (resultSet.next()){
+                rt = resultSet.getBoolean("PlayerVerified")
             }
-        }
-    }
-
-    public fun getPlayerSQLData(uuid: String): Player?{
-        if(connection != null){
-            var queryResult: ResultSet = this.SqlStatement.executeQuery("SELECT * FROM Players WHERE UUID = $uuid;");
-            while (queryResult.next()){
-                return Player(queryResult.getString("UUID"), queryResult.getString("DISCORD_UUID"), queryResult.getBoolean("DISCORD_AUTH_USE"));
-            }
-        }
-        else{
-            return null;
-        }
-        return null;
-    }
-
-    public fun setPlayerSQLData(player: Player){
-        SqlStatement.executeUpdate("INSERT INTO Players (UUID, DISCORD_UUID, DISCORD_AUTH_USE) VALUES (${player.uuid},${player.uuid_disc},${player.usediscordauth})");
-    }
-
-    public fun getConnectionHandler(): Connection{
-        return this.connection;
+        })
+        return rt
     }
 }
