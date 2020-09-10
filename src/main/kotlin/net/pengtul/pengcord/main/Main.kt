@@ -21,7 +21,7 @@ package net.pengtul.pengcord.main
 // If you're reviewing this, or have to read this
 // I'm sorry.
 
-import net.luckperms.api.LuckPerms
+import net.milkbowl.vault.chat.Chat
 import net.pengtul.pengcord.bot.Bot
 import net.pengtul.pengcord.commands.Verify
 import net.pengtul.pengcord.config.Config
@@ -31,8 +31,8 @@ import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
-import org.bukkit.plugin.RegisteredServiceProvider
 import org.bukkit.plugin.java.JavaPlugin
+import org.shanerx.mojang.Mojang
 import java.awt.image.BufferedImage
 import java.io.File
 import java.net.URL
@@ -49,7 +49,8 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         //public lateinit var discordApi: DiscordApi;
         lateinit var dFolder: File
         lateinit var discordBot: Bot
-        lateinit var luckPerms: LuckPerms
+        lateinit var vaultChat: Chat
+        var mojangAPI: Mojang = Mojang().connect()
         var playersToVerify = HashMap<String, String>()
         var doSyncDiscord: Boolean = true
         // lateinit var sqlClass: SQLClass
@@ -69,6 +70,34 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
                     }
                 })
             }
+        }
+
+        fun downloadSkinUUID(uuid: String){
+            val currentPlugin: Plugin? = Bukkit.getServer().pluginManager.getPlugin("pengcord")
+            currentPlugin?.let {
+                Bukkit.getScheduler().runTaskAsynchronously(currentPlugin, Runnable {
+                    try {
+                        val newPngFile = File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${uuid}.png")
+                        newPngFile.mkdirs()
+                        val image: BufferedImage = ImageIO.read(URL("https://minotar.net/helm/${uuid}/100.png"))
+                        ImageIO.write(image, "png", newPngFile)
+                    } catch (e: Exception) {
+                        println("Exception $e")
+                    }
+                })
+            }
+        }
+
+        fun insertDashUUID(uuid: String): String {
+            var sb = StringBuffer(uuid)
+            sb.insert(8, "-")
+            sb = StringBuffer(sb.toString())
+            sb.insert(13, "-")
+            sb = StringBuffer(sb.toString())
+            sb.insert(18, "-")
+            sb = StringBuffer(sb.toString())
+            sb.insert(23, "-")
+            return sb.toString()
         }
 
 
@@ -129,9 +158,16 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
 
         //sqlClass = SQLClass();
 
-        // Load LuckPerms
-        val provider: RegisteredServiceProvider<LuckPerms> = Bukkit.getServicesManager().getRegistration(LuckPerms::class.java)!!
-        luckPerms = provider.provider
+        // Load VaultAPI-Chat
+        val chatProvider = server.servicesManager.getRegistration(Chat::class.java)
+        if (chatProvider != null) {
+            vaultChat = chatProvider.provider
+        }
+
+        // Get Mojang API
+        mojangAPI = Mojang().connect()
+
+
     }
 
     override fun onDisable() {

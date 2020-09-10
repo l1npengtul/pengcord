@@ -57,6 +57,16 @@ public class DscMessageEvent: MessageCreateListener {
                             command.stop(msg.content.toString(), msg.author.asUser().get(), msg)
                         }
                     }
+                    "${Main.ServerConfig.botPrefix}unverify" -> {
+                        if(msg.author.asUser().isPresent){
+                            command.unVerify(msg.content.toString(), msg.author.asUser().get(), msg)
+                        }
+                    }
+                    "${Main.ServerConfig.botPrefix}pban" -> {
+                        if(msg.author.asUser().isPresent){
+                            command.banDiscord(msg.content.toString(), msg.author.asUser().get(), msg)
+                        }
+                    }
                 }
             }
             else {

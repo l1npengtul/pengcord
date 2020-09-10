@@ -60,7 +60,7 @@ data class Config(val es: Boolean, val saesang: String?, val discordkey: String?
         this.saveUsersList()
     }
 
-    public fun getListOfUsers(): HashMap<String, String>{
+    fun getListOfUsers(): HashMap<String, String>{
         var map: HashMap<String, String> = java.util.HashMap<String, String>();
         for(key in Main.ServerRawConfig.getConfigurationSection("verified-users")?.getKeys(false)!!) {
             Main.ServerRawConfig.getString("verified-users.$key")?.let {
@@ -70,9 +70,11 @@ data class Config(val es: Boolean, val saesang: String?, val discordkey: String?
         return map;
     }
 
-    public fun saveUsersList() {
+    fun saveUsersList() {
         for (msg in this.usersList?.keys!!){
-            Main.ServerRawConfig.set("verified-users.$msg", this.usersList!![msg])
+            if (!msg.isBlank()){
+                Main.ServerRawConfig.set("verified-users.$msg", this.usersList!![msg])
+            }
         }
     }
 }

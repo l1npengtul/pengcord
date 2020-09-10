@@ -27,6 +27,10 @@ import org.bukkit.plugin.Plugin
 import org.javacord.api.DiscordApi
 import org.javacord.api.DiscordApiBuilder
 import org.javacord.api.entity.channel.ServerTextChannel
+import org.javacord.api.entity.message.Message
+import org.javacord.api.entity.message.embed.Embed
+import org.javacord.api.entity.message.embed.EmbedBuilder
+import org.javacord.api.entity.user.User
 import org.javacord.api.entity.webhook.Webhook
 import org.javacord.api.entity.webhook.WebhookBuilder
 import org.javacord.api.entity.webhook.WebhookUpdater
@@ -41,6 +45,12 @@ class Bot {
     lateinit var webhookUpdater: WebhookUpdater
     lateinit var webhookSender: WebhookClient
     private val regex: Regex = """(§.)""".toRegex()
+
+    companion object {
+        public fun unverify(discordUUID: String){
+            Main.ServerConfig.usersList?.remove(discordUUID)
+        }
+    }
 
     init {
         discordApi = DiscordApiBuilder()
@@ -77,6 +87,14 @@ class Bot {
             if (!regex.replace(message,"").startsWith("[DSC]")){
                 channel.sendMessage("${Main.ServerConfig.serverPrefix}${regex.replace(message,"")}")
             }
+        }
+    }
+
+    fun sendEmbedToDiscord(message: EmbedBuilder){
+        Main.ServerLogger.info("aaaaa")
+        discordApi.getTextChannelById(Main.ServerConfig.syncChannel).ifPresent { channel ->
+            Main.ServerLogger.info("aaaaaa")
+            channel.sendMessage(message)
         }
     }
 

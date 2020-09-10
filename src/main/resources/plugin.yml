@@ -3,6 +3,7 @@ main: net.pengtul.pengcord.main.Main
 version: 0.0.1
 depend:
   - LuckPerms
+  - Vault
 commands:
   verify:
     description: Verifies Players

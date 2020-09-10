@@ -7,16 +7,31 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.javacord.api.entity.user.User
 import java.lang.Exception
+import java.lang.StringBuilder
 
 class Verify: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender is Player && Main.ServerConfig.enableVerify){
+            var argument = StringBuilder()
+            for (arg in args){
+                if (arg.startsWith("#")){
+                    argument.append(arg)
+                }
+                else if (!argument.isBlank()){
+                    argument.append(" $arg")
+                }
+                else {
+                    argument.append(arg)
+                }
+            }
+
+
             lateinit var discUser: User
             Main.ServerLogger.info("here")
             Main.ServerConfig.serverBind?.let {
                 Main.discordBot.discordApi.getServerById(Main.ServerConfig.serverBind).ifPresent { server ->
-                    Main.ServerLogger.info(args[0])
-                    server.getMemberByDiscriminatedNameIgnoreCase(args[0]).ifPresent { user ->
+                    Main.ServerLogger.info(argument.toString())
+                    server.getMemberByDiscriminatedNameIgnoreCase(argument.toString()).ifPresent { user ->
                         discUser = user
                         Main.ServerLogger.info(discUser.idAsString)
                         Main.ServerConfig.commandChannel?.let { _ ->

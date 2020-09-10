@@ -15,13 +15,8 @@ class Event : Listener{
             Main.discordBot.sendMessageToDiscord("${event.joinMessage?.replace("§e","")}")
             Main.downloadSkin(event.player)
             if (event.player.hasPermission("pengcord.verify.bypass")){
-                if (Main.ServerConfig.usersList?.containsValue(event.player.uniqueId.toString())!!){
-                    event.player.sendMessage("§aCongratulations! You have super bypass powers!")
-                }
-                else {
-                    Main.ServerConfig.usersList?.put("", event.player.uniqueId.toString())
-                    event.player.sendMessage("§aCongratulations! You have super bypass powers!")
-                }
+                Main.ServerConfig.usersList?.put("", event.player.uniqueId.toString())
+                event.player.sendMessage("§aCongratulations! You have super bypass powers!")
             }
         }
     }
