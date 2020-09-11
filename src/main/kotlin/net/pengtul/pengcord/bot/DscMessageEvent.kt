@@ -74,7 +74,7 @@ class DscMessageEvent: MessageCreateListener {
                 if (!(msg.author.isWebhook || msg.author.isBotUser || msg.author.isYourself) && Main.ServerConfig.enableSync){
                     if (msg.channel.idAsString == Main.ServerConfig.syncChannel.toString()){
                         try{
-                            if (Main.discordBot.chatFilterRegex.matches(msg.readableContent.toLowerCase())
+                            if (Main.discordBot.chatFilterRegex.containsMatchIn(msg.readableContent)
                                     && Main.ServerConfig.bannedWordsEnable
                                     && Main.ServerConfig.bannedWordDiscord) {
 
