@@ -52,7 +52,7 @@ class Event : Listener{
     @EventHandler
     fun onBroadcastChatEvent(event: BroadcastMessageEvent){
         if (Main.ServerConfig.enableSync){
-            if (!Main.discordBot.chatFilterRegex.matches(event.message.toLowerCase())){
+            if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message)){
                 Main.discordBot.sendMessageToDiscord(event.message)
                 event.isCancelled = false
             }

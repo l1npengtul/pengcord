@@ -82,19 +82,17 @@ class Bot {
         if (Main.ServerConfig.bannedWordsEnable){
             chatFilterRegex = if (!Main.ServerConfig.bannedWords.isNullOrEmpty()){
                 var regexString = StringBuilder()
-                regexString.append("(")
                 for (word in Main.ServerConfig.bannedWords!!){
                     regexString.append("($word)|")
                 }
                 regexString.deleteAt(regexString.length-1) // Drop the last |
-                regexString.append(")")
-                Regex(regexString.toString())
+                Regex(regexString.toString(), RegexOption.IGNORE_CASE)
             } else {
-                Regex("(?!)")
+                Regex("(?!)", RegexOption.IGNORE_CASE)
             }
         }
         else {
-            chatFilterRegex = Regex("(?!)")
+            chatFilterRegex = Regex("(?!)", RegexOption.IGNORE_CASE)
         }
     }
 
