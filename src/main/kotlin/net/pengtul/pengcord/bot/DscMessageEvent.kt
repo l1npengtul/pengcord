@@ -80,7 +80,7 @@ class DscMessageEvent: MessageCreateListener {
 
                                 msg.delete().thenAccept {
                                     Main.ServerLogger.info("Removed Message: ${msg.content} / ${msg.readableContent}")
-                                    Main.ServerLogger.info("Regex: ${Main.discordBot.chatFilterRegex.pattern}")
+                                    Main.ServerLogger.info("from user ${msg.author.idAsString} / ${msg.author.discriminatedName}")
                                     var msgBuilder = MessageBuilder()
                                     msg.userAuthor.ifPresent {
                                         msgBuilder.append(it.mentionTag)
