@@ -24,6 +24,7 @@ import net.pengtul.pengcord.bot.botcmd.Command
 import net.pengtul.pengcord.main.Main
 import org.bukkit.Bukkit
 import org.javacord.api.entity.message.Message
+import org.javacord.api.entity.message.MessageBuilder
 import org.javacord.api.event.message.MessageCreateEvent
 import org.javacord.api.listener.message.MessageCreateListener
 import java.lang.Exception
@@ -72,6 +73,15 @@ public class DscMessageEvent: MessageCreateListener {
             else {
                 if (!(msg.author.isWebhook || msg.author.isBotUser || msg.author.isYourself) && Main.doSyncDiscord){
                     if (msg.channel.idAsString.equals(Main.ServerConfig.syncChannel.toString())){
+                        if (!Main.discordBot.chatFilterRegex.matches(msg.readableContent)){
+                            var msgBuilder = MessageBuilder()
+                            msg.userAuthor.ifPresent {
+                                msgBuilder.append(it.mentionTag)
+                            }
+                            msgBuilder.append(", ${Main.ServerConfig.bannedWordMessage?.let { it1 -> Main.discordBot.regex.replace(it1, "") }}")
+                            msgBuilder.append(".")
+                            msgBuilder.send(msg.channel)
+                        }
                         try{
                             Bukkit.getServer().broadcastMessage("§7[DSC]${msg.author.displayName}: ${EmojiParser.parseToAliases(msg.readableContent)}");
                             for (attachment in msg.attachments){

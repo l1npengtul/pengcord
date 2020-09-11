@@ -36,6 +36,7 @@ import org.javacord.api.entity.webhook.WebhookBuilder
 import org.javacord.api.entity.webhook.WebhookUpdater
 import java.io.File
 import java.lang.Exception
+import java.lang.StringBuilder
 
 
 class Bot {
@@ -44,7 +45,9 @@ class Bot {
     lateinit var webhook: Webhook
     lateinit var webhookUpdater: WebhookUpdater
     lateinit var webhookSender: WebhookClient
-    private val regex: Regex = """(§.)""".toRegex()
+    var chatFilterRegex: Regex
+    val regex: Regex = """(§.)""".toRegex()
+
 
     companion object {
         public fun unverify(discordUUID: String){
@@ -75,6 +78,24 @@ class Bot {
         webhookInit = this::webhook.isInitialized && this::webhookSender.isInitialized && this::webhookUpdater.isInitialized
         this.onSucessfulConnect()
         discordApi.addListener(DscMessageEvent())
+
+        if (Main.ServerConfig.bannedWordsEnable){
+            chatFilterRegex = if (!Main.ServerConfig.bannedWords.isNullOrEmpty()){
+                var regexString = StringBuilder()
+                regexString.append("(")
+                for (word in Main.ServerConfig.bannedWords!!){
+                    regexString.append("($word)|")
+                }
+                regexString.dropLast(1) // Drop the last |
+                regexString.append(")")
+                Regex(regexString.toString())
+            } else {
+                Regex("(?!)")
+            }
+        }
+        else {
+            chatFilterRegex = Regex("(?!)")
+        }
     }
 
     private fun onSucessfulConnect() {

@@ -36,7 +36,7 @@ server-admin-roles:
 # Enable chat filter
 banned-words-enabled: true
 
-# A chat filter. Case insensitive. Any message
+# A chat filter. Case insensitive, but wont work if you use capital letters. Any message
 banned-words:
   - ""
 # Message to send to the user when the chat filter is triggered
