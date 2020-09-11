@@ -2,15 +2,11 @@ package net.pengtul.pengcord.bot.botcmd
 
 import net.pengtul.pengcord.main.Main
 import org.bukkit.*
-import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.message.embed.EmbedBuilder
-import org.javacord.api.entity.server.Ban
 import org.javacord.api.entity.user.User
 import java.io.File
-import java.time.LocalDate
-import java.time.ZoneId
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -20,86 +16,140 @@ class Command {
     companion object {
         fun shutdown(shutdownTimer: Long, plugin: Plugin) {
             for (p in Bukkit.getServer().onlinePlayers) {
-                p.sendTitle("Server Shutdown in ${shutdownTimer / 20}s", "Please reconnect to this server soon!", 10, 70, 20)
-                p.playSound(Location(p.world, p.location.x, p.location.y, p.location.z), Sound.BLOCK_BELL_USE, SoundCategory.PLAYERS, 1.0F, 1.0F)
+                p.sendTitle("§c§lServer Shutdown in ${shutdownTimer / 20}s", "§cPlease reconnect to this server soon!", 10, 70, 20)
+                Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
+                    Bukkit.getScheduler().runTaskLater(plugin, Runnable {
+                        p.playSound(Location(p.world, p.location.x, p.location.y, p.location.z), Sound.BLOCK_BELL_USE, SoundCategory.PLAYERS, 1.0F, 1.0F)
+                    }, 0L)
+                    Bukkit.getScheduler().runTaskLater(plugin, Runnable {
+                        p.playSound(Location(p.world, p.location.x, p.location.y, p.location.z), Sound.BLOCK_BELL_USE, SoundCategory.PLAYERS, 1.0F, 1.0F)
+                    }, 8L)
+                    Bukkit.getScheduler().runTaskLater(plugin, Runnable {
+                        p.playSound(Location(p.world, p.location.x, p.location.y, p.location.z), Sound.BLOCK_BELL_USE, SoundCategory.PLAYERS, 1.0F, 1.0F)
+                    }, 16L)
+                })
             }
-            Bukkit.getServer().broadcastMessage("§k------------------------")
+            Bukkit.getServer().broadcastMessage("§k--------------------------------------------")
             Bukkit.getServer().broadcastMessage("§c§l§nThis minecraft server is restarting soon! (${shutdownTimer / 20} seconds).")
-            Bukkit.getServer().broadcastMessage("§c§l§nPlease reconnect after the reboot!.")
-            Bukkit.getServer().broadcastMessage("§k------------------------")
+            Bukkit.getServer().broadcastMessage("§c§l§nPlease reconnect after the reboot!")
+            Bukkit.getServer().broadcastMessage("§k--------------------------------------------")
             Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, Runnable {
                 Bukkit.shutdown()
             }, shutdownTimer)
         }
 
-        fun removePlayerfromDiscord(user: User, message: Message){
+        fun removePlayerfromDiscord(user: User, message: Message): Boolean{
+            var ret = false
             if (Main.ServerConfig.usersList?.containsKey(user.idAsString)!!) {
                 Main.ServerConfig.usersList!!.remove(user.idAsString)
                 CommandHelper.deleteAfterSend("Successfully unverified user ${user.idAsString}", 10, message)
+                ret = true
             }
             else {
                 CommandHelper.deleteAfterSend("Error: Could not find ${user.idAsString}.", 5, message)
             }
+            return ret
         }
 
-        fun removePlayerfromMinecraft(username: String){
+        fun removePlayerfromDiscord(user: User, message: Message, doKick: Boolean): Boolean{
+            var ret = false
+            if (Main.ServerConfig.usersList?.containsKey(user.idAsString)!!) {
+                if (doKick){
+                    Bukkit.getServer().getPlayer(UUID.fromString(Main.ServerConfig.usersList!![user.idAsString]))?.kickPlayer("Kicked by operator.")
+                }
+                Main.ServerConfig.usersList!!.remove(user.idAsString)
+                CommandHelper.deleteAfterSend("Successfully unverified user ${user.idAsString}", 10, message)
+                ret = true
+            }
+            else {
+                CommandHelper.deleteAfterSend("Error: Could not find ${user.idAsString}.", 5, message)
+            }
+            return ret
+        }
+
+        fun removePlayerfromMinecraft(username: String): Boolean{
+            var ret = false
             Bukkit.getServer().pluginManager.getPlugin("pengcord")?.let {
                 val uuid = Main.insertDashUUID(Main.mojangAPI.getUUIDOfUsername(username))
                 Bukkit.getScheduler().runTaskAsynchronously(it, Runnable {
-                    var pl: OfflinePlayer
-                    val plUID: UUID = UUID.fromString(uuid)
                     for (key in Main.ServerConfig.usersList!!.keys) {
-                        pl = Bukkit.getOfflinePlayer(UUID.fromString(Main.ServerConfig.usersList!!.get(key)))
-                        if (pl.hasPlayedBefore()) {
-                            if (pl.uniqueId == plUID) {
-                                Bukkit.getScheduler().runTask(it, Runnable {
-                                    Main.ServerConfig.usersList!!.remove(key)
-                                    Main.discordBot.sendMessageToDiscord("Successfully removed ${pl.name} (UUID ${pl.uniqueId}, DSC $key) from the list of verified users.")
-                                })
-                            }
+                        Main.ServerLogger.info("$uuid, $key")
+                        if (Main.ServerConfig.usersList!![key] == uuid){
+                            Main.ServerLogger.info("$uuid, $key")
+                            Main.ServerConfig.usersList!!.remove(key)
+                            ret = true
                         }
                     }
                 })
             }
+            return ret
+        }
+
+        fun removePlayerfromMinecraft(username: String, doKick: Boolean): Boolean{
+            var ret = false
+            Bukkit.getServer().pluginManager.getPlugin("pengcord")?.let {
+                val uuid = Main.insertDashUUID(Main.mojangAPI.getUUIDOfUsername(username))
+                Bukkit.getScheduler().runTaskAsynchronously(it, Runnable {
+                    for (key in Main.ServerConfig.usersList!!.keys) {
+                        Main.ServerLogger.info("$uuid, $key")
+                        if (Main.ServerConfig.usersList!![key] == uuid){
+                            Main.ServerLogger.info("$uuid, $key")
+                            if (doKick){
+                                Bukkit.getScheduler().runTask(it, Runnable {
+                                    Bukkit.getServer().getPlayer(UUID.fromString(uuid))?.kickPlayer("Kicked by operator.")
+                                })
+                            }
+                            Main.ServerConfig.usersList!!.remove(key)
+                            ret = true
+                        }
+                    }
+                })
+            }
+            return ret
         }
 
         fun banUsingDiscord(user: User, message: Message, days: Int?, reason: String?, userToBan: User){
-            var BanUntil: Date? = Date()
+            var banUntil: Date? = Date()
             if (days != null){
-                if (BanUntil != null) {
+                if (banUntil != null) {
                     if (days <= 0){
-                        BanUntil = null
+                        banUntil = null
                     }
                     else{
-                        BanUntil.time = BanUntil.time + TimeUnit.DAYS.toMillis(days.toLong())
+                        banUntil.time = banUntil.time + TimeUnit.DAYS.toMillis(days.toLong())
                     }
                 }
             }
             else {
-                BanUntil = null
+                banUntil = null
             }
+
+            val username: String = Main.mojangAPI.getPlayerProfile(Main.ServerConfig.usersList?.getValue(user.idAsString)!!).username
 
             if (Main.ServerConfig.usersList?.containsKey(userToBan.idAsString)!!) {
                 Bukkit.getBanList(BanList.Type.NAME).addBan(
-                        Main.mojangAPI.getPlayerProfile(Main.ServerConfig.usersList?.getValue(user.idAsString)!!).username,
+                        username,
                         reason,
-                        BanUntil,
+                        banUntil,
                         user.discriminatedName
                 )
-                if (BanUntil == null){
+                if (banUntil == null){
                     Bukkit.getServer().pluginManager.getPlugin("pengcord")?.let {
                         Bukkit.getScheduler().runTask(it, Runnable {
                             Bukkit.getServer().getPlayer(UUID.fromString(Main.ServerConfig.usersList?.getValue(userToBan.idAsString)!!))?.kickPlayer("Banned by ${user.discriminatedName} for $reason. Permanent Ban.")
-                            Main.ServerConfig.usersList!!.remove(userToBan.idAsString)
-
+                            if (removePlayerfromMinecraft(username)){
+                                Main.discordBot.sendMessageToDiscord("Banned and removed user $username")
+                            }
                         })
                     }
                 }
                 else {
                     Bukkit.getServer().pluginManager.getPlugin("pengcord")?.let {
                         Bukkit.getScheduler().runTask(it, Runnable {
-                            Bukkit.getServer().getPlayer(UUID.fromString(Main.ServerConfig.usersList?.getValue(userToBan.idAsString)!!))?.kickPlayer("Banned by ${user.discriminatedName} for $reason. Banned until $BanUntil")
-                            Main.ServerConfig.usersList!!.remove(userToBan.idAsString)
+                            Bukkit.getServer().getPlayer(UUID.fromString(Main.ServerConfig.usersList?.getValue(userToBan.idAsString)!!))?.kickPlayer("Banned by ${user.discriminatedName} for $reason. Banned until $banUntil")
+                            if (removePlayerfromMinecraft(username)){
+                                Main.discordBot.sendMessageToDiscord("Banned and removed user $username")
+                            }
                         })
                     }
                 }
@@ -111,45 +161,44 @@ class Command {
 
         fun banUsingMinecraft(banUUID: String, reason: String?, days: Int?, banUser: String?): Boolean{
             var ret = false
-            Bukkit.getServer().pluginManager.getPlugin("pengcord")?.let {
-                Bukkit.getScheduler().runTaskAsynchronously(it, Runnable {
+            Bukkit.getServer().pluginManager.getPlugin("pengcord")?.let {plugin ->
+                Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
                     for (key in Main.ServerConfig.usersList?.keys!!) {
                         if (Main.ServerConfig.usersList!![key] == banUUID) {
-                            var BanUntil: Date? = Date()
+                            var banUntil: Date? = Date()
                             if (days != null){
-                                if (BanUntil != null) {
+                                if (banUntil != null) {
                                     if (days <= 0){
-                                        BanUntil = null
+                                        banUntil = null
                                     }
                                     else{
-                                        BanUntil.time = BanUntil.time + TimeUnit.DAYS.toMillis(days.toLong())
+                                        banUntil.time = banUntil.time + TimeUnit.DAYS.toMillis(days.toLong())
                                     }
                                 }
                             }
                             else {
-                                BanUntil = null
+                                banUntil = null
                             }
 
+                            val username : String = Main.mojangAPI.getPlayerProfile(banUUID).username
+
                             Bukkit.getBanList(BanList.Type.NAME).addBan(
-                                    Main.mojangAPI.getPlayerProfile(banUUID).username,
+                                    username,
                                     reason,
-                                    BanUntil,
+                                    banUntil,
                                     banUser
                             )
-                            if (BanUntil == null) {
-                                Bukkit.getServer().pluginManager.getPlugin("pengcord")?.let {
-                                    Bukkit.getScheduler().runTask(it, Runnable {
-                                        Bukkit.getServer().getPlayer(UUID.fromString(banUUID))?.kickPlayer("Banned by $banUser for $reason. Permanent Ban.")
-                                        Main.ServerConfig.usersList!!.remove(key)
-                                    })
-                                }
+                            if (banUntil == null) {
+                                Bukkit.getScheduler().runTask(plugin, Runnable {
+                                    Bukkit.getServer().getPlayer(UUID.fromString(banUUID))?.kickPlayer("Banned by $banUser for $reason. Permanent Ban.")
+                                    ret = removePlayerfromMinecraft(username)
+                                })
+
                             } else {
-                                Bukkit.getServer().pluginManager.getPlugin("pengcord")?.let {
-                                    Bukkit.getScheduler().runTask(it, Runnable {
-                                        Bukkit.getServer().getPlayer(UUID.fromString(banUUID))?.kickPlayer("Banned by $banUser for $reason. Banned until $BanUntil")
-                                        Main.ServerConfig.usersList!!.remove(key)
-                                    })
-                                }
+                                Bukkit.getScheduler().runTask(plugin, Runnable {
+                                    Bukkit.getServer().getPlayer(UUID.fromString(banUUID))?.kickPlayer("Banned by $banUser for $reason. Banned until $banUntil")
+                                    ret = removePlayerfromMinecraft(username)
+                                })
                             }
                             ret = true
                         }
@@ -210,10 +259,10 @@ class Command {
                 Main.ServerConfig.usersList?.let { hash ->
                     Bukkit.getServer().getPlayer(mArray[1])?.let { player ->
                         if (!(hash.containsValue(player.uniqueId.toString()) && hash.containsKey(sender.idAsString))) {
-                            hash.put(sender.idAsString, player.uniqueId.toString())
+                            hash[sender.idAsString] = player.uniqueId.toString()
                             Main.ServerLogger.info("[pengcord]: Registered User with discord id ${sender.idAsString} with UUID ${player.uniqueId}")
                             CommandHelper.deleteAfterSend("Successfully Verified!", 8, message)
-                            player.sendTitle("You have been verified!", "GLHF!", 10, 70, 20)
+                            player.sendTitle("§aYou have been verified!", "§aGLHF!", 10, 70, 20)
                             player.playSound(Location(player.world, player.location.x, player.location.y, player.location.z), Sound.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1.0F, 1.0F)
                             if (player.isInvulnerable) {
                                 player.isInvulnerable = false
@@ -271,26 +320,30 @@ class Command {
     }
 
     fun stop(msg: String, sender: User, message: Message) {
-        val mArray: List<String> = msg.split(" ")
-        var shutdownTimer: Long = 0;
-        shutdownTimer = try {
-            mArray[1].toLong() * 20L
-        } catch (e: Exception) {
-            200L
-        }
+        if (doesUserHavePermission(sender, message)){
+            val mArray: List<String> = msg.split(" ")
+            val shutdownTimer = try {
+                mArray[1].toLong() * 20L
+            } catch (e: Exception) {
+                200L
+            }
 
-        message.server?.let { optional ->
-            optional.ifPresent {
-                if (doesUserHavePermission(sender, message)){
-                    Bukkit.getServer().pluginManager.getPlugin("pengcord")?.let {
-                        shutdown(shutdownTimer, it)
+            message.server?.let { optional ->
+                optional.ifPresent {
+                    if (doesUserHavePermission(sender, message)){
+                        Bukkit.getServer().pluginManager.getPlugin("pengcord")?.let {
+                            shutdown(shutdownTimer, it)
+                        }
                     }
                 }
             }
         }
+        else {
+            CommandHelper.deleteAfterSend("You do not have permission to run this command", 5, message)
+        }
     }
 
-    fun whoIs(msg: String, sender: User, message: Message) {
+    fun whoIs(msg: String, sender : User, message: Message) {
         val mArray: List<String> = msg.split(" ")
         if (message.mentionedUsers.size == 1) {
             val user: User = message.mentionedUsers[0]
@@ -323,7 +376,7 @@ class Command {
                         for (key in Main.ServerConfig.usersList?.keys!!) {
                             if (Main.ServerConfig.usersList!![key] == player) {
                                 val user: User = Main.discordBot.discordApi.getUserById(key).join()
-                                var embed: EmbedBuilder = EmbedBuilder()
+                                val embed: EmbedBuilder = EmbedBuilder()
                                         .setAuthor("Discord whois lookup")
                                         .setTitle("Whois for user ${Main.mojangAPI.getPlayerProfile(player).username}")
                                         .setThumbnail(File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${player}.png"))
@@ -347,16 +400,19 @@ class Command {
     }
 
 
-    fun unVerify(msg: String, sender: User, message: Message) {
+    fun kick(msg: String, sender: User, message: Message) {
         val mArray: List<String> = msg.split(" ")
         if (doesUserHavePermission(sender, message)){
             if (message.mentionedUsers.size == 1){
                 val user: User = message.mentionedUsers[0]
-                removePlayerfromDiscord(user, message)
+
+                removePlayerfromDiscord(user, message, true)
+                Main.discordBot.sendMessageToDiscord("Successfully Unverified ${user.discriminatedName}")
             }
             else if (message.mentionedUsers.size == 0){
                 try {
-                    removePlayerfromMinecraft(mArray[1])
+                    removePlayerfromMinecraft(mArray[1], true)
+                    Main.discordBot.sendMessageToDiscord("Successfully Unverified ${mArray[1]}")
                 }
                 catch (e: Exception){
                     CommandHelper.deleteAfterSend("Could not find user ${mArray[1]}.", 5, message)

@@ -29,14 +29,14 @@ import org.javacord.api.event.message.MessageCreateEvent
 import org.javacord.api.listener.message.MessageCreateListener
 import java.lang.Exception
 
-public class DscMessageEvent: MessageCreateListener {
-    private var command: Command = Command();
-    public override fun onMessageCreate(event: MessageCreateEvent?) {
-        val msg: Message? = event?.message;
+class DscMessageEvent: MessageCreateListener {
+    private var command: Command = Command()
+    override fun onMessageCreate(event: MessageCreateEvent?) {
+        val msg: Message? = event?.message
         msg?.let {
-            if (msg.content.startsWith(Main.ServerConfig.botPrefix.toString())){
-                Main.ServerLogger.info("Inc CMD: In text channel ${msg.channel.idAsString} by user ${msg.author.idAsString}");
-                val messageAsList: List<String> = msg.content.split(" ");
+            if (msg.content.startsWith(Main.ServerConfig.botPrefix.toString()) && msg.channel.idAsString == Main.ServerConfig.syncChannel.toString()){
+                Main.ServerLogger.info("Inc CMD: In text channel ${msg.channel.idAsString} by user ${msg.author.idAsString}")
+                val messageAsList: List<String> = msg.content.split(" ")
                 when (messageAsList[0]){
                     "${Main.ServerConfig.botPrefix}bind" -> {
                         if(msg.author.asUser().isPresent){
@@ -58,9 +58,9 @@ public class DscMessageEvent: MessageCreateListener {
                             command.stop(msg.content.toString(), msg.author.asUser().get(), msg)
                         }
                     }
-                    "${Main.ServerConfig.botPrefix}unverify" -> {
+                    "${Main.ServerConfig.botPrefix}pkick" -> {
                         if(msg.author.asUser().isPresent){
-                            command.unVerify(msg.content.toString(), msg.author.asUser().get(), msg)
+                            command.kick(msg.content.toString(), msg.author.asUser().get(), msg)
                         }
                     }
                     "${Main.ServerConfig.botPrefix}pban" -> {
@@ -71,25 +71,38 @@ public class DscMessageEvent: MessageCreateListener {
                 }
             }
             else {
-                if (!(msg.author.isWebhook || msg.author.isBotUser || msg.author.isYourself) && Main.doSyncDiscord){
-                    if (msg.channel.idAsString.equals(Main.ServerConfig.syncChannel.toString())){
-                        if (!Main.discordBot.chatFilterRegex.matches(msg.readableContent)){
-                            var msgBuilder = MessageBuilder()
-                            msg.userAuthor.ifPresent {
-                                msgBuilder.append(it.mentionTag)
-                            }
-                            msgBuilder.append(", ${Main.ServerConfig.bannedWordMessage?.let { it1 -> Main.discordBot.regex.replace(it1, "") }}")
-                            msgBuilder.append(".")
-                            msgBuilder.send(msg.channel)
-                        }
+                if (!(msg.author.isWebhook || msg.author.isBotUser || msg.author.isYourself) && Main.ServerConfig.enableSync){
+                    if (msg.channel.idAsString == Main.ServerConfig.syncChannel.toString()){
                         try{
-                            Bukkit.getServer().broadcastMessage("§7[DSC]${msg.author.displayName}: ${EmojiParser.parseToAliases(msg.readableContent)}");
-                            for (attachment in msg.attachments){
-                                if (attachment.isSpoiler){
-                                    Bukkit.getServer().broadcastMessage("§7[DSC]${msg.author.displayName}: SPOILER IMG: ${attachment.proxyUrl}");
+                            if (Main.discordBot.chatFilterRegex.matches(msg.readableContent.toLowerCase())
+                                    && Main.ServerConfig.bannedWordsEnable
+                                    && Main.ServerConfig.bannedWordDiscord) {
+
+                                msg.delete().thenAccept {
+                                    Main.ServerLogger.info("Removed Message: ${msg.content} / ${msg.readableContent}")
+                                    Main.ServerLogger.info("Regex: ${Main.discordBot.chatFilterRegex.pattern}")
+                                    var msgBuilder = MessageBuilder()
+                                    msg.userAuthor.ifPresent {
+                                        msgBuilder.append(it.mentionTag)
+                                    }
+                                    msgBuilder.append(", ${Main.ServerConfig.bannedWordMessage?.let { it1 -> Main.discordBot.regex.replace(it1, "") }}")
+                                    msgBuilder.append(".")
+                                    msgBuilder.send(msg.channel)
+                                    return@thenAccept
                                 }
-                                else {
-                                    Bukkit.getServer().broadcastMessage("§7[DSC]${msg.author.displayName}: ${attachment.proxyUrl}");
+                            }
+                            else{
+                                val message = "§7[DSC]${msg.author.displayName}: ${EmojiParser.parseToAliases(msg.readableContent)}"
+                                if (message.isNotBlank()){
+                                    Bukkit.getServer().broadcastMessage(message)
+                                }
+                                for (attachment in msg.attachments){
+                                    if (attachment.isSpoiler){
+                                        Bukkit.getServer().broadcastMessage("§7[DSC]${msg.author.displayName}: SPOILER: ${attachment.url}")
+                                    }
+                                    else {
+                                        Bukkit.getServer().broadcastMessage("§7[DSC]${msg.author.displayName}: ${attachment.url}")
+                                    }
                                 }
                             }
                         }
