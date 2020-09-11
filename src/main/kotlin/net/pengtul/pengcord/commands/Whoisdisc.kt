@@ -1,4 +1,4 @@
 package net.pengtul.pengcord.commands
 
-class whoismc {
+class Whoisdisc {
 }

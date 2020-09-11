@@ -38,13 +38,20 @@ class Event : Listener{
     @EventHandler
     fun onPlayerChatEvent(event: AsyncPlayerChatEvent){
         if(Main.ServerConfig.enableSync) {
-            Main.discordBot.sendMessagetoWebhook(event.message, event.player.displayName, null, event.player)
+            if (!Main.discordBot.chatFilterRegex.matches(event.message.toLowerCase())){
+                Main.discordBot.sendMessagetoWebhook(event.message, event.player.displayName, null, event.player)
+            }
+            else {
+                event.player.sendMessage(Main.ServerConfig.bannedWordMessage!!)
+            }
         }
     }
     @EventHandler
     fun onBroadcastChatEvent(event: BroadcastMessageEvent){
         if (Main.ServerConfig.enableSync){
-            Main.discordBot.sendMessageToDiscord(event.message)
+            if (!Main.discordBot.chatFilterRegex.matches(event.message.toLowerCase())){
+                Main.discordBot.sendMessageToDiscord(event.message)
+            }
         }
     }
 

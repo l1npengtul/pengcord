@@ -9,6 +9,23 @@ commands:
     description: Verifies Players
     usage: /verify <Discord Tag>
     permission: pengcord.verify.command
+  whoismc:
+    description: Look up someone's discord ID by their username
+    usage: /whoismc <player>
+    permission: pengcord.whois.mc
+  whoisdisc:
+    description: Look up someone's Minecraft from their Discord username + tag
+    usage: /whoisdisc <discord tag>
+    permission: pengcord.whois.discord
+  unverify:
+    description: Remove someone's verification. Note that said user needs to relog for the changes to apply
+    usage: /unverify <discord tag|MC user name>
+    permission: pengcord.verify.undo
+  stopserver:
+    description: Stop the Server
+    usage: /stopserver <time seconds>
+    permission: pengcord.stopserver.command
+
 permissions:
   pengcord.verify:
     description: Everything related to the verify commands
@@ -18,4 +35,22 @@ permissions:
         default: true
       pengcord.verify.bypass:
         description: Allows these players to bypass the verification system
+        default: false
+      pengcord.verify.undo:
+        description: Allows the running of /unverify
+        default: false
+  pengcord.whois:
+    description: whois lookup related permissions
+    children:
+      pengcord.whois.discord:
+        description: Allows Discord -> MC lookup
+        default: true
+      pengcord.whois.mc:
+        description: Allows MC -> Discord lookup
+        default: true
+  pengcord.stopserver:
+    description: Permission relationg to stopping the server
+    children:
+      pengcord.stopserver.command:
+        description: Allows running of /stopserver
         default: false
