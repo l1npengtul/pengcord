@@ -86,7 +86,7 @@ class Bot {
                 for (word in Main.ServerConfig.bannedWords!!){
                     regexString.append("($word)|")
                 }
-                regexString.dropLast(1) // Drop the last |
+                regexString.deleteAt(regexString.length-1) // Drop the last |
                 regexString.append(")")
                 Regex(regexString.toString())
             } else {
