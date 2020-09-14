@@ -62,7 +62,7 @@ class Event : Listener{
         if(Main.ServerConfig.enableSync) {
             if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message.toLowerCase())){
                 Main.discordBot.sendMessagetoWebhook(event.message, event.player.displayName, null, event.player)
-                Main.discordBot.log("[pengcord]: [MC-EVENT-PLAYERCHAT]: ${event.message} (user ${event.player.uniqueId }).")
+                Main.discordBot.log("[pengcord]: [MC-EVENT-PLAYERCHAT]: <${event.player.name}> ${event.message}")
             }
             else {
                 event.player.sendMessage(Main.ServerConfig.bannedWordMessage!!)
