@@ -25,6 +25,10 @@ commands:
     description: Stop the Server
     usage: /stopserver <time seconds>
     permission: pengcord.command.stopserver
+  info:
+    description: Gets Server RAM usage and uptime
+    usage: /info
+    permission: pengcord.command.info
 
 permissions:
   pengcord.verify:
@@ -47,5 +51,8 @@ permissions:
         default: false
       pengcord.command.whois:
         description: Allows MC <-> Discord lookup
+        default: true
+      pengcord.command.info:
+        description: Allows user to get server info
         default: true
 

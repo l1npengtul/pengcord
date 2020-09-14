@@ -37,6 +37,7 @@ class Event : Listener{
                 Main.ServerConfig.usersList?.put("", event.player.uniqueId.toString())
                 event.player.sendMessage("§aCongratulations! You have super bypass powers!")
             }
+            Main.discordBot.log("[pengcord]: [MC-EVENT-JOIN]: ${event.joinMessage} (user ${event.player.uniqueId }).")
         }
     }
     @EventHandler
@@ -44,11 +45,13 @@ class Event : Listener{
         //Main.ServerLogger.info("[${Main.ServerConfig.ServerName}]: ${event.quitMessage}");
         if(Main.ServerConfig.enableSync) {
             Main.discordBot.sendMessageToDiscord("${event.quitMessage?.replace("§e", "")}")
+            Main.discordBot.log("[pengcord]: [MC-EVENT-QUIT]: ${event.quitMessage} (user ${event.player.uniqueId }).")
         }
     }
     @EventHandler
     fun onPlayerKickEvent(event: PlayerKickEvent){
         if(Main.ServerConfig.enableSync) {
+            Main.discordBot.log("[pengcord]: [MC-EVENT-KICK]: ${event.leaveMessage} for reason ${event.reason} (user ${event.player.uniqueId }).")
             Main.discordBot.sendMessageToDiscord("${event.leaveMessage.replace("§e", "")}. Reason: ${event.reason.replace("§e", "")}")
         }
     }
@@ -59,9 +62,11 @@ class Event : Listener{
         if(Main.ServerConfig.enableSync) {
             if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message.toLowerCase())){
                 Main.discordBot.sendMessagetoWebhook(event.message, event.player.displayName, null, event.player)
+                Main.discordBot.log("[pengcord]: [MC-EVENT-PLAYERCHAT]: ${event.message} (user ${event.player.uniqueId }).")
             }
             else {
                 event.player.sendMessage(Main.ServerConfig.bannedWordMessage!!)
+                Main.discordBot.log("[pengcord]: [ChatFilter]: User ${event.player.name} (${event.player.uniqueId }) tripped chat filter with message ${event.message}")
                 event.isCancelled = true
             }
         }
@@ -70,8 +75,13 @@ class Event : Listener{
     fun onBroadcastChatEvent(event: BroadcastMessageEvent){
         if (Main.ServerConfig.enableSync){
             if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message)){
+                Main.discordBot.log("[pengcord]: [MC-EVENT-BROADCAST]: ${event.message}.")
                 Main.discordBot.sendMessageToDiscord(event.message)
                 event.isCancelled = false
+            }
+            else {
+                Main.discordBot.log("[pengcord]: [ChatFilter]: Message of unknown origin (Message Broadcast) tripped chat filter with message ${event.message}.")
+                event.isCancelled = true
             }
         }
     }
@@ -80,6 +90,7 @@ class Event : Listener{
     @EventHandler
     fun onPlayerDeathEvent(event: PlayerDeathEvent){
         if(Main.ServerConfig.enableSync) {
+            Main.discordBot.log("[pengcord]: [MC-EVENT-PLAYERDEATH]: ${event.deathMessage}.")
             Main.discordBot.sendMessageToDiscord("${event.deathMessage}")
         }
     }

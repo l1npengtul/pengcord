@@ -1,9 +1,11 @@
 package net.pengtul.pengcord.commands
 
+import net.pengtul.pengcord.main.Main
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 
 /*
 *    Stops the server (MC Command)
@@ -32,13 +34,28 @@ class StopServer: CommandExecutor {
         val shutdownTimer = try {
             args[0].toLong() * 20L
         } catch (e: Exception) {
-            200L
+            sender.sendMessage("§cPlease enter a valid time!")
+            return false
         }
 
         if (sender.hasPermission("pengcord.command.stopserver")) {
             Bukkit.getServer().pluginManager.getPlugin("pengcord")?.let {
                 net.pengtul.pengcord.bot.botcmd.Command.shutdown(shutdownTimer, it)
+                if (sender is Player){
+                    Main.discordBot.log("[pengcord]: User ${sender.uniqueId} (${sender.name}) ran `stopserver`.")
+                }
+                else {
+                    Main.discordBot.log("[pengcord]: Console ran command `stopserver`.")
+                }
                 ret = true
+            }
+        }
+        else {
+            if (sender is Player){
+                Main.discordBot.log("[pengcord]: User ${sender.uniqueId} (${sender.name}) ran `stopserver`. Failed due to invalid permission.")
+            }
+            else {
+                Main.discordBot.log("[pengcord]: Console ran command `stopserver`. Failed due to invalid permission.")
             }
         }
         return ret

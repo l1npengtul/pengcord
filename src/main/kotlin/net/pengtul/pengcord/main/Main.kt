@@ -41,7 +41,7 @@ import javax.imageio.ImageIO
 
 class Main : JavaPlugin(), Listener, CommandExecutor{
     companion object {
-        val ServerLogger: Logger = Bukkit.getLogger()
+        lateinit var ServerLogger: Logger
         lateinit var ServerConfig: Config
         lateinit var ServerRawConfig: FileConfiguration
 
@@ -53,6 +53,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         var mojangAPI: Mojang = Mojang().connect()
         var playersToVerify = HashMap<String, String>()
         var doSyncDiscord: Boolean = true
+
         // lateinit var sqlClass: SQLClass
 
         fun downloadSkin(usr: Player){
@@ -112,6 +113,8 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         // Register the Events
         Bukkit.getPluginManager().registerEvents(Event(), this)
 
+        ServerLogger =  Bukkit.getLogger()
+
         // Read the `config.yml` and set a dataclass
         val cfgfile = this.config
         ServerRawConfig = cfgfile
@@ -159,9 +162,11 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         this.getCommand("whoismc")?.setExecutor(Whoismc())
         this.getCommand("stopserver")?.setExecutor(StopServer())
         this.getCommand("unverify")?.setExecutor(Unverify())
-
+        this.getCommand("info")?.setExecutor(Info())
+        discordBot.log("[pengcord]: Server Startup and Plugin Initialization successful.")
         // Get Mojang API
         mojangAPI = Mojang().connect()
+
 
 
     }
@@ -169,6 +174,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
     override fun onDisable() {
         //SqlDealer.getConnectionHandler().close();
         discordBot.sendMessageToDiscord("Server Shutdown Event!")
+        discordBot.log("[pengcord]: Server Shutdown initiated.")
         discordBot.webhook.delete().join()
         discordBot.discordApi.disconnect()
         ServerConfig.writeValues()

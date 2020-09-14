@@ -59,13 +59,16 @@ class Verify: CommandExecutor {
                                     if (!Main.playersToVerify.containsKey(discUser.idAsString) && !Main.playersToVerify.containsValue(sender.uniqueId.toString())){
                                         Main.playersToVerify[discUser.idAsString] = sender.uniqueId.toString()
                                         sender.sendMessage("§aPlease type `${Main.ServerConfig.botPrefix}verify ${sender.name}` in #${it.name} to finish your verification!")
+                                        Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `verify` with arguments ${user.idAsString} (${user.discriminatedName}). Successful, awaiting verification.")
                                     }
                                     else {
+                                        Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `verify` with arguments ${user.idAsString} (${user.discriminatedName}). Already exists.")
                                         sender.sendMessage("§cERROR: You already exist! Type `${Main.ServerConfig.botPrefix}verify ${sender.name}` in #${it.name} to finish your verification!")
                                     }
                                 }
                             }
                             catch (e: Exception){
+                                Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `verify` with arguments ${user.idAsString} (${user.discriminatedName}). Exception occurred ${e}")
                                 sender.sendMessage("§aAn exception occurred in your request. ERR: $e")
                                 Main.ServerLogger.severe("An exception occurred in your request verifying ${user.discriminatedName}. ERR: $e")
                                 Main.ServerLogger.severe(e.stackTrace.toString())
@@ -76,6 +79,9 @@ class Verify: CommandExecutor {
                 }
             }
             return true
+        }
+        else {
+            Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `verify` with arguments. Failed due to error.")
         }
         return false
     }
