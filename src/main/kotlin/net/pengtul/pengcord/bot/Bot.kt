@@ -20,6 +20,8 @@ package net.pengtul.pengcord.bot
 
 
 import club.minnced.discord.webhook.WebhookClient
+import net.pengtul.pengcord.bot.botcmd.*
+import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandHandler
 import net.pengtul.pengcord.error.DiscordLoginFailException
 import net.pengtul.pengcord.main.Main
 import org.bukkit.Bukkit
@@ -27,11 +29,7 @@ import org.bukkit.plugin.Plugin
 import org.javacord.api.DiscordApi
 import org.javacord.api.DiscordApiBuilder
 import org.javacord.api.entity.channel.ServerTextChannel
-import org.javacord.api.entity.message.Message
-import org.javacord.api.entity.message.embed.Embed
 import org.javacord.api.entity.message.embed.EmbedBuilder
-import org.javacord.api.entity.server.Server
-import org.javacord.api.entity.user.User
 import org.javacord.api.entity.webhook.Webhook
 import org.javacord.api.entity.webhook.WebhookBuilder
 import org.javacord.api.entity.webhook.WebhookUpdater
@@ -46,15 +44,10 @@ class Bot {
     lateinit var webhook: Webhook
     lateinit var webhookUpdater: WebhookUpdater
     lateinit var webhookSender: WebhookClient
+    var commandHandler: JCDiscordCommandHandler
     var chatFilterRegex: Regex
     val regex: Regex = """(§.)""".toRegex()
 
-
-    companion object {
-        public fun unverify(discordUUID: String){
-            Main.ServerConfig.usersList?.remove(discordUUID)
-        }
-    }
 
     init {
         discordApi = DiscordApiBuilder()
@@ -64,7 +57,6 @@ class Bot {
                     throw DiscordLoginFailException("Failed to log into discord!")
                 }
                 .join()
-
 
         discordApi.getServerTextChannelById(Main.ServerConfig.syncChannel).ifPresent { serverTextChannel: ServerTextChannel ->
             this.webhook = WebhookBuilder(serverTextChannel)
@@ -82,7 +74,7 @@ class Bot {
 
         if (Main.ServerConfig.bannedWordsEnable){
             chatFilterRegex = if (!Main.ServerConfig.bannedWords.isNullOrEmpty()){
-                var regexString = StringBuilder()
+                val regexString = StringBuilder()
                 for (word in Main.ServerConfig.bannedWords!!){
                     regexString.append("($word)|")
                 }
@@ -95,10 +87,23 @@ class Bot {
         else {
             chatFilterRegex = Regex("(?!)", RegexOption.IGNORE_CASE)
         }
+        val bc : MutableList<String> = ArrayList()
+        //bc.add(Main.ServerConfig.syncChannel!!)
+        //bc.add(Main.ServerConfig.syncChannel!!)
+        bc.add(Main.ServerConfig.commandChannel!!)
+        bc.add(Main.ServerConfig.adminChannel!!)
+        commandHandler = JCDiscordCommandHandler(discordApi, Main.ServerConfig.botPrefix!!, true, bc.toList())
+        commandHandler.addCommand(BanFromDiscord())
+        commandHandler.addCommand(Info())
+        commandHandler.addCommand(Kick())
+        commandHandler.addCommand(Stop())
+        commandHandler.addCommand(Verify())
+        commandHandler.addCommand(Whois())
+        commandHandler.generateHelp()
     }
 
     private fun onSucessfulConnect() {
-        Main.ServerLogger.info("Sucessfully connected to Discord! Invite to server using:")
+        Main.ServerLogger.info("[pengcord]: Successfully connected to Discord! Invite to server using:")
         Main.ServerLogger.info(discordApi.createBotInvite())
     }
 
@@ -110,20 +115,6 @@ class Bot {
         }
     }
 
-    /*
-    fun banFromDiscord(userToBan: User): Boolean{
-        discordApi.getServerById(Main.ServerConfig.serverBind).ifPresent { server ->
-            if ()
-        }
-        return false
-    }
-
-    fun pardonFromDiscord(userToPardon: User): Boolean{
-
-    }
-    */
-
-
     fun sendEmbedToDiscord(message: EmbedBuilder){
         Main.ServerLogger.info("aaaaa")
         discordApi.getTextChannelById(Main.ServerConfig.syncChannel).ifPresent { channel ->
@@ -132,13 +123,25 @@ class Bot {
         }
     }
 
+    fun log(message: String){
+        discordApi.getTextChannelById(Main.ServerConfig.adminChannel).ifPresent {channel ->
+            channel.sendMessage("[${System.currentTimeMillis() / 1000L}]: ${regex.replace(message, "")}")
+        }
+    }
+
+    fun logEmbed(embed: EmbedBuilder){
+        discordApi.getTextChannelById(Main.ServerConfig.adminChannel).ifPresent {channel ->
+            embed.addField("Time Log:", "UnixTime: ${System.currentTimeMillis() / 1000L}.")
+            channel.sendMessage(embed)
+        }
+    }
 
     fun sendMessagetoWebhook(message: String, usrname: String, pfp: String?, player: org.bukkit.entity.Player){
         if(webhookInit){
             val currentPlugin: Plugin? = Bukkit.getServer().pluginManager.getPlugin("pengcord")
             currentPlugin?.let {
                 Bukkit.getScheduler().runTaskAsynchronously(currentPlugin, Runnable {
-                    var msg: String = message
+                    val msg: String = message
                     if (usrname.toLowerCase().equals("clyde")){
                         webhookUpdater = webhookUpdater.setName("cly de")
                     }

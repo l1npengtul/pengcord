@@ -1,6 +1,7 @@
 package net.pengtul.pengcord.bot.botcmd;
 
 import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.util.logging.ExceptionLogger;
 import org.jetbrains.annotations.NotNull;
 

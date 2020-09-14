@@ -54,11 +54,15 @@ class Whoisdisc: CommandExecutor {
                             sender.sendMessage("§aMinecraft Name: $minecraftUsername")
                             sender.sendMessage("§9Discord UUID: ${user.idAsString}")
                             sender.sendMessage("§9Discord Name: ${user.discriminatedName}")
+                            Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `whoisdisc` with argument ${argument}.")
                             ret = true
                         }
                     }
                 })
             }
+        }
+        else {
+            Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `whoisdisc`. Failed due to inadequate permissions.")
         }
         return ret
     }

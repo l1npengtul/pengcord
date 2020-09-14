@@ -42,6 +42,8 @@ class Whoismc : CommandExecutor {
                                 sender.sendMessage("§aMinecraft Name: ${args[0]}")
                                 sender.sendMessage("§9Discord UUID: $key")
                                 sender.sendMessage("§9Discord Name: ${Main.discordBot.discordApi.getUserById(key).join().discriminatedName}")
+                                Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `whoisdisc` with argument ${args[0]}.")
+
                                 ret = true
                             }
                         }
@@ -49,9 +51,11 @@ class Whoismc : CommandExecutor {
                 }
             } else {
                 sender.sendMessage("§cI don't know who is ${args[0]}...")
+                Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `whoisdisc` with argument ${args[0]}. Failed due to invalid user.")
             }
         }
         else {
+            Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `whoisdisc` with argument ${args[0]}. Failed due to invalid permission.")
             sender.sendMessage("§cYou do not have permission to run this command.")
         }
         return ret
