@@ -30,6 +30,7 @@ import org.javacord.api.entity.channel.ServerTextChannel
 import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.message.embed.Embed
 import org.javacord.api.entity.message.embed.EmbedBuilder
+import org.javacord.api.entity.server.Server
 import org.javacord.api.entity.user.User
 import org.javacord.api.entity.webhook.Webhook
 import org.javacord.api.entity.webhook.WebhookBuilder
@@ -108,6 +109,20 @@ class Bot {
             }
         }
     }
+
+    /*
+    fun banFromDiscord(userToBan: User): Boolean{
+        discordApi.getServerById(Main.ServerConfig.serverBind).ifPresent { server ->
+            if ()
+        }
+        return false
+    }
+
+    fun pardonFromDiscord(userToPardon: User): Boolean{
+
+    }
+    */
+
 
     fun sendEmbedToDiscord(message: EmbedBuilder){
         Main.ServerLogger.info("aaaaa")

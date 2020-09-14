@@ -7,6 +7,7 @@ import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.entity.user.User
 import java.io.File
+import java.lang.StringBuilder
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -74,7 +75,7 @@ class Command {
                 Bukkit.getScheduler().runTaskAsynchronously(it, Runnable {
                     for (key in Main.ServerConfig.usersList!!.keys) {
                         Main.ServerLogger.info("$uuid, $key")
-                        if (Main.ServerConfig.usersList!![key] == uuid){
+                        if (Main.ServerConfig.usersList!![key] == uuid && key.isNotBlank()){
                             Main.ServerLogger.info("$uuid, $key")
                             Main.ServerConfig.usersList!!.remove(key)
                             ret = true
@@ -92,7 +93,7 @@ class Command {
                 Bukkit.getScheduler().runTaskAsynchronously(it, Runnable {
                     for (key in Main.ServerConfig.usersList!!.keys) {
                         Main.ServerLogger.info("$uuid, $key")
-                        if (Main.ServerConfig.usersList!![key] == uuid){
+                        if (Main.ServerConfig.usersList!![key] == uuid && key.isNotBlank()){
                             Main.ServerLogger.info("$uuid, $key")
                             if (doKick){
                                 Bukkit.getScheduler().runTask(it, Runnable {
@@ -164,7 +165,7 @@ class Command {
             Bukkit.getServer().pluginManager.getPlugin("pengcord")?.let {plugin ->
                 Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
                     for (key in Main.ServerConfig.usersList?.keys!!) {
-                        if (Main.ServerConfig.usersList!![key] == banUUID) {
+                        if (Main.ServerConfig.usersList!![key] == banUUID && key.isNotBlank()) {
                             var banUntil: Date? = Date()
                             if (days != null){
                                 if (banUntil != null) {
@@ -350,18 +351,23 @@ class Command {
             if (Main.ServerConfig.usersList?.containsKey(user.idAsString)!!) {
                 val player: String = Main.mojangAPI.getPlayerProfile(Main.ServerConfig.usersList!!.getValue(user.idAsString)).username
                 val uuid: String = Main.mojangAPI.getUUIDOfUsername(player)
-                //val bukkitPlayer: OfflinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(Main.insertDashUUID(uuid)))
-                Main.downloadSkinUUID(Main.insertDashUUID(uuid))
+                //Main.downloadSkinUUID(Main.insertDashUUID(uuid))
                 Main.ServerLogger.info("aaa")
+                Main.ServerLogger.info(Main.mojangAPI.getPlayerProfile(uuid).username)
+                Main.ServerLogger.info(player)
+                Main.ServerLogger.info(user.discriminatedName)
+                Main.ServerLogger.info(user.idAsString)
+                Main.ServerLogger.info(File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${player}.png").absolutePath)
                 val embed = EmbedBuilder()
                         .setAuthor("Discord whois lookup")
-                        .setTitle("Whois for user ${user.discriminatedName}")
-                        .setThumbnail(File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${Main.insertDashUUID(uuid)}.png"))
-                        .addField("Discord UUID:", user.idAsString + " ")
-                        .addInlineField("Minecraft Username:", "$player ")
-                        .addInlineField("Minecraft UUID:", "${Main.insertDashUUID(uuid)} ")
+                        .setTitle("Whois for user ${user.discriminatedName} .")
+                        //.setThumbnail(File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${Main.insertDashUUID(uuid)}.png"))
+                        .addField("Discord UUID:", user.idAsString + " .")
+                        .addInlineField("Minecraft Username:", "$player .")
+                        .addInlineField("Minecraft UUID:", "${Main.insertDashUUID(uuid)} .")
                 //.addInlineField("LuckPerms Prefix:", getPlayerPrefix(player.uniqueId.toString()))
                 message.serverTextChannel.ifPresent {
+                    Main.ServerLogger.info("aaa")
                     it.sendMessage(embed)
                 }
 
@@ -370,21 +376,31 @@ class Command {
         else if (message.mentionedUsers.size == 0) {
             val player: String = Main.insertDashUUID(Main.mojangAPI.getUUIDOfUsername(mArray[1]))
             if (Main.ServerConfig.usersList?.containsValue(player)!!) {
-                Bukkit.getServer().pluginManager.getPlugin("pengcord")?.let {
-                    Bukkit.getScheduler().runTaskAsynchronously(it, Runnable {
+                Bukkit.getServer().pluginManager.getPlugin("pengcord")?.let { plugin ->
+                    Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
                         Main.ServerLogger.info("aaa")
                         for (key in Main.ServerConfig.usersList?.keys!!) {
-                            if (Main.ServerConfig.usersList!![key] == player) {
+                            if (Main.ServerConfig.usersList!!.getValue(key) == player && key.isNotBlank()) {
+                                Main.ServerLogger.info(key)
                                 val user: User = Main.discordBot.discordApi.getUserById(key).join()
+                                Main.downloadSkinUUID(Main.insertDashUUID(player))
+                                Main.ServerLogger.info(Main.mojangAPI.getPlayerProfile(player).username)
+                                Main.ServerLogger.info(player)
+                                Main.ServerLogger.info(user.discriminatedName)
+                                Main.ServerLogger.info(key)
+                                Main.ServerLogger.info(File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${player}.png").absolutePath)
                                 val embed: EmbedBuilder = EmbedBuilder()
                                         .setAuthor("Discord whois lookup")
-                                        .setTitle("Whois for user ${Main.mojangAPI.getPlayerProfile(player).username}")
-                                        .setThumbnail(File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${player}.png"))
-                                        .addField("Minecraft UUID:", "$player ")
-                                        .addInlineField("Discord Username:", user.discriminatedName.toString() + " ")
-                                        .addInlineField("Discord UUID:", "$key ")
+                                        .setTitle("Whois for user ${Main.mojangAPI.getPlayerProfile(player).username} .")
+                                        //.setThumbnail(File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${player}.png"))
+                                        .addField("Minecraft UUID:", "$player .")
+                                        .addInlineField("Discord Username: ", "${user.discriminatedName} .")
+                                        .addInlineField("Discord UUID:", "$key .")
                                 //.addInlineField("LuckPerms Prefix:", getPlayerPrefix(player.uniqueId.toString()))
-                                Main.discordBot.sendEmbedToDiscord(embed)
+                                message.serverTextChannel.ifPresent {
+                                    Main.ServerLogger.info("aaa")
+                                    it.sendMessage(embed)
+                                }
                                 return@Runnable
                             }
                         }
@@ -432,6 +448,8 @@ class Command {
             message.server.get().isAdmin(user) && Main.ServerConfig.adminNoRole
         }
     }
+
+
 }
 
 
