@@ -23,7 +23,7 @@ package net.pengtul.pengcord.main
 
 import net.milkbowl.vault.chat.Chat
 import net.pengtul.pengcord.bot.Bot
-import net.pengtul.pengcord.commands.Verify
+import net.pengtul.pengcord.commands.*
 import net.pengtul.pengcord.config.Config
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandExecutor
@@ -155,14 +155,10 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
 
         discordBot.sendMessageToDiscord("Server Started!")
         this.getCommand("verify")?.setExecutor(Verify())
-
-        //sqlClass = SQLClass();
-
-        // Load VaultAPI-Chat
-        val chatProvider = server.servicesManager.getRegistration(Chat::class.java)
-        if (chatProvider != null) {
-            vaultChat = chatProvider.provider
-        }
+        this.getCommand("whoisdisc")?.setExecutor(Whoisdisc())
+        this.getCommand("whoismc")?.setExecutor(Whoismc())
+        this.getCommand("stopserver")?.setExecutor(StopServer())
+        this.getCommand("unverify")?.setExecutor(Unverify())
 
         // Get Mojang API
         mojangAPI = Mojang().connect()

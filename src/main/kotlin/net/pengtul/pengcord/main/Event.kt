@@ -1,9 +1,7 @@
 package net.pengtul.pengcord.main
 
-import org.bukkit.entity.EntityType
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.entity.EntityPickupItemEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.server.BroadcastMessageEvent
 import org.bukkit.event.player.*
@@ -40,7 +38,7 @@ class Event : Listener{
     @EventHandler
     fun onPlayerChatEvent(event: AsyncPlayerChatEvent){
         if(Main.ServerConfig.enableSync) {
-            if (!Main.discordBot.chatFilterRegex.matches(event.message.toLowerCase())){
+            if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message.toLowerCase())){
                 Main.discordBot.sendMessagetoWebhook(event.message, event.player.displayName, null, event.player)
             }
             else {

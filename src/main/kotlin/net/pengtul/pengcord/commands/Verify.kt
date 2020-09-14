@@ -11,8 +11,8 @@ import java.lang.StringBuilder
 
 class Verify: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender is Player && Main.ServerConfig.enableVerify){
-            var argument = StringBuilder()
+        if (sender is Player && Main.ServerConfig.enableVerify && sender.hasPermission("pengcord.verify.command")){
+            val argument = StringBuilder()
             for (arg in args){
                 if (arg.startsWith("#")){
                     argument.append(arg)
@@ -24,7 +24,6 @@ class Verify: CommandExecutor {
                     argument.append(arg)
                 }
             }
-
 
             lateinit var discUser: User
             Main.ServerLogger.info("here")

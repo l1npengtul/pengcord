@@ -68,7 +68,13 @@ class DscMessageEvent: MessageCreateListener {
                             command.banDiscord(msg.content.toString(), msg.author.asUser().get(), msg)
                         }
                     }
+                    "${Main.ServerConfig.botPrefix}help" -> {
+                        if(msg.author.asUser().isPresent){
+
+                        }
+                    }
                 }
+
             }
             else {
                 if (!(msg.author.isWebhook || msg.author.isBotUser || msg.author.isYourself) && Main.ServerConfig.enableSync){
@@ -93,7 +99,7 @@ class DscMessageEvent: MessageCreateListener {
                             }
                             else{
                                 val message = "§7[DSC]${msg.author.displayName}: ${EmojiParser.parseToAliases(msg.readableContent)}"
-                                if (message.isNotBlank()){
+                                if (EmojiParser.parseToAliases(msg.readableContent).isNotBlank()){
                                     Bukkit.getServer().broadcastMessage(message)
                                 }
                                 for (attachment in msg.attachments){
