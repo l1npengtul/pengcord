@@ -75,7 +75,9 @@ class Event : Listener{
     fun onBroadcastChatEvent(event: BroadcastMessageEvent){
         if (Main.ServerConfig.enableSync){
             if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message)){
-                Main.discordBot.log("[pengcord]: [MC-EVENT-BROADCAST]: ${event.message}.")
+                if (!Main.discordBot.regex.replace(event.message, "").startsWith("[DSC]")){
+                    Main.discordBot.log("[pengcord]: [MC-EVENT-BROADCAST]: ${event.message}.")
+                }
                 Main.discordBot.sendMessageToDiscord(event.message)
                 event.isCancelled = false
             }

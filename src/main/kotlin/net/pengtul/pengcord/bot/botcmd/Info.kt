@@ -41,6 +41,9 @@ class Info: JCDiscordCommandExecutor {
             playerList.append("${player.displayName}, ")
             playerOnline++
         }
+        if (Bukkit.getOnlinePlayers().isEmpty()){
+            playerList.append("N/A")
+        }
         val currentUsedRAM : Long = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1048576L
         val maxRAM : Long = Runtime.getRuntime().totalMemory() /  1048576L
         val tpsString = StringBuilder()
