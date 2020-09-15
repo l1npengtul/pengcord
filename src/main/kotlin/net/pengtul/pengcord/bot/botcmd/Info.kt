@@ -44,8 +44,8 @@ class Info: JCDiscordCommandExecutor {
         if (Bukkit.getOnlinePlayers().isEmpty()){
             playerList.append("N/A")
         }
-        val currentUsedRAM : Long = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1048576L
-        val maxRAM : Long = Runtime.getRuntime().totalMemory() /  1048576L
+        val currentUsedRAM : Long = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 3600000L
+        val maxRAM : Long = Runtime.getRuntime().totalMemory() /  3600000L
         val tpsString = StringBuilder()
         for (tps in Bukkit.getTPS()){
             tpsString.append("$tps, ")
