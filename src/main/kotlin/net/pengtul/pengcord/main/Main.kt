@@ -162,7 +162,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         this.getCommand("whoismc")?.setExecutor(Whoismc())
         this.getCommand("stopserver")?.setExecutor(StopServer())
         this.getCommand("unverify")?.setExecutor(Unverify())
-        this.getCommand("info")?.setExecutor(Info())
+        this.getCommand("serverinfo")?.setExecutor(Info())
         discordBot.log("[pengcord]: Server Startup and Plugin Initialization successful.")
         // Get Mojang API
         mojangAPI = Mojang().connect()

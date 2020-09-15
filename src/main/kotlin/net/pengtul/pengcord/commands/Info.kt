@@ -26,7 +26,7 @@ import org.bukkit.entity.Player
 
 class Info: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender.hasPermission("pengcord.command.info")){
+        if (sender.hasPermission("pengcord.command.info") || sender.isOp){
             val currentUsedRAM : Long = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1048576L
             val maxRAM : Long = Runtime.getRuntime().totalMemory() /  1048576L
             sender.sendMessage("§9-------§r§6[Server Info]§r§9-------§r")
