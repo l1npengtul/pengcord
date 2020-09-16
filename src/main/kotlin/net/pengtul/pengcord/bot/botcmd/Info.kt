@@ -44,18 +44,19 @@ class Info: JCDiscordCommandExecutor {
         if (Bukkit.getOnlinePlayers().isEmpty()){
             playerList.append("N/A")
         }
-        val currentUsedRAM : Long = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 3600000L
-        val maxRAM : Long = Runtime.getRuntime().totalMemory() /  3600000L
+        val currentUsedRAM : Long = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1048576L
+        val maxRAM : Long = Runtime.getRuntime().totalMemory() /  1048576L
+        val ramUsedPercent = Math.round((currentUsedRAM.toFloat()  / maxRAM.toFloat()) * 100)
         val tpsString = StringBuilder()
         for (tps in Bukkit.getTPS()){
-            tpsString.append("$tps, ")
+            tpsString.append("${Math.round(tps * 100.0F)/100.0F}, ")
         }
         val embed = EmbedBuilder()
                 .setAuthor("Server Info")
                 .setTitle("Server TPS, Server Playerlist, Server RAM usage, Server Uptime")
                 .addInlineField("Server TPS 1M, 5M, 15M", "$tpsString")
-                .addInlineField("Server RAM Usage", "$currentUsedRAM MiB / $maxRAM MiB (${Math.round((currentUsedRAM.toDouble() / maxRAM.toDouble()) * 100) / 100.0}%)")
-                .addInlineField("Server Uptime: ", "${Command.getUptime()} Hours")
+                .addInlineField("Server RAM Usage", "$currentUsedRAM MiB / $maxRAM MiB ($ramUsedPercent%)")
+                .addInlineField("Server Uptime(HH:MM:SS): ", "${Command.getUptime()} ")
                 .addField("Users Online ($playerOnline)", "$playerList")
 
         message.serverTextChannel.ifPresent {

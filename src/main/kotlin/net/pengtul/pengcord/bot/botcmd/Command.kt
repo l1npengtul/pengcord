@@ -8,6 +8,10 @@ import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.entity.user.User
 import java.lang.management.ManagementFactory
 import java.text.SimpleDateFormat
+import java.time.Duration
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -247,8 +251,26 @@ class Command {
         }
 
         fun getUptime(): String {
-            val uptime: Long = ManagementFactory.getRuntimeMXBean().uptime
-            return (Math.round((uptime / 360000.0) * 100000.0) / 100000.0).toString()
+            val uptimeInstant: Instant = Instant.now()
+            var duration: Duration = Duration.between(Main.startInstant, uptimeInstant)
+            val hours: Long = duration.toHours()
+            duration = duration.minusDays(hours)
+            val mins: Long = duration.toMinutes()
+            duration = duration.minusMinutes(mins)
+            val secs: Long = duration.toMillis() / 1000L
+            var hourStr: String = hours.toString()
+            var minString: String = mins.toString()
+            var secsString: String = secs.toString()
+            if (hourStr == "0"){
+                hourStr = "00"
+            }
+            if (minString == "0"){
+                minString = "00"
+            }
+            if (secsString == "0"){
+                secsString = "00"
+            }
+            return "$hourStr:$minString:$secsString"
         }
     }
 }

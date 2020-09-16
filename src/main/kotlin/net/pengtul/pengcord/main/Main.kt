@@ -36,6 +36,7 @@ import org.shanerx.mojang.Mojang
 import java.awt.image.BufferedImage
 import java.io.File
 import java.net.URL
+import java.time.Instant
 import java.util.logging.Logger
 import javax.imageio.ImageIO
 
@@ -53,6 +54,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         var mojangAPI: Mojang = Mojang().connect()
         var playersToVerify = HashMap<String, String>()
         var doSyncDiscord: Boolean = true
+        var startInstant: Instant = Instant.now()
 
         // lateinit var sqlClass: SQLClass
 
@@ -166,9 +168,6 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         discordBot.log("[pengcord]: Server Startup and Plugin Initialization successful.")
         // Get Mojang API
         mojangAPI = Mojang().connect()
-
-
-
     }
 
     override fun onDisable() {
