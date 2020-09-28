@@ -254,7 +254,7 @@ class Command {
             val uptimeInstant: Instant = Instant.now()
             var duration: Duration = Duration.between(Main.startInstant, uptimeInstant)
             val hours: Long = duration.toHours()
-            duration = duration.minusDays(hours)
+            duration = duration.minusHours(hours)
             val mins: Long = duration.toMinutes()
             duration = duration.minusMinutes(mins)
             val secs: Long = duration.toMillis() / 1000L
