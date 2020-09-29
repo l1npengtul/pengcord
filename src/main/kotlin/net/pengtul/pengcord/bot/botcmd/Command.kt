@@ -6,13 +6,11 @@ import org.bukkit.plugin.Plugin
 import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.entity.user.User
-import java.lang.management.ManagementFactory
-import java.text.SimpleDateFormat
+import org.javacord.api.util.logging.ExceptionLogger
 import java.time.Duration
 import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.*
+import java.util.concurrent.Callable
 import java.util.concurrent.TimeUnit
 
 /*
@@ -272,6 +270,7 @@ class Command {
             }
             return "$hourStr:$minString:$secsString"
         }
+
     }
 }
 
