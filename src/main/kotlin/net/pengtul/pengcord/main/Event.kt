@@ -61,8 +61,18 @@ class Event : Listener{
     fun onPlayerChatEvent(event: AsyncPlayerChatEvent){
         if(Main.ServerConfig.enableSync) {
             if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message.toLowerCase())){
-                Main.discordBot.sendMessagetoWebhook(event.message, event.player.displayName, null, event.player)
-                Main.discordBot.log("[pengcord]: [MC-EVENT-PLAYERCHAT]: <${event.player.name}> ${event.message}")
+                if (!Main.ServerConfig.usersList?.containsValue(event.player.uniqueId.toString())!!) {
+                    event.player.sendMessage("§cYou are not verified! Do `/verify <discord tag>` to start!")
+                    event.player.sendMessage("§ce.g. /verify clyde#0000 (replace clyde#0000 with your own discord username and tag)")
+                    if (!event.player.isInvulnerable) {
+                        event.player.isInvulnerable = true
+                    }
+                    event.isCancelled = true
+                }
+                else {
+                    Main.discordBot.sendMessagetoWebhook(event.message, event.player.displayName, null, event.player)
+                    Main.discordBot.log("[pengcord]: [MC-EVENT-PLAYERCHAT]: <${event.player.name}> ${event.message}")
+                }
             }
             else {
                 event.player.sendMessage(Main.ServerConfig.bannedWordMessage!!)

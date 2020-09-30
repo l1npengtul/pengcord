@@ -38,7 +38,7 @@ class Info: JCDiscordCommandExecutor {
         val playerList = StringBuilder()
         var playerOnline = 0
         for (player in Bukkit.getOnlinePlayers()){
-            playerList.append("${player.displayName}, ")
+            playerList.append("${Main.discordBot.regex.replace(player.playerListName, "")}, ")
             playerOnline++
         }
         if (Bukkit.getOnlinePlayers().isEmpty()){
