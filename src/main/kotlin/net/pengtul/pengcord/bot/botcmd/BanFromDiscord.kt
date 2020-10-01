@@ -5,7 +5,6 @@ import net.pengtul.pengcord.main.Main
 import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.entity.user.User
-import java.awt.Color
 
 /*   This is the class for banning from Discord
 *    Copyright (C) 2020-2021  l1npengtul Rho
@@ -26,20 +25,25 @@ import java.awt.Color
 
 class BanFromDiscord: JCDiscordCommandExecutor {
     override val commandDescription: String
-        get() = "Bans a player using discord. Note that this does not support banning players from the discord server itself, just only discord -> Minecraft Server. Note that the <reason> CANNOT contain spaces."
+        get() = "Bans a player using discord. Note that this does not support banning players from the discord server itself, just only discord -> Minecraft Server."
     override val commandName: String
         get() = "pban"
     override val commandUsage: String
-        get() = "pban <minecraft username/discord mention> <reason> <time: days>"
+        get() = "pban <minecraft username/discord mention> <time: days> <reason>"
 
     override fun executeCommand(msg: String, sender: User, message: Message, args: List<String>) {
+        var concReason = String()
+        for (a in args.subList(2, args.size-1)){
+            concReason += a
+        }
+
         if (Command.doesUserHavePermission(sender, message)){
             if (message.mentionedUsers.size == 1) {
                 try {
                     val user: User = message.mentionedUsers[0]
-                    val reason: String? = args[1]
+                    val reason: String = concReason
                     if (Main.ServerConfig.usersList?.containsKey(user.idAsString)!!) {
-                        Command.banUsingDiscord(sender, message, args[2].toInt(), reason, user)
+                        Command.banUsingDiscord(sender, message, args[1].toInt(), reason, user)
                     }
                 }
                 catch (e: Exception){
@@ -52,8 +56,8 @@ class BanFromDiscord: JCDiscordCommandExecutor {
             else if (message.mentionedUsers.size == 0) {
                 try {
                     val playerUUID: String = Main.insertDashUUID(Main.mojangAPI.getUUIDOfUsername(args[0]))
-                    val reason: String? = args[1]
-                    val suc = Command.banUsingMinecraft(playerUUID, reason, args[2].toInt(), sender.discriminatedName)
+                    val reason: String = concReason
+                    val suc = Command.banUsingMinecraft(playerUUID, reason, args[1].toInt(), sender.discriminatedName)
                     Main.discordBot.log("[pengcord]: Attempted/Successful ban of player ${args[0]} ($playerUUID) by user ${sender.discriminatedName} (${sender.idAsString})")
                     if (suc){
                         CommandHelper.deleteAfterSend("Successfully Banned player ${args[0]}", 10, message)
@@ -63,7 +67,7 @@ class BanFromDiscord: JCDiscordCommandExecutor {
                                 .addInlineField("Banned By:", "${sender.discriminatedName} (${sender.idAsString})")
                                 .addInlineField("User Banned:", "${args[0]} ($playerUUID)")
                                 .addInlineField("Reason:", "$reason .")
-                                .addInlineField("Days:", "${args[2].toInt()} .")
+                                .addInlineField("Days:", "${args[1].toInt()} .")
                         Main.discordBot.logEmbed(embed)
                     }
                 }
