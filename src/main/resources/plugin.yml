@@ -29,6 +29,10 @@ commands:
     description: Gets Server RAM usage and uptime
     usage: /info
     permission: pengcord.command.info
+  goodnight:
+    description: Casts Goodnight Vote
+    usage: /goodnight
+    permission: pengcord.command.goodnight
 
 permissions:
   pengcord.verify:
@@ -55,4 +59,10 @@ permissions:
       pengcord.command.serverinfo:
         description: Allows user to get server info
         default: true
+      pengcord.command.goodnight:
+        description: Allows user to cast goodnight vote
+        default: true
+      pengcord.command.fgoodnight:
+        description: Allows user to force goodnight
+        default: false
 

@@ -56,6 +56,8 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         var doSyncDiscord: Boolean = true
         var startInstant: Instant = Instant.now()
 
+        var peopleVoted = 0
+
         // lateinit var sqlClass: SQLClass
 
         fun downloadSkin(usr: Player){
@@ -165,6 +167,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         this.getCommand("stopserver")?.setExecutor(StopServer())
         this.getCommand("unverify")?.setExecutor(Unverify())
         this.getCommand("serverinfo")?.setExecutor(Info())
+        this.getCommand("goodnight")?.setExecutor(goodnight())
         discordBot.log("[pengcord]: Server Startup and Plugin Initialization successful.")
         // Get Mojang API
         mojangAPI = Mojang().connect()
