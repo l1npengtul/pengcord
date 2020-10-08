@@ -43,6 +43,8 @@ data class Config(val es: Boolean, val saesang: String?, val discordkey: String?
     var bannedWordMessage: String? = bwmsg
     var bannedWordDiscord: Boolean = bwdisc
     var usersList: HashMap<String, String>? = getListOfUsers();
+    var webhookID: String? = webid
+    var webhookToken: String? = webtok
 
     fun writeValues(){
         Main.ServerRawConfig.set("enable-sync", this.enableSync)
@@ -53,8 +55,8 @@ data class Config(val es: Boolean, val saesang: String?, val discordkey: String?
         Main.ServerRawConfig.set("bot-command-channel", this.commandChannel)
         Main.ServerRawConfig.set("bot-admin-channel", this.adminChannel)
         Main.ServerRawConfig.set("bot-server", this.serverBind)
-        Main.ServerRawConfig.set("webhook-id", this.serverBind)
-        Main.ServerRawConfig.set("webhook-token", this.serverBind)
+        Main.ServerRawConfig.set("webhook-id", this.webhookID)
+        Main.ServerRawConfig.set("webhook-token", this.webhookToken)
         Main.ServerRawConfig.set("server-admin-roles", this.adminList)
 
         this.saveUsersList()

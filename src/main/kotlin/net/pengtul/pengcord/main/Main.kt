@@ -21,7 +21,6 @@ package net.pengtul.pengcord.main
 // If you're reviewing this, or have to read this
 // I'm sorry.
 
-import net.milkbowl.vault.chat.Chat
 import net.pengtul.pengcord.bot.Bot
 import net.pengtul.pengcord.commands.*
 import net.pengtul.pengcord.config.Config
@@ -50,7 +49,6 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         //public lateinit var discordApi: DiscordApi;
         lateinit var dFolder: File
         lateinit var discordBot: Bot
-        lateinit var vaultChat: Chat
         var mojangAPI: Mojang = Mojang().connect()
         var playersToVerify = HashMap<String, String>()
         var doSyncDiscord: Boolean = true
@@ -75,6 +73,11 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
                     }
                 })
             }
+        }
+
+        fun getSkinURL(usr: Player): String{
+            val usrUUID: String = usr.uniqueId.toString()
+            return "https://minotar.net/helm/${usrUUID}/100.png"
         }
 
         fun downloadSkinUUID(uuid: String){
@@ -177,7 +180,6 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         //SqlDealer.getConnectionHandler().close();
         discordBot.sendMessageToDiscord("Server Shutdown Event!")
         discordBot.log("[pengcord]: Server Shutdown initiated.")
-        discordBot.webhook.delete().join()
         discordBot.discordApi.disconnect()
         ServerConfig.writeValues()
         this.saveConfig()

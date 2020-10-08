@@ -20,6 +20,8 @@ package net.pengtul.pengcord.bot
 
 
 import club.minnced.discord.webhook.WebhookClient
+import club.minnced.discord.webhook.WebhookClientBuilder
+import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import net.pengtul.pengcord.bot.botcmd.*
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandHandler
 import net.pengtul.pengcord.error.DiscordLoginFailException
@@ -36,6 +38,7 @@ import org.javacord.api.entity.webhook.WebhookUpdater
 import java.io.File
 import java.lang.Exception
 import java.lang.StringBuilder
+import javax.swing.Icon
 
 
 class Bot {
@@ -58,16 +61,25 @@ class Bot {
                 }
                 .join()
 
-        discordApi.getServerTextChannelById(Main.ServerConfig.syncChannel).ifPresent { serverTextChannel: ServerTextChannel ->
-            this.webhook = WebhookBuilder(serverTextChannel)
-                    .setName("DSC-SYNC")
-                    .create()
-                    .join()
-            this.webhookUpdater = webhook.createUpdater()
-            webhook.token.ifPresent { s: String ->
-                this.webhookSender = WebhookClient.withId(webhook.id,s)
+        if (!Main.ServerConfig.webhookID.isNullOrEmpty() && !Main.ServerConfig.webhookToken.isNullOrEmpty()){
+            val whid = Main.ServerConfig.webhookID.toString()
+            val whtk = Main.ServerConfig.webhookToken.toString()
+            webhookSender = WebhookClient.withId(whid.toLong(), whtk)
+        }
+        else {
+            discordApi.getServerTextChannelById(Main.ServerConfig.syncChannel).ifPresent {
+                WebhookBuilder(it).setName("DSC-SYNC").create().thenAccept {
+                    webhook = it
+                    Main.ServerConfig.webhookID = webhook.idAsString
+                    Main.ServerConfig.webhookToken = webhook.token.get()
+                    val whid = Main.ServerConfig.webhookID.toString()
+                    val whtk = Main.ServerConfig.webhookToken.toString()
+                    webhookSender = WebhookClient.withId(whid.toLong(), whtk)
+                }
             }
         }
+
+
         webhookInit = this::webhook.isInitialized && this::webhookSender.isInitialized && this::webhookUpdater.isInitialized
         this.onSucessfulConnect()
         discordApi.addListener(DscMessageEvent())
@@ -137,28 +149,25 @@ class Bot {
     }
 
     fun sendMessagetoWebhook(message: String, usrname: String, pfp: String?, player: org.bukkit.entity.Player){
-        if(webhookInit){
-            val currentPlugin: Plugin? = Bukkit.getServer().pluginManager.getPlugin("pengcord")
-            currentPlugin?.let {
-                Bukkit.getScheduler().runTaskAsynchronously(currentPlugin, Runnable {
-                    val msg: String = message
-                    if (usrname.toLowerCase().equals("clyde")){
-                        webhookUpdater = webhookUpdater.setName("cly de")
+        val currentPlugin: Plugin? = Bukkit.getServer().pluginManager.getPlugin("pengcord")
+        Main.ServerLogger.info("async task")
+        currentPlugin?.let {
+            Main.ServerLogger.info("async task")
+            Bukkit.getScheduler().runTaskAsynchronously(currentPlugin, Runnable {
+                Main.ServerLogger.info("async task")
+                val msg: String = message
+                if (usrname.toLowerCase().equals("clyde")){
+                    webhookUpdater = webhookUpdater.setName("cly de")
+                }
+                else {
+                    val wbhkmsg: WebhookMessageBuilder = WebhookMessageBuilder()
+                    wbhkmsg.setUsername(regex.replace(usrname, ""))
+                    wbhkmsg.setAvatarUrl(Main.getSkinURL(player))
+                    wbhkmsg.setContent(msg)
+                    webhookSender.send(wbhkmsg.build()).thenAccept {
                     }
-                    else {
-                        webhookUpdater = webhookUpdater.setName(regex.replace(usrname, ""))
-                    }
-                    try {
-                        webhookUpdater.setAvatar(File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${player.uniqueId}.png"))
-                    }
-                    catch (e: Exception){
-                        Main.ServerLogger.severe("Failed to get PlayerIcon for player ${player.displayName}: Exception $e")
-                    }
-                    webhook = webhookUpdater.update().join()
-
-                    this.webhookSender.send(msg)
-                })
-            }
+                }
+            })
         }
     }
 }
