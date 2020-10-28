@@ -31,6 +31,7 @@ import org.bukkit.plugin.Plugin
 import org.javacord.api.DiscordApi
 import org.javacord.api.DiscordApiBuilder
 import org.javacord.api.entity.channel.ServerTextChannel
+import org.javacord.api.entity.intent.Intent
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.entity.webhook.Webhook
 import org.javacord.api.entity.webhook.WebhookBuilder
@@ -55,6 +56,7 @@ class Bot {
     init {
         discordApi = DiscordApiBuilder()
                 .setToken(Main.ServerConfig.discordApiKey)
+                .setAllIntentsExcept(Intent.GUILD_PRESENCES)
                 .login()
                 .exceptionally {
                     throw DiscordLoginFailException("Failed to log into discord!")
