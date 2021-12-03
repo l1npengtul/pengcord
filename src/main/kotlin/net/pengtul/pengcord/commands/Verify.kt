@@ -37,7 +37,7 @@ class Verify: CommandExecutor {
                 if (arg.startsWith("#")){
                     argument.append(arg)
                 }
-                else if (!argument.isBlank()){
+                else if (argument.isNotBlank()){
                     argument.append(" $arg")
                 }
                 else {
@@ -68,7 +68,7 @@ class Verify: CommandExecutor {
                                 }
                             }
                             catch (e: Exception){
-                                Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `verify` with arguments ${user.idAsString} (${user.discriminatedName}). Exception occurred ${e}")
+                                Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `verify` with arguments ${user.idAsString} (${user.discriminatedName}). Exception occurred $e")
                                 sender.sendMessage("§aAn exception occurred in your request. ERR: $e")
                                 Main.ServerLogger.severe("An exception occurred in your request verifying ${user.discriminatedName}. ERR: $e")
                                 Main.ServerLogger.severe(e.stackTrace.toString())

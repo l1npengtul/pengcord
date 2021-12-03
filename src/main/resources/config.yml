@@ -1,8 +1,6 @@
 # Enable syncing between Discord <-> MC
 enable-sync: true
 
-# World to sync to discord. Currently unused
-world-to-track: ""
 # Discord Bot Token (NOTE: Replace with your own)
 client-token: "who is rem, i love emilia"
 # Discord Bot Prefix
@@ -10,9 +8,11 @@ bot-prefix: "mc!"
 # Enables the "Verify" feature, tying a discord account to an in game account
 enable-verify: false
 
-server-sys: "[Server]: "
-server-name: "boomer"
-system-sys: "[System]: "
+filter-join-leave: false
+filter-ingame: false
+filter_announcements: false
+
+server-message-prefix: "[Server]: "
 
 # Channels for the bot, do not edit (unless you know what you are doing)
 bot-sync-channel: ""
@@ -23,9 +23,6 @@ bot-server: ""
 # Webhook ID to manage. Do not edit, managed by bot
 webhook-id: ""
 webhook-token: ""
-
-# Enable admin commands of people who has the "Administrator" permission. Recommended to disable
-server-non-adminrole-admin: false
 
 # A list of admin roles on the Discord Server. Managed by bot.
 # Usage: admins add <ping role here>
@@ -45,8 +42,3 @@ banned-word-message: "§c§oSorry, but you are not allowed to say that as it vio
 # Note: Only set to true if you do not have a word filter on the channel and want one
 # Also note that the bot only listens to the track channel
 banned-word-discord: false
-
-# Verified Users, goes discord UUID (string): "<minecraft_username>"
-# e.g. 1234567890: "20fc82-29128930-2391923-s292n"
-verified-users:
-  0: "0"

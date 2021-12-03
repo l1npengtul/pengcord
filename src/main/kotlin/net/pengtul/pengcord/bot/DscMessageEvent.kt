@@ -20,7 +20,6 @@ package net.pengtul.pengcord.bot
 
 
 import com.vdurmont.emoji.EmojiParser
-import net.pengtul.pengcord.bot.botcmd.Command
 import net.pengtul.pengcord.bot.botcmd.CommandHelper
 import net.pengtul.pengcord.main.Main
 import org.bukkit.Bukkit
@@ -28,7 +27,6 @@ import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.message.MessageBuilder
 import org.javacord.api.event.message.MessageCreateEvent
 import org.javacord.api.listener.message.MessageCreateListener
-import java.lang.Exception
 
 class DscMessageEvent: MessageCreateListener {
     override fun onMessageCreate(event: MessageCreateEvent?) {
@@ -45,7 +43,7 @@ class DscMessageEvent: MessageCreateListener {
                                 Main.ServerLogger.info("Removed Message: ${msg.content} / ${msg.readableContent}")
                                 Main.ServerLogger.info("from user ${msg.author.idAsString} / ${msg.author.discriminatedName}")
                                 Main.discordBot.log("[pengcord]: [ChatFilter]: User ${msg.author.idAsString} (${msg.author.discriminatedName}) tripped the word filter with message `${msg.content}` / `${msg.readableContent}`.")
-                                var msgBuilder = MessageBuilder()
+                                val msgBuilder = MessageBuilder()
                                 msg.userAuthor.ifPresent {
                                     msgBuilder.append(it.mentionTag)
                                 }

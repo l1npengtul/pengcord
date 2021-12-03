@@ -5,7 +5,6 @@ import net.pengtul.pengcord.main.Main
 import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.entity.user.User
-import java.awt.Color
 
 /*   This is the class for banning from Discord
 *    Copyright (C) 2020  Lewis Rho
@@ -37,7 +36,7 @@ class BanFromDiscord: JCDiscordCommandExecutor {
             if (message.mentionedUsers.size == 1) {
                 try {
                     val user: User = message.mentionedUsers[0]
-                    val reason: String? = args[1]
+                    val reason: String = args[1]
                     if (Main.ServerConfig.usersList?.containsKey(user.idAsString)!!) {
                         Command.banUsingDiscord(sender, message, args[2].toInt(), reason, user)
                     }
@@ -52,7 +51,7 @@ class BanFromDiscord: JCDiscordCommandExecutor {
             else if (message.mentionedUsers.size == 0) {
                 try {
                     val playerUUID: String = Main.insertDashUUID(Main.mojangAPI.getUUIDOfUsername(args[0]))
-                    val reason: String? = args[1]
+                    val reason: String = args[1]
                     val suc = Command.banUsingMinecraft(playerUUID, reason, args[2].toInt(), sender.discriminatedName)
                     Main.discordBot.log("[pengcord]: Attempted/Successful ban of player ${args[0]} ($playerUUID) by user ${sender.discriminatedName} (${sender.idAsString})")
                     if (suc){

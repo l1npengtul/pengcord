@@ -6,6 +6,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import kotlin.math.roundToLong
 
 /*   This is the class for getting server info from minecraft
 *    Copyright (C) 2020  Lewis Rho
@@ -30,7 +31,7 @@ class Info: CommandExecutor {
             val currentUsedRAM : Long = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1048576L
             val maxRAM : Long = Runtime.getRuntime().totalMemory() /  1048576L
             sender.sendMessage("§9-------§r§6[Server Info]§r§9-------§r")
-            sender.sendMessage("§aServer RAM usage: $currentUsedRAM §r§4MiB / $maxRAM MiB (${Math.round((currentUsedRAM.toDouble() / maxRAM.toDouble()) * 100) / 100.0}%)")
+            sender.sendMessage("§aServer RAM usage: $currentUsedRAM §r§4MiB / $maxRAM MiB (${((currentUsedRAM.toDouble() / maxRAM.toDouble()) * 100).roundToLong() / 100.0}%)")
             sender.sendMessage("§aServer Uptime: ${getUptime()} Hours")
             sender.sendMessage("§9-----------------------------------§r")
             if (sender is Player){

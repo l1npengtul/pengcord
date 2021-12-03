@@ -6,10 +6,10 @@ import org.javacord.api.event.message.MessageCreateEvent
 import org.javacord.api.listener.message.MessageCreateListener
 
 class JCDiscordCommandEvent(pre: String, commandToTrack: String, execute: JCDiscordCommandExecutor, binds: List<TextChannel>) : MessageCreateListener {
-    val prefix = pre
+    private val prefix = pre
     val cmd = commandToTrack
-    val exec = execute
-    val boundChannels = binds
+    private val exec = execute
+    private val boundChannels = binds
     override fun onMessageCreate(event: MessageCreateEvent?) {
         event?.let { msgevent ->
             if (msgevent.messageContent.startsWith("$prefix$cmd") && boundChannels.contains(msgevent.channel)){

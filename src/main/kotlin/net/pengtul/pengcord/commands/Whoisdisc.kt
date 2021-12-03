@@ -36,7 +36,7 @@ class Whoisdisc: CommandExecutor {
                 if (arg.startsWith("#")){
                     argument.append(arg)
                 }
-                else if (!argument.isBlank()){
+                else if (argument.isNotBlank()){
                     argument.append(" $arg")
                 }
                 else {

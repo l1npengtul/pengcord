@@ -5,6 +5,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.server.BroadcastMessageEvent
 import org.bukkit.event.player.*
+import java.util.*
 
 /*
 *    Minecraft Event Handler
@@ -60,7 +61,7 @@ class Event : Listener{
     @EventHandler
     fun onPlayerChatEvent(event: AsyncPlayerChatEvent){
         if(Main.ServerConfig.enableSync) {
-            if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message.toLowerCase())){
+            if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message.lowercase(Locale.getDefault()))){
                 Main.discordBot.sendMessagetoWebhook(event.message, event.player.displayName, null, event.player)
                 Main.discordBot.log("[pengcord]: [MC-EVENT-PLAYERCHAT]: <${event.player.name}> ${event.message}")
             }

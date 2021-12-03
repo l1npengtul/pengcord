@@ -2,20 +2,18 @@ package net.pengtul.pengcord.bot.commandhandler
 
 import net.pengtul.pengcord.bot.commandhandler.default.Git
 import net.pengtul.pengcord.bot.commandhandler.default.Help
-import net.pengtul.pengcord.bot.commandhandler.exceptions.CommandAlreadyExistsException
 import net.pengtul.pengcord.main.Main
 import org.javacord.api.DiscordApi
 import org.javacord.api.entity.channel.TextChannel
 import org.javacord.api.entity.message.MessageBuilder
-import org.javacord.api.listener.message.MessageCreateListener
 
-public class JCDiscordCommandHandler(api: DiscordApi, prefix: String, autoHelp: Boolean, boundChannels: List<String>) {
+class JCDiscordCommandHandler(api: DiscordApi, prefix: String, autoHelp: Boolean, boundChannels: List<String>) {
     private var allowedCommandChannels: MutableList<TextChannel> = ArrayList()
-    var commandPrefix = prefix
+    private var commandPrefix = prefix
     private val discordApi: DiscordApi = api
-    var commandMap: HashMap<JCDiscordCommandExecutor, JCDiscordCommandEvent> = HashMap()
+    private var commandMap: HashMap<JCDiscordCommandExecutor, JCDiscordCommandEvent> = HashMap()
     val genHelp = autoHelp
-    var helpMessage = MessageBuilder()
+    private var helpMessage = MessageBuilder()
 
     init {
         Main.ServerLogger.info("Added Command Listener")
@@ -33,7 +31,7 @@ public class JCDiscordCommandHandler(api: DiscordApi, prefix: String, autoHelp: 
         addCommand(Git())
     }
 
-    public fun addCommand(command: JCDiscordCommandExecutor){
+    fun addCommand(command: JCDiscordCommandExecutor){
         if (!commandMap.containsKey(command)){
             val commandListener = JCDiscordCommandEvent(commandPrefix, command.commandName, command, allowedCommandChannels)
             commandMap[command] = commandListener
@@ -42,7 +40,7 @@ public class JCDiscordCommandHandler(api: DiscordApi, prefix: String, autoHelp: 
         }
     }
 
-    public fun generateHelp(){
+    fun generateHelp(){
         for (cmd in commandMap.keys){
             helpMessage.appendNewLine()
             helpMessage.append("+ Command ${Main.ServerConfig.botPrefix}${cmd.commandName}")

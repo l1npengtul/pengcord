@@ -49,10 +49,8 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         //public lateinit var discordApi: DiscordApi;
         lateinit var dFolder: File
         lateinit var discordBot: Bot
-        lateinit var vaultChat: Chat
         var mojangAPI: Mojang = Mojang().connect()
         var playersToVerify = HashMap<String, String>()
-        var doSyncDiscord: Boolean = true
 
         // lateinit var sqlClass: SQLClass
 

@@ -1,0 +1,45 @@
+plugins {
+    id 'idea'
+    id 'org.jetbrains.kotlin.jvm' version '1.6.0'
+    id 'com.github.johnrengelman.shadow' version '7.1.0'
+}
+
+group 'net.pengtul.pengcord'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://papermc.io/repo/repository/maven-public/"
+    }
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.6.0'
+    implementation 'org.javacord:javacord:3.3.2'
+    implementation 'com.github.SparklingComet:java-mojang-api:592fabf3e2'
+    implementation "club.minnced:discord-webhooks:0.7.3"
+    compileOnly "io.papermc.paper:paper-api:1.18-R0.1-SNAPSHOT"
+    compileOnly "com.github.MilkBowl:VaultAPI:1.7"
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "17"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "17"
+}

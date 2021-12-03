@@ -22,6 +22,7 @@ package net.pengtul.pengcord.bot
 import club.minnced.discord.webhook.WebhookClient
 import net.pengtul.pengcord.bot.botcmd.*
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandHandler
+import net.pengtul.pengcord.config.Config
 import net.pengtul.pengcord.error.DiscordLoginFailException
 import net.pengtul.pengcord.main.Main
 import org.bukkit.Bukkit
@@ -36,27 +37,28 @@ import org.javacord.api.entity.webhook.WebhookUpdater
 import java.io.File
 import java.lang.Exception
 import java.lang.StringBuilder
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class Bot {
-    var discordApi: DiscordApi
-    var webhookInit: Boolean
+    var discordApi: DiscordApi = DiscordApiBuilder()
+            .setToken(Main.ServerConfig.discordApiKey)
+            .login()
+            .exceptionally {
+                throw DiscordLoginFailException("Failed to log into discord!")
+            }
+            .join()
+    private var webhookInit: Boolean
     lateinit var webhook: Webhook
-    lateinit var webhookUpdater: WebhookUpdater
-    lateinit var webhookSender: WebhookClient
+    private lateinit var webhookUpdater: WebhookUpdater
+    private lateinit var webhookSender: WebhookClient
     var commandHandler: JCDiscordCommandHandler
     var chatFilterRegex: Regex
     val regex: Regex = """(§.)""".toRegex()
 
 
     init {
-        discordApi = DiscordApiBuilder()
-                .setToken(Main.ServerConfig.discordApiKey)
-                .login()
-                .exceptionally {
-                    throw DiscordLoginFailException("Failed to log into discord!")
-                }
-                .join()
 
         discordApi.getServerTextChannelById(Main.ServerConfig.syncChannel).ifPresent { serverTextChannel: ServerTextChannel ->
             this.webhook = WebhookBuilder(serverTextChannel)
@@ -64,16 +66,14 @@ class Bot {
                     .create()
                     .join()
             this.webhookUpdater = webhook.createUpdater()
-            webhook.token.ifPresent { s: String ->
-                this.webhookSender = WebhookClient.withId(webhook.id,s)
-            }
+            Config
         }
         webhookInit = this::webhook.isInitialized && this::webhookSender.isInitialized && this::webhookUpdater.isInitialized
         this.onSucessfulConnect()
         discordApi.addListener(DscMessageEvent())
 
-        if (Main.ServerConfig.bannedWordsEnable){
-            chatFilterRegex = if (!Main.ServerConfig.bannedWords.isNullOrEmpty()){
+        chatFilterRegex = if (Main.ServerConfig.bannedWordsEnable){
+            if (!Main.ServerConfig.bannedWords.isNullOrEmpty()){
                 val regexString = StringBuilder()
                 for (word in Main.ServerConfig.bannedWords!!){
                     regexString.append("($word)|")
@@ -83,9 +83,8 @@ class Bot {
             } else {
                 Regex("(?!)", RegexOption.IGNORE_CASE)
             }
-        }
-        else {
-            chatFilterRegex = Regex("(?!)", RegexOption.IGNORE_CASE)
+        } else {
+            Regex("(?!)", RegexOption.IGNORE_CASE)
         }
         val bc : MutableList<String> = ArrayList()
         //bc.add(Main.ServerConfig.syncChannel!!)
@@ -142,11 +141,10 @@ class Bot {
             currentPlugin?.let {
                 Bukkit.getScheduler().runTaskAsynchronously(currentPlugin, Runnable {
                     val msg: String = message
-                    if (usrname.toLowerCase().equals("clyde")){
-                        webhookUpdater = webhookUpdater.setName("cly de")
-                    }
-                    else {
-                        webhookUpdater = webhookUpdater.setName(regex.replace(usrname, ""))
+                    webhookUpdater = if (usrname.lowercase(Locale.getDefault()) == "clyde"){
+                        webhookUpdater.setName("cly de")
+                    } else {
+                        webhookUpdater.setName(regex.replace(usrname, ""))
                     }
                     try {
                         webhookUpdater.setAvatar(File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${player.uniqueId}.png"))

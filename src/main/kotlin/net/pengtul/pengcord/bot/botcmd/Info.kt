@@ -3,11 +3,10 @@ package net.pengtul.pengcord.bot.botcmd
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.main.Main
 import org.bukkit.Bukkit
-import org.bukkit.GameMode
 import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.entity.user.User
-import java.lang.StringBuilder
+import kotlin.math.roundToLong
 
 /*   This is the class for getting server misc info
 *    Copyright (C) 2020  Lewis Rho
@@ -51,7 +50,7 @@ class Info: JCDiscordCommandExecutor {
                 .setAuthor("Server Info")
                 .setTitle("Server TPS, Server Playerlist, Server RAM usage, Server Uptime")
                 .addInlineField("Server TPS 1M, 5M, 15M", "$tpsString")
-                .addInlineField("Server RAM Usage", "$currentUsedRAM MiB / $maxRAM MiB (${Math.round((currentUsedRAM.toDouble() / maxRAM.toDouble()) * 100) / 100.0}%)")
+                .addInlineField("Server RAM Usage", "$currentUsedRAM MiB / $maxRAM MiB (${((currentUsedRAM.toDouble() / maxRAM.toDouble()) * 100).roundToLong() / 100.0}%)")
                 .addInlineField("Server Uptime: ", "${Command.getUptime()} Hours")
                 .addField("Users Online ($playerOnline)", "$playerList")
 

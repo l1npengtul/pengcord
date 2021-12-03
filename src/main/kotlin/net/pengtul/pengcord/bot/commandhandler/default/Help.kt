@@ -14,7 +14,7 @@ class Help(helpmsg: MessageBuilder) : JCDiscordCommandExecutor {
         get() = "help"
     override val commandUsage: String
         get() = "help"
-    var content = helpmsg
+    private var content = helpmsg
     override fun executeCommand(msg: String, sender: User, message: Message, args: List<String>) {
         Bukkit.getPluginManager().getPlugin("pengcord")?.let {
             Bukkit.getScheduler().runTaskAsynchronously(it, Runnable {

@@ -28,15 +28,14 @@ import org.bukkit.command.CommandSender
 class Unverify: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender.hasPermission("pengcord.verify.undo")){
-            if (net.pengtul.pengcord.bot.botcmd.Command.removePlayerfromMinecraft(args[0], true)){
+            return if (net.pengtul.pengcord.bot.botcmd.Command.removePlayerfromMinecraft(args[0], true)){
                 Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `kick`.")
                 sender.sendMessage("§aSuccessfully Unverified ${args[0]}")
-                return true
-            }
-            else {
+                true
+            } else {
                 Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `kick`. Failed due to error.")
                 sender.sendMessage("§cFailed to unverify ${args[0]}")
-                return false
+                false
             }
         }
         else{

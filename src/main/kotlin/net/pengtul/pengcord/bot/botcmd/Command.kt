@@ -7,9 +7,9 @@ import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.entity.user.User
 import java.lang.management.ManagementFactory
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.math.roundToLong
 
 /*
 *    This code creates and defines all discord commands
@@ -88,7 +88,7 @@ class Command {
             return ret
         }
 
-        fun removePlayerfromMinecraft(username: String): Boolean{
+        private fun removePlayerfromMinecraft(username: String): Boolean{
             var ret = false
             Bukkit.getServer().pluginManager.getPlugin("pengcord")?.let {
                 val uuid = Main.insertDashUUID(Main.mojangAPI.getUUIDOfUsername(username))
@@ -248,7 +248,7 @@ class Command {
 
         fun getUptime(): String {
             val uptime: Long = ManagementFactory.getRuntimeMXBean().uptime
-            return (Math.round((uptime / 360000.0) * 100000.0) / 100000.0).toString()
+            return (((uptime / 360000.0) * 100000.0).roundToLong() / 100000.0).toString()
         }
     }
 }
