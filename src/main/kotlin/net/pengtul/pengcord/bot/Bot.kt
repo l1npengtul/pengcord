@@ -232,6 +232,7 @@ class Bot {
             currentPlugin?.let {
                 Bukkit.getScheduler().runTaskAsynchronously(currentPlugin, Runnable {
                     val msg: String = message
+                    val prefix: String
                     webhookUpdater = if (usrname.lowercase(Locale.getDefault()) == "clyde"){
                         webhookUpdater.setName("cly de")
                     } else {
@@ -241,7 +242,7 @@ class Bot {
                         webhookUpdater.setAvatar(File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${player.uniqueId}.png"))
                     }
                     catch (e: Exception){
-                        Main.serverLogger.severe("Failed to get PlayerIcon for player ${player.displayName}: Exception $e")
+                        Main.serverLogger.severe("Failed to get PlayerIcon for player ${player.name}: Exception $e")
                     }
                     webhook = webhookUpdater.update().join()
 

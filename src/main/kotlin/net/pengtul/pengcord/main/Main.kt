@@ -21,6 +21,7 @@ package net.pengtul.pengcord.main
 // If you're reviewing this, or have to read this
 // I'm sorry.
 
+import net.milkbowl.vault.chat.Chat
 import net.pengtul.pengcord.Utils.Companion.banPardon
 import net.pengtul.pengcord.Utils.Companion.pardonMute
 import net.pengtul.pengcord.bot.Bot
@@ -79,6 +80,8 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
             .minimumPrintedDigits(2)
             .appendSeconds()
             .toFormatter()
+        lateinit var vaultApi: Plugin
+        lateinit var vaultChatApi: Chat
 
         fun downloadSkin(usr: Player){
             val usrUUID: String = usr.uniqueId.toString()
@@ -180,10 +183,14 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         // Register the Events
         Bukkit.getPluginManager().registerEvents(Event(), this)
 
+
         val pl = Bukkit.getServer().pluginManager.getPlugin("pengcord")
-        pl?.let {
-            pengcord = it
-        }
+        pengcord = pl!!
+
+        vaultApi = Bukkit.getServer().pluginManager.getPlugin("Vault")!!
+        val rsp = Bukkit.getServer().servicesManager.getRegistration(Chat::class.java)
+        vaultChatApi = rsp!!.provider
+
 
         // Read the `config.yml` and set a dataclass
         val cfgfile = this.config
