@@ -1,10 +1,9 @@
-package net.pengtul.pengcord.bot.botcmd;
+package net.pengtul.pengcord.bot.botcmd
 
-import org.javacord.api.entity.message.Message;
-import org.javacord.api.util.logging.ExceptionLogger;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.concurrent.TimeUnit;
+import org.javacord.api.entity.message.Message
+import org.javacord.api.util.logging.ExceptionLogger
+import java.util.concurrent.Callable
+import java.util.concurrent.TimeUnit
 
 /*
 *    A message that delets after send
@@ -23,15 +22,18 @@ import java.util.concurrent.TimeUnit;
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-
-
-public class CommandHelper {
-    public static void deleteAfterSend(String message, int duration, @NotNull final Message msg){
-        msg.getChannel()
-                .sendMessage(message)
-                .thenAccept(sent -> sent.getApi().getThreadPool().getScheduler()
-                        .schedule(() -> sent.delete().exceptionally(ExceptionLogger.get()), duration, TimeUnit.SECONDS))
-                .exceptionally(ExceptionLogger.get());
+object CommandHelper {
+    fun deleteAfterSend(message: String?, duration: Int, msg: Message) {
+        msg.channel
+            .sendMessage(message)
+            .thenAccept { sent: Message ->
+                sent.api.threadPool.scheduler
+                    .schedule(
+                        Callable { sent.delete().exceptionally(ExceptionLogger.get()) },
+                        duration.toLong(),
+                        TimeUnit.SECONDS
+                    )
+            }
+            .exceptionally(ExceptionLogger.get())
     }
 }

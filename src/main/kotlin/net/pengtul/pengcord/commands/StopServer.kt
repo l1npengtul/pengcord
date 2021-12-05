@@ -1,5 +1,6 @@
 package net.pengtul.pengcord.commands
 
+import net.pengtul.pengcord.Utils.Companion.shutdown
 import net.pengtul.pengcord.main.Main
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
@@ -39,16 +40,14 @@ class StopServer: CommandExecutor {
         }
 
         if (sender.hasPermission("pengcord.command.stopserver")) {
-            Bukkit.getServer().pluginManager.getPlugin("pengcord")?.let {
-                net.pengtul.pengcord.bot.botcmd.Command.shutdown(shutdownTimer, it)
-                if (sender is Player){
-                    Main.discordBot.log("[pengcord]: User ${sender.uniqueId} (${sender.name}) ran `stopserver`.")
-                }
-                else {
-                    Main.discordBot.log("[pengcord]: Console ran command `stopserver`.")
-                }
-                ret = true
+            shutdown(shutdownTimer)
+            if (sender is Player){
+                Main.discordBot.log("[pengcord]: User ${sender.uniqueId} (${sender.name}) ran `stopserver`.")
             }
+            else {
+                Main.discordBot.log("[pengcord]: Console ran command `stopserver`.")
+            }
+            ret = true
         }
         else {
             if (sender is Player){

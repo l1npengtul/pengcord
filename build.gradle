@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'net.pengtul.pengcord'
-version '1.0-SNAPSHOT'
+version '2.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -20,6 +20,13 @@ dependencies {
     implementation 'org.javacord:javacord:3.3.2'
     implementation 'com.github.SparklingComet:java-mojang-api:592fabf3e2'
     implementation "club.minnced:discord-webhooks:0.7.3"
+    implementation 'com.h2database:h2:2.0.202'
+    implementation 'org.jetbrains.exposed:exposed-core:0.36.1'
+    implementation 'org.jetbrains.exposed:exposed-dao:0.36.1'
+    implementation 'org.jetbrains.exposed:exposed-jdbc:0.36.1'
+    implementation 'org.jetbrains.exposed:exposed-jodatime:0.36.1'
+    implementation 'io.michaelrocks.bimap:bimap:1.1.0'
+    implementation 'com.vdurmont:emoji-java:5.1.1'
     compileOnly "io.papermc.paper:paper-api:1.18-R0.1-SNAPSHOT"
     compileOnly "com.github.MilkBowl:VaultAPI:1.7"
 }

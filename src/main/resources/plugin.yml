@@ -6,21 +6,21 @@ depend:
   - Vault
 commands:
   verify:
-    description: Verifies Players
+    description: Verify Player
     usage: /verify <Discord Tag>
     permission: pengcord.verify.command
-  whoismc:
-    description: Look up someone's discord ID by their username
-    usage: /whoismc <player>
-    permission: pengcord.command.whois
-  whoisdisc:
-    description: Look up someone's Minecraft from their Discord username + tag
-    usage: /whoisdisc <discord tag>
-    permission: pengcord.command.whois
   unverify:
-    description: Remove someone's verification. Note that said user needs to relog for the changes to apply
+    description: Remove someone's verification. Player is automatically kicked. Permission is only needed if <player> is specified.
     usage: /unverify <player>
     permission: pengcord.verify.undo
+  whois:
+    description: Look up someone by their Discord Username/Discord UUID/Minecraft Username/Minecraft UUID
+    usage: /whois <player>
+    permission: pengcord.command.whois
+  me:
+    description: Look up yourself.
+    usage: /me
+    permission: pengcord.command.me
   stopserver:
     description: Stop the Server
     usage: /stopserver <time seconds>
@@ -29,6 +29,34 @@ commands:
     description: Gets Server RAM usage and uptime
     usage: /info
     permission: pengcord.command.info
+  warn:
+    description: Warn a player. Will log the warn and also kick them from the server
+    usage: /warn <player> <reason>
+    permission: pengcord.punishments.warn
+  mute:
+    description: Mute a player.
+    usage: /mute <player> <reason> <days>
+    permission: pengcord.punishments.mute
+  unmute:
+    description: Unmute via a Mute ID. This can be obtained by using `/query m <player>`. Alternatively, pass in "all" for the first argument then a player for the second to pardon all their mutes.
+    usage: /unmute <mute Id/all> <player?>
+    permission: pengcord.punishments.unmute
+  pban:
+    description: Ban a player
+    usage: /pban <player> <reason> <days>
+    permission: pengcord.punishments.ban
+  punban:
+    description: Pardon by a ban Id. This can be obtained by using `/query b <player>`. Alternatively, pass in "all" for the first argument then a player for the second to pardon all their bans.
+    usage: /punban <ban Id/all> <player?>
+    permission: pengcord.punishments.ban
+  queryrecords:
+    description: Query punishment history of a player. b -> Bans, m -> Mutes, w -> Warns, f -> Filter Alerts, a -> All
+    usage: /queryrecord <b|m|w|f|a> <player>
+    permission: pengcord.punishments.query
+  query:
+    description: Query a specific punishment. b -> Bans, m -> Mutes, w -> Warns, f -> Filter Alerts,
+    usage: /query <b|m|w|f> <punishmentId>
+    permission: pengcord.punishments.query
 
 permissions:
   pengcord.verify:
@@ -37,9 +65,6 @@ permissions:
       pengcord.verify.command:
         description: Allows the running of /verify, etc
         default: true
-      pengcord.verify.bypass:
-        description: Allows these players to bypass the verification system
-        default: false
       pengcord.verify.undo:
         description: Allows the running of /unverify
         default: false
@@ -55,4 +80,23 @@ permissions:
       pengcord.command.info:
         description: Allows user to get server info
         default: true
+      pengcord.command.me:
+        description: Allows lookup of self.
+        default: true
+  pengcord.punishments:
+    description: All commands related to punishment. This is only useful if you enabled "enable-bot-moderation-features"
+    children:
+      pengcord.punishments.warn:
+        description: Warn other players
+        default: false
+      pengcord.punishments.mute:
+        description: Mute/Unmute other players
+        default: false
+      pengcord.punishments.ban:
+        description: Ban/Unban other players
+        default: false
+      pengcord.punishments.query:
+        description: Query the punishments of other players
+        default: false
+
 

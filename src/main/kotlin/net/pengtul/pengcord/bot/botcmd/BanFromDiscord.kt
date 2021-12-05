@@ -1,10 +1,17 @@
 package net.pengtul.pengcord.bot.botcmd
 
+import net.pengtul.pengcord.Utils.Companion.banPlayer
+import net.pengtul.pengcord.Utils.Companion.doesUserHavePermission
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
+import net.pengtul.pengcord.data.interact.ExpiryDateTime
+import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.main.Main
+import org.javacord.api.entity.emoji.Emoji
 import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.entity.user.User
+import org.joda.time.DateTime
+import java.time.DateTimeException
 
 /*   This is the class for banning from Discord
 *    Copyright (C) 2020  Lewis Rho
@@ -32,56 +39,59 @@ class BanFromDiscord: JCDiscordCommandExecutor {
         get() = "pban <minecraft username/discord mention> <reason> <time: days>"
 
     override fun executeCommand(msg: String, sender: User, message: Message, args: List<String>) {
-        if (Command.doesUserHavePermission(sender, message)){
+        if (doesUserHavePermission(sender)){
             if (message.mentionedUsers.size == 1) {
-                try {
+                Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                     val user: User = message.mentionedUsers[0]
                     val reason: String = args[1]
-                    if (Main.ServerConfig.usersList?.containsKey(user.idAsString)!!) {
-                        Command.banUsingDiscord(sender, message, args[2].toInt(), reason, user)
+                    val days = args[2].toInt()
+                    val until = if (days >= 0) {
+                        ExpiryDateTime.DateAndTime(DateTime.now().plusDays(days))
+                    } else {
+                        ExpiryDateTime.Permanent
                     }
-                }
-                catch (e: Exception){
-                    val user: User = message.mentionedUsers[0]
-                    if (Main.ServerConfig.usersList?.containsKey(user.idAsString)!!) {
-                        Command.banUsingDiscord(sender, message, null, null, user)
+                    Main.database.playerGetByDiscordUUID(user.id)?.let { player ->
+                        banPlayer(player, TypeOfUniqueID.DiscordTypeOfUniqueID(sender.id), until, reason)
+                        message.addReaction("✅") // White Heavy Check Mark
+                        return@Runnable
                     }
-                }
+                    CommandHelper.deleteAfterSend("[pengcord]: User not found.", 5, message)
+                })
             }
             else if (message.mentionedUsers.size == 0) {
-                try {
-                    val playerUUID: String = Main.insertDashUUID(Main.mojangAPI.getUUIDOfUsername(args[0]))
-                    val reason: String = args[1]
-                    val suc = Command.banUsingMinecraft(playerUUID, reason, args[2].toInt(), sender.discriminatedName)
-                    Main.discordBot.log("[pengcord]: Attempted/Successful ban of player ${args[0]} ($playerUUID) by user ${sender.discriminatedName} (${sender.idAsString})")
-                    if (suc){
-                        CommandHelper.deleteAfterSend("Successfully Banned player ${args[0]}", 10, message)
-                        val embed = EmbedBuilder()
-                                .setAuthor("User Banned")
-                                .setTitle("Ban Report for user banned: ${args[0]}")
-                                .addInlineField("Banned By:", "${sender.discriminatedName} (${sender.idAsString})")
-                                .addInlineField("User Banned:", "${args[0]} ($playerUUID)")
-                                .addInlineField("Reason:", "$reason .")
-                                .addInlineField("Days:", "${args[2].toInt()} .")
-                        Main.discordBot.logEmbed(embed)
-                    }
-                }
-                catch (e: Exception){
-                    val playerUUID: String = Main.insertDashUUID(Main.mojangAPI.getUUIDOfUsername(args[0]))
-                    val suc = Command.banUsingMinecraft(playerUUID, "", null, sender.discriminatedName)
-                    Main.discordBot.log("[pengcord]: Attempted/Successful ban of player ${args[0]} ($playerUUID) by user ${sender.discriminatedName} (${sender.idAsString})")
-                    if (suc){
-                        CommandHelper.deleteAfterSend("Successfully Banned player ${args[0]}", 10, message)
-                        val embed = EmbedBuilder()
-                                .setAuthor("User Banned")
-                                .setTitle("Ban Report for user banned: ${args[0]}")
-                                .addInlineField("Banned By:", "${sender.discriminatedName} (${sender.idAsString})")
-                                .addInlineField("User Banned:", "${args[0]} ($playerUUID)")
-                                .addInlineField("Reason:", "null")
-                                .addInlineField("Days:", "Permanent")
-                        Main.discordBot.logEmbed(embed)
-                    }
-                }
+//                try {
+//                    val playerUUID: String = Main.insertDashUUID(Main.mojangAPI.getUUIDOfUsername(args[0]))
+//                    val reason: String = args[1]
+//                    val suc = Command.banUsingMinecraft(playerUUID, reason, args[2].toInt(), sender.discriminatedName)
+//                    Main.discordBot.log("[pengcord]: Attempted/Successful ban of player ${args[0]} ($playerUUID) by user ${sender.discriminatedName} (${sender.idAsString})")
+//                    if (suc){
+//                        CommandHelper.deleteAfterSend("Successfully Banned player ${args[0]}", 10, message)
+//                        val embed = EmbedBuilder()
+//                                .setAuthor("User Banned")
+//                                .setTitle("Ban Report for user banned: ${args[0]}")
+//                                .addInlineField("Banned By:", "${sender.discriminatedName} (${sender.idAsString})")
+//                                .addInlineField("User Banned:", "${args[0]} ($playerUUID)")
+//                                .addInlineField("Reason:", "$reason .")
+//                                .addInlineField("Days:", "${args[2].toInt()} .")
+//                        Main.discordBot.logEmbed(embed)
+//                    }
+//                }
+//                catch (e: Exception){
+//                    val playerUUID: String = Main.insertDashUUID(Main.mojangAPI.getUUIDOfUsername(args[0]))
+//                    val suc = Command.banUsingMinecraft(playerUUID, "", null, sender.discriminatedName)
+//                    Main.discordBot.log("[pengcord]: Attempted/Successful ban of player ${args[0]} ($playerUUID) by user ${sender.discriminatedName} (${sender.idAsString})")
+//                    if (suc){
+//                        CommandHelper.deleteAfterSend("Successfully Banned player ${args[0]}", 10, message)
+//                        val embed = EmbedBuilder()
+//                                .setAuthor("User Banned")
+//                                .setTitle("Ban Report for user banned: ${args[0]}")
+//                                .addInlineField("Banned By:", "${sender.discriminatedName} (${sender.idAsString})")
+//                                .addInlineField("User Banned:", "${args[0]} ($playerUUID)")
+//                                .addInlineField("Reason:", "null")
+//                                .addInlineField("Days:", "Permanent")
+//                        Main.discordBot.logEmbed(embed)
+//                    }
+//                }
             }
         }
         else {

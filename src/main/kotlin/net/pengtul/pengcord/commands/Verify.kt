@@ -31,7 +31,7 @@ import java.lang.StringBuilder
 
 class Verify: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender is Player && Main.ServerConfig.enableVerify && sender.hasPermission("pengcord.verify.command")){
+        if (sender is Player && Main.serverConfig.enableVerify && sender.hasPermission("pengcord.verify.command")){
             val argument = StringBuilder()
             for (arg in args){
                 if (arg.startsWith("#")){
@@ -45,44 +45,31 @@ class Verify: CommandExecutor {
                 }
             }
 
-            lateinit var discUser: User
-            Main.ServerLogger.info("here")
-            Main.ServerConfig.serverBind?.let {
-                Main.discordBot.discordApi.getServerById(Main.ServerConfig.serverBind).ifPresent { server ->
-                    Main.ServerLogger.info(argument.toString())
-                    server.getMemberByDiscriminatedNameIgnoreCase(argument.toString()).ifPresent { user ->
-                        discUser = user
-                        Main.ServerLogger.info(discUser.idAsString)
-                        Main.ServerConfig.commandChannel?.let { _ ->
-                            try{
-                                Main.discordBot.discordApi.getServerById(Main.ServerConfig.serverBind).get().getChannelById(Main.ServerConfig.commandChannel).ifPresent {
-                                    if (!Main.playersToVerify.containsKey(discUser.idAsString) && !Main.playersToVerify.containsValue(sender.uniqueId.toString())){
-                                        Main.playersToVerify[discUser.idAsString] = sender.uniqueId.toString()
-                                        sender.sendMessage("§aPlease type `${Main.ServerConfig.botPrefix}verify ${sender.name}` in #${it.name} to finish your verification!")
-                                        Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `verify` with arguments ${user.idAsString} (${user.discriminatedName}). Successful, awaiting verification.")
-                                    }
-                                    else {
-                                        Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `verify` with arguments ${user.idAsString} (${user.discriminatedName}). Already exists.")
-                                        sender.sendMessage("§cERROR: You already exist! Type `${Main.ServerConfig.botPrefix}verify ${sender.name}` in #${it.name} to finish your verification!")
-                                    }
+            Main.serverLogger.info("Got valid verification request... Attempting verify MC Player ${sender.uniqueId} with discord tag $argument")
+            Main.serverConfig.botServer?.let { serverId ->
+                Main.discordBot.discordApi.getServerById(serverId).ifPresent { discordServer ->
+                    discordServer.getMemberByDiscriminatedNameIgnoreCase(argument.toString()).ifPresent { serverMember ->
+                        Main.serverLogger.info("User ${serverMember.discriminatedName} found with user ID ${serverMember.id}")
+                        Main.serverConfig.botCommandChannel?.let { cmdChannnelId ->
+                            discordServer.getChannelById(cmdChannnelId).ifPresent { commandChannel ->
+                                if (!Main.playersAwaitingVerification.containsKey(serverMember.id) && !Main.playersAwaitingVerification.containsValue(sender.uniqueId)) {
+                                    Main.playersAwaitingVerification[serverMember.id] = sender.uniqueId
+                                    sender.sendMessage("§aPlease type `${Main.serverConfig.botPrefix}verify ${sender.name}` in ${discordServer.name}/#${commandChannel.name} to finish your verification!")
+                                    Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `verify` with arguments ${serverMember.idAsString} (${serverMember.discriminatedName}). Successful, awaiting verification.")
                                 }
-                            }
-                            catch (e: Exception){
-                                Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `verify` with arguments ${user.idAsString} (${user.discriminatedName}). Exception occurred $e")
-                                sender.sendMessage("§aAn exception occurred in your request. ERR: $e")
-                                Main.ServerLogger.severe("An exception occurred in your request verifying ${user.discriminatedName}. ERR: $e")
-                                Main.ServerLogger.severe(e.stackTrace.toString())
-                                Main.ServerLogger.severe("Did you set command channel by using `${Main.ServerConfig.botPrefix}bind command` in the proper channel?")
+                                else {
+                                    Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `verify` with arguments ${serverMember.idAsString} (${serverMember.discriminatedName}). Already exists.")
+                                    sender.sendMessage("§cERROR: You already exist! Type `${Main.serverConfig.botPrefix}verify ${sender.name}` in ${discordServer.name}/#${commandChannel.name} to finish your verification!")
+                                }
                             }
                         }
                     }
                 }
             }
             return true
-        }
-        else {
+         } else {
             Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `verify` with arguments. Failed due to error.")
+            return false
         }
-        return false
     }
 }

@@ -1,5 +1,6 @@
 package net.pengtul.pengcord.bot.botcmd
 
+import net.pengtul.pengcord.Utils.Companion.getUptime
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.main.Main
 import org.bukkit.Bukkit
@@ -34,25 +35,16 @@ class Info: JCDiscordCommandExecutor {
         get() = "info"
 
     override fun executeCommand(msg: String, sender: User, message: Message, args: List<String>) {
-        val playerList = StringBuilder()
-        var playerOnline = 0
-        for (player in Bukkit.getOnlinePlayers()){
-            playerList.append("${player.displayName}, ")
-            playerOnline++
-        }
+        val playerList = Bukkit.getOnlinePlayers()
         val currentUsedRAM : Long = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1048576L
         val maxRAM : Long = Runtime.getRuntime().totalMemory() /  1048576L
-        val tpsString = StringBuilder()
-        for (tps in Bukkit.getTPS()){
-            tpsString.append("$tps, ")
-        }
         val embed = EmbedBuilder()
                 .setAuthor("Server Info")
                 .setTitle("Server TPS, Server Playerlist, Server RAM usage, Server Uptime")
-                .addInlineField("Server TPS 1M, 5M, 15M", "$tpsString")
+                .addInlineField("Server TPS 1M, 5M, 15M", Bukkit.getTPS().joinToString())
                 .addInlineField("Server RAM Usage", "$currentUsedRAM MiB / $maxRAM MiB (${((currentUsedRAM.toDouble() / maxRAM.toDouble()) * 100).roundToLong() / 100.0}%)")
-                .addInlineField("Server Uptime: ", "${Command.getUptime()} Hours")
-                .addField("Users Online ($playerOnline)", "$playerList")
+                .addInlineField("Server Uptime (HH:MM:SS): ", getUptime())
+                .addField("Users Online (${playerList.size}/${Bukkit.getMaxPlayers()})", playerList.joinToString())
 
         message.serverTextChannel.ifPresent {
             it.sendMessage(embed)

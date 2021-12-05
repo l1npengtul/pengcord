@@ -21,10 +21,13 @@ package net.pengtul.pengcord.main
 // If you're reviewing this, or have to read this
 // I'm sorry.
 
-import net.milkbowl.vault.chat.Chat
+import net.pengtul.pengcord.Utils.Companion.banPardon
+import net.pengtul.pengcord.Utils.Companion.pardonMute
 import net.pengtul.pengcord.bot.Bot
 import net.pengtul.pengcord.commands.*
-import net.pengtul.pengcord.config.Config
+import net.pengtul.pengcord.data.ServerConfig
+import net.pengtul.pengcord.data.UserSQL
+import net.pengtul.pengcord.data.interact.ExpiryState
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandExecutor
 import org.bukkit.configuration.file.FileConfiguration
@@ -32,77 +35,143 @@ import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.scheduler.BukkitScheduler
+import org.joda.time.DateTime
+import org.joda.time.Duration
+import org.joda.time.format.PeriodFormatter
+import org.joda.time.format.PeriodFormatterBuilder
 import org.shanerx.mojang.Mojang
 import java.awt.image.BufferedImage
 import java.io.File
 import java.net.URL
-import java.util.logging.Logger
+import java.util.*
+import java.util.logging.Level
 import javax.imageio.ImageIO
+import kotlin.collections.HashMap
+
+typealias DiscordId = Long
+typealias MinecraftId = UUID
 
 class Main : JavaPlugin(), Listener, CommandExecutor{
     companion object {
-        lateinit var ServerLogger: Logger
-        lateinit var ServerConfig: Config
-        lateinit var ServerRawConfig: FileConfiguration
-
-        //public lateinit var SqlDealer: SQLClass;
-        //public lateinit var discordApi: DiscordApi;
-        lateinit var dFolder: File
+        val serverLogger =  Bukkit.getLogger()
+        lateinit var database: UserSQL
+        lateinit var serverRawConfig: FileConfiguration
+        lateinit var serverConfig: ServerConfig
+        lateinit var discordFolder: File
         lateinit var discordBot: Bot
         var mojangAPI: Mojang = Mojang().connect()
-        var playersToVerify = HashMap<String, String>()
-
-        // lateinit var sqlClass: SQLClass
+        lateinit var pengcord: Plugin
+        val scheduler: BukkitScheduler = Bukkit.getScheduler()
+        val neverHappenedDateTime: DateTime = DateTime(0)
+        var playersAwaitingVerification: HashMap<DiscordId, MinecraftId> = HashMap()
+        var playersCurrentJoinTime: HashMap<MinecraftId, DateTime> = HashMap()
+        val periodFormatter: PeriodFormatter = PeriodFormatterBuilder()
+            .printZeroAlways()
+            .minimumPrintedDigits(2)
+            .appendHours()
+            .appendSeparator(":")
+            .printZeroAlways()
+            .minimumPrintedDigits(2)
+            .appendMinutes()
+            .appendSeparator(":")
+            .printZeroAlways()
+            .minimumPrintedDigits(2)
+            .appendSeconds()
+            .toFormatter()
 
         fun downloadSkin(usr: Player){
-            val currentPlugin: Plugin? = Bukkit.getServer().pluginManager.getPlugin("pengcord")
             val usrUUID: String = usr.uniqueId.toString()
-            currentPlugin?.let {
-                Bukkit.getScheduler().runTaskAsynchronously(currentPlugin, Runnable {
-                    try {
-                        val newPngFile = File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${usrUUID}.png")
-                        newPngFile.mkdirs()
-                        val image: BufferedImage = ImageIO.read(URL("https://minotar.net/helm/${usrUUID}/100.png"))
-                        ImageIO.write(image, "png", newPngFile)
-                    } catch (e: Exception) {
-                        println("Exception $e")
-                    }
-                })
-            }
+            scheduler.runTaskAsynchronously(pengcord, Runnable {
+                try {
+                    val newPngFile = File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${usrUUID}.png")
+                    newPngFile.mkdirs()
+                    val image: BufferedImage = ImageIO.read(URL("https://minotar.net/helm/${usrUUID}/100.png"))
+                    ImageIO.write(image, "png", newPngFile)
+                } catch (e: Exception) {
+                    println("Exception $e")
+                }
+            })
+
         }
 
-        fun downloadSkinUUID(uuid: String){
-            val currentPlugin: Plugin? = Bukkit.getServer().pluginManager.getPlugin("pengcord")
-            currentPlugin?.let {
-                Bukkit.getScheduler().runTaskAsynchronously(currentPlugin, Runnable {
-                    try {
-                        val newPngFile = File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${uuid}.png")
-                        newPngFile.mkdirs()
-                        val image: BufferedImage = ImageIO.read(URL("https://minotar.net/helm/${uuid}/100.png"))
-                        ImageIO.write(image, "png", newPngFile)
-                    } catch (e: Exception) {
-                        println("Exception $e")
-                    }
-                })
+        fun downloadSkinUUID(uuid: UUID){
+            scheduler.runTaskAsynchronously(pengcord, Runnable {
+                try {
+                    val newPngFile = File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${uuid}.png")
+                    newPngFile.mkdirs()
+                    val image: BufferedImage = ImageIO.read(URL("https://minotar.net/helm/${uuid}/100.png"))
+                    ImageIO.write(image, "png", newPngFile)
+                } catch (e: Exception) {
+                    println("Exception $e")
+                }
+            })
+        }
+
+        fun getDownloadedSkinAsFile(uuid: UUID): File? {
+            val pngFile = File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${uuid}.png")
+            if (!pngFile.isFile) {
+                return null
             }
+            return pngFile
+        }
+
+        fun uuidToString(uuid: UUID): String {
+            return insertDashUUID(uuid.toString())
         }
 
         fun insertDashUUID(uuid: String): String {
-            var sb = StringBuffer(uuid)
-            sb.insert(8, "-")
-            sb = StringBuffer(sb.toString())
-            sb.insert(13, "-")
-            sb = StringBuffer(sb.toString())
-            sb.insert(18, "-")
-            sb = StringBuffer(sb.toString())
-            sb.insert(23, "-")
-            return sb.toString()
+            return if (!uuid.contains('-')) {
+                var sb = StringBuffer(uuid)
+                sb.insert(8, "-")
+                sb = StringBuffer(sb.toString())
+                sb.insert(13, "-")
+                sb = StringBuffer(sb.toString())
+                sb.insert(18, "-")
+                sb = StringBuffer(sb.toString())
+                sb.insert(23, "-")
+                sb.toString()
+            } else {
+                uuid
+            }
         }
 
+        fun startUnmuteTask(muteId: Long) {
+            scheduler.runTaskAsynchronously(pengcord, Runnable {
+                val mute = database.queryPlayerMuteById(muteId) ?: return@Runnable
+                if (mute.isPermanent) {
+                    return@Runnable
+                } else {
+                    if (mute.expiresOn.isBeforeNow) {
+                        pardonMute(mute, false)
+                    } else {
+                        scheduler.runTaskLaterAsynchronously(pengcord, Runnable {
+                            pardonMute(mute, false)
+                        }, Duration(DateTime.now().toInstant(), mute.expiresOn.toInstant()).toStandardSeconds().seconds * 20L)
+                    }
 
+                }
+            })
+        }
+
+        fun startUnbanTask(banId: Long) {
+            scheduler.runTaskAsynchronously(pengcord, Runnable {
+                val ban = database.queryPlayerBanById(banId) ?: return@Runnable
+                if (ban.isPermanent) {
+                    return@Runnable
+                } else {
+                    if (ban.expiresOn.isBeforeNow) {
+                        banPardon(ban, false)
+                    } else {
+                        scheduler.runTaskLaterAsynchronously(pengcord, Runnable {
+                            banPardon(ban, false)
+                        }, Duration(DateTime.now().toInstant(), ban.expiresOn.toInstant()).toStandardSeconds().seconds * 20L)
+                    }
+
+                }
+            })
+        }
     }
-
-
 
     override fun onEnable() {
         // Save the default config if it doesn't exist
@@ -111,62 +180,66 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         // Register the Events
         Bukkit.getPluginManager().registerEvents(Event(), this)
 
-        ServerLogger =  Bukkit.getLogger()
+        val pl = Bukkit.getServer().pluginManager.getPlugin("pengcord")
+        pl?.let {
+            pengcord = it
+        }
 
         // Read the `config.yml` and set a dataclass
         val cfgfile = this.config
-        ServerRawConfig = cfgfile
+        serverRawConfig = cfgfile
 
-        ServerConfig = Config(
-                es = cfgfile.getBoolean("enable-sync"),
-                saesang = cfgfile.getString("world-to-track"),
-                discordkey = cfgfile.getString("client-token"),
-                verienable = cfgfile.getBoolean("enable-verify"),
-                serv = cfgfile.getString("server-sys"),
-                sys = cfgfile.getString("system-sys"),
-                servname = cfgfile.getString("server-name"),
-                bpf = cfgfile.getString("bot-prefix"),
-                bind_sync = cfgfile.getString("bot-sync-channel"),
-                bind_cmd = cfgfile.getString("bot-command-channel"),
-                bind_admin = cfgfile.getString("bot-admin-channel"),
-                servtrak = cfgfile.getString("bot-server"),
-                webid = cfgfile.getString("webhook-id"),
-                webtok = cfgfile.getString("webhook-token"),
-                admins = cfgfile.getStringList("server-admin-roles"),
-                adnr = cfgfile.getBoolean("server-non-adminrole-admin"),
-                bwenable = cfgfile.getBoolean("banned-words-enabled"),
-                bw = cfgfile.getStringList("banned-words"),
-                bwdisc = cfgfile.getBoolean("banned-word-discord"),
-                bwmsg = cfgfile.getString("banned-word-message")
-        )
+        val cfg = ServerConfig.new(serverRawConfig)
+        cfg.onFailure {
+            this.logger.log(Level.SEVERE, "Failed to load server configuration:")
+            this.logger.log(Level.SEVERE, it.toString())
+            this.logger.log(Level.SEVERE, "Exiting pengcord!!!")
+            this.pluginLoader.disablePlugin(this)
+        }
 
-        dFolder = dataFolder
+        // Initialize SQL
+        database = UserSQL(this.dataFolder)
+
+        discordFolder = dataFolder
         try{
             discordBot = Bot()
         }
         catch (e: Exception){
-            ServerLogger.severe("Exception ${e}. Disabling plugin!")
+            serverLogger.severe("Exception ${e}. Disabling plugin!")
             this.pluginLoader.disablePlugin(this)
         }
 
-        // Log to console for startup message
-        ServerLogger.info {
-            "[Pengcord] Sucessfully Started!"
+        discordBot.sendMessageToDiscord("Server Started!")
+        // General Commands
+        this.getCommand("stopserver")?.setExecutor(StopServer())
+        this.getCommand("info")?.setExecutor(Info())
+        // Verify
+        this.getCommand("verify")?.setExecutor(Verify())
+        this.getCommand("unverify")?.setExecutor(Unverify())
+        // Query Player
+        this.getCommand("me")?.setExecutor(Me())
+        this.getCommand("whois")?.setExecutor(WhoIs())
+        // Punishments
+        this.getCommand("warn")?.setExecutor(Warn())
+        this.getCommand("mute")?.setExecutor(Mute())
+        this.getCommand("unmute")?.setExecutor(UnMute())
+        this.getCommand("pban")?.setExecutor(PBan())
+        this.getCommand("punban")?.setExecutor(PUnban())
+        this.getCommand("queryrecords")?.setExecutor(QueryRecord())
+        this.getCommand("query")?.setExecutor(Query())
+
+        // Start tasks to unban/unmute players
+        database.queryPlayerBansByStatus(ExpiryState.OnGoing).filter { !it.isPermanent }.forEach {ban ->
+            startUnbanTask(ban.banId)
+        }
+        database.queryPlayerMutesByStatus(ExpiryState.OnGoing).filter { !it.isPermanent }.forEach {mute ->
+            startUnbanTask(mute.muteId)
         }
 
-        discordBot.sendMessageToDiscord("Server Started!")
-        this.getCommand("verify")?.setExecutor(Verify())
-        this.getCommand("whoisdisc")?.setExecutor(Whoisdisc())
-        this.getCommand("whoismc")?.setExecutor(Whoismc())
-        this.getCommand("stopserver")?.setExecutor(StopServer())
-        this.getCommand("unverify")?.setExecutor(Unverify())
-        this.getCommand("info")?.setExecutor(Info())
         discordBot.log("[pengcord]: Server Startup and Plugin Initialization successful.")
-        // Get Mojang API
-        mojangAPI = Mojang().connect()
-
-
-
+        serverLogger.info {
+            "[Pengcord] Sucessfully Started!"
+        }
     }
 
     override fun onDisable() {
@@ -175,7 +248,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         discordBot.log("[pengcord]: Server Shutdown initiated.")
         discordBot.webhook.delete().join()
         discordBot.discordApi.disconnect()
-        ServerConfig.writeValues()
+        serverConfig.saveToConfigFile(this.config)
         this.saveConfig()
     }
 }

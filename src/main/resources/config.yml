@@ -1,44 +1,67 @@
+# Enables the "Verify" feature, tying a discord account to an in game account
+enable-verify: false
+
+# Custom discord server link. If blank, the bot will generate one on the fly.
+discord-server-link: ""
+# Minecraft Server IP
+minecraft-server-ip: ""
 # Enable syncing between Discord <-> MC
 enable-sync: true
 
 # Discord Bot Token (NOTE: Replace with your own)
-client-token: "who is rem, i love emilia"
+bot-token: "who is rem, i love emilia"
 # Discord Bot Prefix
 bot-prefix: "mc!"
-# Enables the "Verify" feature, tying a discord account to an in game account
-enable-verify: false
+# The bio text of the bot
+bot-bio-text: "A link between worlds..."
+# Playing... status of bot
+bot-playing-status: "Vanguard of the Minecraft Server"
 
+# Filter Player Join/Leave messages
 filter-join-leave: false
+# Filter In Game Notification (E.g. someone dies)
 filter-ingame: false
+# Filter Server Plugin Announcements (E.g. server shutdown)
 filter_announcements: false
 
-server-message-prefix: "[Server]: "
+# What server broadcasts will be prefixed with. The space at the end is automatically appended.
+server-message-prefix: "[Server]:"
 
 # Channels for the bot, do not edit (unless you know what you are doing)
-bot-sync-channel: ""
-bot-command-channel: ""
-bot-admin-channel: ""
-bot-server: ""
+bot-chat-sync-channel: 0
+bot-command-channel: 0
+bot-logging-channel: 0
+bot-server: 0
 
 # Webhook ID to manage. Do not edit, managed by bot
-webhook-id: ""
-webhook-token: ""
+webhook-id: 0
+webhook-token: 0
 
-# A list of admin roles on the Discord Server. Managed by bot.
-# Usage: admins add <ping role here>
-# e.g.: admins add @Admins
-server-admin-roles:
-    - ""
+# A list of admin roles on the Discord Server. They can run history and moderation commands
+# This should be a long number, such as 741365968336322711
+discord-admin-roles:
+    - 0
 
 # Enable chat filter
-banned-words-enabled: true
+enable-literally-nineteen-eighty-four: true
 
-# A chat filter. Case insensitive, but wont work if you use capital letters. Any message
+# A chat filter. Case-insensitive, but won't work if you use capital letters.
+# Does not sync to discord (will ignore uses of these words in discrd. get yourself a proper moderation bot)
+# Every word **must** be less than 50 characters.
 banned-words:
   - ""
-# Message to send to the user when the chat filter is triggered
-banned-word-message: "§c§oSorry, but you are not allowed to say that as it violates our rules."
-# Track banned words on discord?
-# Note: Only set to true if you do not have a word filter on the channel and want one
-# Also note that the bot only listens to the track channel
-banned-word-discord: false
+# Message to send to the user when the chat filter is triggered in Minecraft
+filtered-messageg: "§c§oSorry, but you are not allowed to say that as it violates our rules."
+
+# Enables moderation features.
+# Allow the bot to do moderation from Discord<->Minecraft and sync them up as well.
+# Enables mute, kick/warn, ban
+enable-bot-moderation-features: true
+
+# The muted role ID to apply to a user when they are muted.
+# This should be a long number, such as 741365968336322711
+discord-muted-role: 0
+
+# Delete number of days of messages
+# Must be between 0-7
+discord-onban-delete-message-days: 0
