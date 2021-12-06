@@ -47,6 +47,7 @@ import kotlin.collections.ArrayList
 class Bot {
     var discordApi: DiscordApi = DiscordApiBuilder()
             .setToken(Main.serverConfig.botToken)
+            .setAllIntents()
             .login()
             .exceptionally {
                 throw DiscordLoginFailException("Failed to log into discord!")
@@ -62,6 +63,7 @@ class Bot {
     lateinit var discordServer: Server
 
     init {
+        Main.serverLogger.info("aaaa")
         Main.serverConfig.botChatSyncChannel?.let {
             discordApi.getServerTextChannelById(
                 it
@@ -71,16 +73,18 @@ class Bot {
                     .create()
                     .join()
                 this.webhookUpdater = webhook.createUpdater()
-                ServerConfig
             }
         }
+        Main.serverLogger.info("aaaa")
         webhookInit = this::webhook.isInitialized && this::webhookSender.isInitialized && this::webhookUpdater.isInitialized
         this.onSucessfulConnect()
+        Main.serverLogger.info("aaaa")
         discordApi.addListener(DscMessageEvent())
         if (Main.serverConfig.enableCrossMinecraftDiscordModeration) {
             discordApi.addListener(DscServerMemberLeaveEvent())
             discordApi.addListener(DscServerMemberBannedEvent())
         }
+        Main.serverLogger.info("aaaa")
 
         chatFilterRegex = if (Main.serverConfig.enableLiterallyNineteenEightyFour){
             if (Main.serverConfig.bannedWords.isNotEmpty()){
@@ -96,6 +100,7 @@ class Bot {
         } else {
             Regex("(?!)", RegexOption.IGNORE_CASE)
         }
+        Main.serverLogger.info("aaaa")
         val bc : MutableList<String> = ArrayList()
         bc.add(Main.serverConfig.botChatSyncChannel!!.toString())
         bc.add(Main.serverConfig.botLoggingChannel!!.toString())
@@ -117,14 +122,25 @@ class Bot {
         commandHandler.addCommand(Query())
         commandHandler.addCommand(QueryRecord())
         commandHandler.generateHelp()
+        Main.serverLogger.info("aaaa")
     }
 
     private fun onSucessfulConnect() {
-        val botServerId = Main.serverConfig.botServer!!
-        val server = Main.discordBot.discordApi.getServerById(botServerId)!!
-        discordServer = if (server.isPresent) server.orElseThrow() else throw DiscordLoginFailException("Failed to get discord server")
-        Main.serverLogger.info("[pengcord]: Successfully connected to Discord! Invite to server using:")
-        Main.serverLogger.info(discordApi.createBotInvite())
+        Main.serverConfig.botServer?.let {
+            this.discordApi.getServerById(it).ifPresentOrElse (
+                {
+                    server ->
+                    Main.serverLogger.info("[pengcord]: Invite to server using:")
+                    Main.serverLogger.info(discordApi.createBotInvite())
+                    discordServer = server
+                },
+                {
+                    Main.serverLogger.info("[pengcord]: Invite to server using:")
+                    Main.serverLogger.info(discordApi.createBotInvite())
+                    throw DiscordLoginFailException("Failed to get discord server")
+                }
+            )
+        }
     }
 
     fun sendMessageToDiscord(message: String){

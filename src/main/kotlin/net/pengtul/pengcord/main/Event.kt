@@ -95,52 +95,56 @@ class Event : Listener{
     // Chat Events
     @EventHandler
     fun onPlayerChatEvent(event: AsyncChatEvent){
+        var playerVerified = false
+        var playerMuted = false
         Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
-            // check if player verified
-            if (!Main.database.playerIsVerified(TypeOfUniqueID.MinecraftTypeOfUniqueID(
-                    event.player.uniqueId
-            ))) {
-                Main.discordBot.log(LogType.Verification, "<${event.player.name}> Attempted to say \" ${event.message()} \"" +
-                        "\nbut user is not verified!")
-                Main.serverLogger.info(
-                    "[MC-EVENT-PLAYERCHAT]: <${event.player.name}> Attempted to say \" ${event.message()} \"" +
-                            "\nbut user is not verified!"
-                )
-                event.isCancelled = true
-                return@Runnable
-            }
-
-            if (Main.database.checkIfPlayerMuted(event.player.uniqueId)) {
-                Main.discordBot.log(LogType.PlayerMuted, "<${event.player.name}> Attempted to say \" ${event.message()} \"" +
-                        "\nbut user is muted!")
-                Main.serverLogger.info("[MC-EVENT-PLAYERCHAT]: <${event.player.name}> Attempted to say \" ${event.message()} \"" +
-                        "\nbut user is muted!" )
-                event.isCancelled = true
-                return@Runnable
-            }
-
-            if (Main.serverConfig.enableSync) {
-                if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message().toString().lowercase(Locale.getDefault()))){
-                    val prefix = Main.vaultChatApi.getPlayerPrefix(event.player)
-                    Main.discordBot.sendMessagetoWebhook(
-                        event.message().toString(),
-                        "[${prefix}] ${event.player.displayName()}",
-                        event.player
-                    )
-                    Main.discordBot.log(LogType.PlayerChat, "<${event.player.name}> ${event.message()}")
-                }
-                else {
-                    event.player.sendMessage(Main.serverConfig.filteredMessage)
-                    Main.discordBot.log(LogType.ChatFilter, "User ${event.player.name} (${event.player.uniqueId }) tripped chat filter with message ${event.message()}")
-                    val matchedWords = Main.discordBot.chatFilterRegex.findAll(event.message().toString().lowercase()).joinToString()
-                    Main.database.addFilterAlertToPlayer(player = event.player.uniqueId, w = matchedWords, event.message().toString()).onFailure { exception ->
-                        Main.serverLogger.warning("[ChatFilter] [SQLError]: Failed to add filter alert to ${event.player.name} (${event.player.uniqueId }) due to error: $exception")
-                        Main.discordBot.log(LogType.GenericError, "Failed to add filter alert to ${event.player.name} (${event.player.uniqueId }) due to error: $exception")
-                    }
-                    event.isCancelled = true
-                }
-            }
+            playerVerified = Main.database.playerIsVerified(TypeOfUniqueID.MinecraftTypeOfUniqueID(
+                event.player.uniqueId
+            ))
+            playerMuted = Main.database.checkIfPlayerMuted(event.player.uniqueId)
         })
+
+        if (!playerVerified) {
+            Main.discordBot.log(LogType.Verification, "<${event.player.name}> Attempted to say \" ${event.message()} \"" +
+                    "\nbut user is not verified!")
+            Main.serverLogger.info(
+                "[MC-EVENT-PLAYERCHAT]: <${event.player.name}> Attempted to say \" ${event.message()} \"" +
+                        "\nbut user is not verified!"
+            )
+            event.isCancelled = true
+            return
+        }
+
+        if (playerMuted) {
+            Main.discordBot.log(LogType.PlayerMuted, "<${event.player.name}> Attempted to say \" ${event.message()} \"" +
+                    "\nbut user is muted!")
+            Main.serverLogger.info("[MC-EVENT-PLAYERCHAT]: <${event.player.name}> Attempted to say \" ${event.message()} \"" +
+                    "\nbut user is muted!" )
+            event.isCancelled = true
+            return
+        }
+
+        if (Main.serverConfig.enableSync) {
+            if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message().toString().lowercase(Locale.getDefault()))){
+                val prefix = Main.vaultChatApi.getPlayerPrefix(event.player)
+                Main.discordBot.sendMessagetoWebhook(
+                    event.message().toString(),
+                    "[${prefix}] ${event.player.displayName()}",
+                    event.player
+                )
+                Main.discordBot.log(LogType.PlayerChat, "<${event.player.name}> ${event.message()}")
+            }
+            else {
+                event.player.sendMessage(Main.serverConfig.filteredMessage)
+                Main.discordBot.log(LogType.ChatFilter, "User ${event.player.name} (${event.player.uniqueId }) tripped chat filter with message ${event.message()}")
+                val matchedWords = Main.discordBot.chatFilterRegex.findAll(event.message().toString().lowercase()).joinToString()
+                Main.database.addFilterAlertToPlayer(player = event.player.uniqueId, w = matchedWords, event.message().toString()).onFailure { exception ->
+                    Main.serverLogger.warning("[ChatFilter] [SQLError]: Failed to add filter alert to ${event.player.name} (${event.player.uniqueId }) due to error: $exception")
+                    Main.discordBot.log(LogType.GenericError, "Failed to add filter alert to ${event.player.name} (${event.player.uniqueId }) due to error: $exception")
+                }
+                event.isCancelled = true
+            }
+        }
 
 
     }
@@ -176,18 +180,14 @@ class Event : Listener{
     @EventHandler
     fun onPlayerMoveEvent(event: PlayerMoveEvent){
         if (Main.serverConfig.enableVerify){
-            Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
-                if (!Main.database.playerIsVerified(TypeOfUniqueID.MinecraftTypeOfUniqueID(event.player.uniqueId))) {
-                    event.player.sendMessage("§cYou are not verified! Do `/verify <discord tag>` to start!")
-                    event.player.sendMessage("§ce.g. /verify clyde#0000 (replace clyde#0000 with your own discord username and tag)")
-                }
-                if (!event.player.isInvulnerable || !event.player.isInvisible) {
+            if (!Main.database.playerIsVerified(TypeOfUniqueID.MinecraftTypeOfUniqueID(event.player.uniqueId))) {
+                event.player.sendMessage("§cYou are not verified! Do `/verify <discord tag>` to start!")
+                event.player.sendMessage("§ce.g. /verify clyde#0000 (replace clyde#0000 with your own discord username and tag)")
+                if (!event.player.isInvulnerable) {
                     event.player.isInvulnerable = true
-                    event.player.isInvisible = true
                 }
-
                 event.isCancelled = true
-            })
+            }
         }
     }
 
@@ -195,18 +195,14 @@ class Event : Listener{
     @EventHandler
     fun onPlayerInteractEvent(event: PlayerInteractEvent){
         if (Main.serverConfig.enableVerify){
-            Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
-                if (!Main.database.playerIsVerified(TypeOfUniqueID.MinecraftTypeOfUniqueID(event.player.uniqueId))) {
-                    event.player.sendMessage("§cYou are not verified! Do `/verify <discord tag>` to start!")
-                    event.player.sendMessage("§ce.g. /verify clyde#0000 (replace clyde#0000 with your own discord username and tag)")
-                }
-                if (!event.player.isInvulnerable || !event.player.isInvisible) {
+            if (!Main.database.playerIsVerified(TypeOfUniqueID.MinecraftTypeOfUniqueID(event.player.uniqueId))) {
+                event.player.sendMessage("§cYou are not verified! Do `/verify <discord tag>` to start!")
+                event.player.sendMessage("§ce.g. /verify clyde#0000 (replace clyde#0000 with your own discord username and tag)")
+                if (!event.player.isInvulnerable) {
                     event.player.isInvulnerable = true
-                    event.player.isInvisible = true
                 }
-
                 event.isCancelled = true
-            })
+            }
         }
     }
 

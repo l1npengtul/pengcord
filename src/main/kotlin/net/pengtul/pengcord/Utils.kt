@@ -20,6 +20,7 @@ import org.javacord.api.entity.user.User
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.awt.Color
+import java.awt.TextComponent
 import java.lang.management.ManagementFactory
 import java.util.*
 
@@ -671,9 +672,13 @@ fun String.toComponentNewline(click: ClickEvent): Component {
 }
 
 fun String.toComponent(hover: HoverEvent<Component>, click: ClickEvent): Component {
-    val c = Component.text(this+"\n")
+    val c = Component.text(this)
     c.clickEvent(click)
     c.hoverEvent(hover)
     return c
+}
+
+fun Component.toString(): String {
+    return Component.empty().append(this).toBuilder().build().content()
 }
 

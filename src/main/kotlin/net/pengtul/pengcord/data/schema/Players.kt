@@ -10,7 +10,7 @@ import java.util.*
 object Players: Table() {
     val playerUUID = uuid("playerUUID").uniqueIndex()
     val currentUsername = varchar("currentUsername", 17).default("")
-    val discordUUID = long("discordUUID").uniqueIndex()
+    val discordUUID = long("discordUUID")
     val firstJoinDateTime = datetime("firstJoinDateTime").default(Main.neverHappenedDateTime)
     val verifiedDateTime = datetime("verifiedDateTime").default(Main.neverHappenedDateTime)
     val secondsPlayed = long("hoursPlayed").default(0)

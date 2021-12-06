@@ -19,22 +19,12 @@ import java.lang.IllegalArgumentException
 import java.util.*
 
 // WARNING: Every one of these must be done **inside** of a AsyncRun in bukkit!
-class UserSQL(path: File) {
-    private val database: Database
+class UserSQL() {
+    private val database: Database = Database.connect(url = "jdbc:h2:./plugins/pengcord/data;DB_CLOSE_DELAY=-1;", driver = "org.h2.Driver")
 
     init {
-        val dataDir = "$path${File.pathSeparator}data"
-
-        // Create data folders if they don't exist already
-        require(path.mkdir())
-        // Directory for users
-        require(File(dataDir).mkdir())
-
-        // Connect to H2 Database for users
-        database = Database.connect(url = "jdbc:h2:file:$dataDir", driver = "org.h2.Driver")
-
         transaction(database) {
-            SchemaUtils.createMissingTablesAndColumns(Players, Warns, Mutes, Bans, FilterAlerts)
+            SchemaUtils.create(Players, Warns, Mutes, Bans, FilterAlerts)
         }
     }
 
@@ -46,6 +36,7 @@ class UserSQL(path: File) {
             if (checkExistanceQuery.empty()) {
                 Players.insert {
                     it[playerUUID] = uuid
+                    it[discordUUID] = 0
                     it[currentUsername] = username
                     it[firstJoinDateTime] = DateTime.now()
                 }

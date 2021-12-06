@@ -212,9 +212,12 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
             this.logger.log(Level.SEVERE, "Exiting pengcord!!!")
             this.pluginLoader.disablePlugin(this)
         }
+        cfg.onSuccess {
+            serverConfig = it
+        }
 
         // Initialize SQL
-        database = UserSQL(this.dataFolder)
+        database = UserSQL()
 
         discordFolder = dataFolder
         try{
