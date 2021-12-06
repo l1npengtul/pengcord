@@ -230,9 +230,9 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         this.getCommand("stopserver")?.setExecutor(StopServer())
         this.getCommand("info")?.setExecutor(Info())
         this.getCommand("git")?.setExecutor(Git())
-        if (serverConfig.enableSync) {
-            this.getCommand("reply")?.setExecutor(Reply())
-        }
+//        if (serverConfig.enableSync) {
+//            this.getCommand("reply")?.setExecutor(Reply())
+//        }
         // Verify
         this.getCommand("verify")?.setExecutor(Verify())
         this.getCommand("unverify")?.setExecutor(Unverify())

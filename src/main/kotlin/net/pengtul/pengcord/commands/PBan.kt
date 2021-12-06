@@ -1,6 +1,7 @@
 package net.pengtul.pengcord.commands
 
 import net.pengtul.pengcord.Utils
+import net.pengtul.pengcord.Utils.Companion.parseTimeFromString
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.ExpiryDateTime
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
@@ -13,14 +14,13 @@ import org.joda.time.DateTime
 class PBan: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.count() != 3) {
-            sender.sendMessage("§cExpected 3 arguments. Usage: /pban <player> <reason> <days>")
+            sender.sendMessage("§cExpected 3 arguments. Usage: /pban <player> <reason> <time/perm>")
             return false
         }
         if (sender.hasPermission("pengcord.punishments.ban")) {
             val playerToMute = args[0]
             val reason = args[1]
-            val days = args[2].toIntOrNull() ?: 0
-            val until = if (days == 0) ExpiryDateTime.Permanent else ExpiryDateTime.DateAndTime(DateTime.now().plusDays(days))
+            val until = parseTimeFromString(args[2]) ?: ExpiryDateTime.Permanent
 
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                 Utils.queryPlayerFromString(playerToMute)?.let { player ->

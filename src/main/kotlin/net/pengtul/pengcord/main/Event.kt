@@ -3,6 +3,7 @@ package net.pengtul.pengcord.main
 import io.papermc.paper.event.player.AsyncChatEvent
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
+import net.pengtul.pengcord.toComponent
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
@@ -32,6 +33,17 @@ import kotlin.collections.HashMap
 
 
 class Event : Listener{
+    @EventHandler
+    fun onPlayerPreLogin(event: AsyncPlayerPreLoginEvent) {
+        if (Main.serverConfig.enableLiterallyNineteenEightyFour) {
+            if (Main.discordBot.chatFilterRegex.containsMatchIn(event.name.lowercase())) {
+                event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, "Please change your minecraft username!".toComponent())
+            } else {
+                event.allow()
+            }
+        }
+    }
+
     // Player Leave/Join
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent){
@@ -109,13 +121,18 @@ class Event : Listener{
 
             if (Main.serverConfig.enableSync) {
                 if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message().toString().lowercase(Locale.getDefault()))){
-                    Main.discordBot.sendMessagetoWebhook(event.message().toString(), event.player.displayName().toString(), null, event.player)
+                    val prefix = Main.vaultChatApi.getPlayerPrefix(event.player)
+                    Main.discordBot.sendMessagetoWebhook(
+                        event.message().toString(),
+                        "[${prefix}] ${event.player.displayName()}",
+                        event.player
+                    )
                     Main.discordBot.log(LogType.PlayerChat, "<${event.player.name}> ${event.message()}")
                 }
                 else {
                     event.player.sendMessage(Main.serverConfig.filteredMessage)
                     Main.discordBot.log(LogType.ChatFilter, "User ${event.player.name} (${event.player.uniqueId }) tripped chat filter with message ${event.message()}")
-                    val matchedWords = Main.discordBot.chatFilterRegex.findAll(event.message().toString()).joinToString()
+                    val matchedWords = Main.discordBot.chatFilterRegex.findAll(event.message().toString().lowercase()).joinToString()
                     Main.database.addFilterAlertToPlayer(player = event.player.uniqueId, w = matchedWords, event.message().toString()).onFailure { exception ->
                         Main.serverLogger.warning("[ChatFilter] [SQLError]: Failed to add filter alert to ${event.player.name} (${event.player.uniqueId }) due to error: $exception")
                         Main.discordBot.log(LogType.GenericError, "Failed to add filter alert to ${event.player.name} (${event.player.uniqueId }) due to error: $exception")
@@ -190,6 +207,15 @@ class Event : Listener{
 
                 event.isCancelled = true
             })
+        }
+    }
+
+    @EventHandler
+    fun onPlayerAdvancementDoneEvent(event: PlayerAdvancementDoneEvent) {
+        if (Main.serverConfig.enableSync) {
+            event.message()?.let { msg ->
+                Main.discordBot.sendMessageToDiscordInGame(msg.toString())
+            }
         }
     }
 }

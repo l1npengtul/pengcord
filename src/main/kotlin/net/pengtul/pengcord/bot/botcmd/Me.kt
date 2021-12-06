@@ -6,6 +6,8 @@ import net.pengtul.pengcord.main.Main
 import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.entity.user.User
+import org.joda.time.Duration
+import org.joda.time.Period
 
 class Me: JCDiscordCommandExecutor {
     override val commandDescription: String
@@ -27,6 +29,7 @@ class Me: JCDiscordCommandExecutor {
                         .addInlineField("Banned Status:", "${dbPlayer.isBanned}")
                         .addInlineField("Muted Status:", "${dbPlayer.isMuted}")
                         .addInlineField("Deaths:", "${dbPlayer.deaths}")
+                        .addInlineField("Time Played:", Main.periodFormatter.print(Period(Duration(time * 1000))))
                     if (dbPlayer.firstJoinDateTime != Main.neverHappenedDateTime) {
                         userInfoEmbed.addInlineField("First Join Date Time:", "${dbPlayer.firstJoinDateTime}")
                     }

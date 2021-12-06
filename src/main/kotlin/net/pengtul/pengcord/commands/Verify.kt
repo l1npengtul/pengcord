@@ -6,13 +6,10 @@ import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.main.Main
 import net.pengtul.pengcord.toComponent
-import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.javacord.api.entity.user.User
-import java.lang.Exception
 import java.lang.StringBuilder
 
 /*

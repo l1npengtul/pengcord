@@ -26,6 +26,7 @@ import net.pengtul.pengcord.data.ServerConfig
 import net.pengtul.pengcord.error.DiscordLoginFailException
 import net.pengtul.pengcord.main.Main
 import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import org.javacord.api.DiscordApi
 import org.javacord.api.DiscordApiBuilder
@@ -57,7 +58,7 @@ class Bot {
     private lateinit var webhookSender: WebhookClient
     var commandHandler: JCDiscordCommandHandler
     var chatFilterRegex: Regex
-    val regex: Regex = """(§.)""".toRegex()
+    private val regex: Regex = """(§.)""".toRegex()
     lateinit var discordServer: Server
 
     init {
@@ -102,15 +103,19 @@ class Bot {
         // General Commands
         commandHandler.addCommand(Info())
         commandHandler.addCommand(StopServer())
+        commandHandler.addCommand(WhoIs())
+        commandHandler.addCommand(Me())
         // Users
         commandHandler.addCommand(Verify())
         commandHandler.addCommand(Unverify())
-        commandHandler.addCommand(Me())
         // Punishments
+        commandHandler.addCommand(Warn())
         commandHandler.addCommand(Ban())
         commandHandler.addCommand(UnBan())
-        commandHandler.addCommand(Me())
-        commandHandler.addCommand(Me())
+        commandHandler.addCommand(Mute())
+        commandHandler.addCommand(UnMute())
+        commandHandler.addCommand(Query())
+        commandHandler.addCommand(QueryRecord())
         commandHandler.generateHelp()
     }
 
@@ -247,17 +252,16 @@ class Bot {
         }
     }
 
-    fun sendMessagetoWebhook(message: String, usrname: String, pfp: String?, player: org.bukkit.entity.Player){
+    fun sendMessagetoWebhook(message: String, usrname: String, player: Player){
         if(webhookInit){
             val currentPlugin: Plugin? = Bukkit.getServer().pluginManager.getPlugin("pengcord")
             currentPlugin?.let {
                 Bukkit.getScheduler().runTaskAsynchronously(currentPlugin, Runnable {
                     val msg: String = message
-                    val prefix: String
                     webhookUpdater = if (usrname.lowercase(Locale.getDefault()) == "clyde"){
                         webhookUpdater.setName("cly de")
                     } else {
-                        webhookUpdater.setName(regex.replace(usrname, ""))
+                        webhookUpdater.setName(usrname)
                     }
                     try {
                         webhookUpdater.setAvatar(File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${player.uniqueId}.png"))
