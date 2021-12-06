@@ -12,7 +12,7 @@ commands:
   unverify:
     description: Remove someone's verification. Player is automatically kicked. Permission is only needed if <player> is specified.
     usage: /unverify <player>
-    permission: pengcord.verify.undo
+    permission: pengcord.verify.command
   whois:
     description: Look up someone by their Discord Username/Discord UUID/Minecraft Username/Minecraft UUID
     usage: /whois <player>
@@ -29,21 +29,29 @@ commands:
     description: Gets Server RAM usage and uptime
     usage: /info
     permission: pengcord.command.info
+  git:
+    description: Gets link to development github
+    usage: /git
+    permission: pengcord.command.git
+  reply:
+    description: Replies to message synced from discord.
+    usage: /reply <messageId> <content>
+    permission: pengcord.command.reply
   warn:
     description: Warn a player. Will log the warn and also kick them from the server
     usage: /warn <player> <reason>
     permission: pengcord.punishments.warn
   mute:
-    description: Mute a player.
-    usage: /mute <player> <reason> <days>
+    description: Mute a player. Time must be a <amt><unit> literal such as 10d or perm to ban permanently.
+    usage: /mute <player> <reason> <time/perm>
     permission: pengcord.punishments.mute
   unmute:
     description: Unmute via a Mute ID. This can be obtained by using `/query m <player>`. Alternatively, pass in "all" for the first argument then a player for the second to pardon all their mutes.
     usage: /unmute <mute Id/all> <player?>
     permission: pengcord.punishments.unmute
   pban:
-    description: Ban a player
-    usage: /pban <player> <reason> <days>
+    description: Ban a player. Time must be a <amt><unit> literal such as 10d or perm to ban permanently.
+    usage: /pban <player> <reason> <time/perm>
     permission: pengcord.punishments.ban
   punban:
     description: Pardon by a ban Id. This can be obtained by using `/query b <player>`. Alternatively, pass in "all" for the first argument then a player for the second to pardon all their bans.
@@ -66,8 +74,11 @@ permissions:
         description: Allows the running of /verify, etc
         default: true
       pengcord.verify.undo:
-        description: Allows the running of /unverify
+        description: Allows the running of /unverify on others
         default: false
+      pengcord.verify.undoself:
+        description: Allows the running of /unverify on yourself
+        default: true
   pengcord.command:
     description: All non-specialized in-game commands
     children:
@@ -82,6 +93,12 @@ permissions:
         default: true
       pengcord.command.me:
         description: Allows lookup of self.
+        default: true
+      pengcord.command.git:
+        description: Allows search of github
+        default: true
+      pengcord.command.reply:
+        description: Allows reply to synced messages
         default: true
   pengcord.punishments:
     description: All commands related to punishment. This is only useful if you enabled "enable-bot-moderation-features"

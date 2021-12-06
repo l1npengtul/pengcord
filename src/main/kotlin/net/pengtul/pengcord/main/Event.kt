@@ -1,6 +1,7 @@
 package net.pengtul.pengcord.main
 
 import io.papermc.paper.event.player.AsyncChatEvent
+import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -9,6 +10,7 @@ import org.bukkit.event.server.BroadcastMessageEvent
 import org.bukkit.event.player.*
 import org.joda.time.DateTime
 import java.util.*
+import kotlin.collections.HashMap
 
 /*
 *    Minecraft Event Handler
@@ -35,9 +37,9 @@ class Event : Listener{
     fun onPlayerJoin(event: PlayerJoinEvent){
         event.joinMessage()?.let {
             if (Main.serverConfig.enableSync){
-                Main.discordBot.sendMessageToDiscord(it.toString().replace("§e",""))
+                Main.discordBot.sendMessageToDiscordJoinLeave(it.toString().replace("§e",""))
                 Main.downloadSkin(event.player)
-                Main.discordBot.log("[pengcord]: [MC-EVENT-JOIN]: $it (user ${event.player.uniqueId }).")
+                Main.discordBot.log(LogType.PlayerJoin, "$it (user ${event.player.uniqueId }).")
             }
 
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
@@ -53,7 +55,7 @@ class Event : Listener{
         event.quitMessage()?.let {
             if(Main.serverConfig.enableSync) {
                 Main.discordBot.sendMessageToDiscordJoinLeave(it.toString().replace("§e", ""))
-                Main.discordBot.log("[pengcord]: [MC-EVENT-QUIT]: $it (user ${event.player.uniqueId }).")
+                Main.discordBot.log(LogType.PlayerLeave, "$it (user ${event.player.uniqueId }).")
             }
 
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
@@ -63,9 +65,12 @@ class Event : Listener{
     }
     @EventHandler
     fun onPlayerKickEvent(event: PlayerKickEvent){
+        Main.playersAwaitingVerification = Main.playersAwaitingVerification.filterValues { v ->
+            v != event.player.uniqueId
+        } as HashMap<Int, MinecraftId>
         event.leaveMessage().let {
             if(Main.serverConfig.enableSync) {
-                Main.discordBot.log("[pengcord]: [MC-EVENT-KICK]: $it for reason ${event.reason()} (user ${event.player.uniqueId }).")
+                Main.discordBot.log(LogType.PlayerLeave, "$it for reason ${event.reason()} (user ${event.player.uniqueId }).")
                 Main.discordBot.sendMessageToDiscordJoinLeave("${it.toString().replace("§e", "")}. Reason: ${event.reason().toString().replace("§e", "")}")
             }
 
@@ -83,7 +88,7 @@ class Event : Listener{
             if (!Main.database.playerIsVerified(TypeOfUniqueID.MinecraftTypeOfUniqueID(
                     event.player.uniqueId
             ))) {
-                Main.discordBot.log("[pengcord]: [MC-EVENT-PLAYERCHAT]: <${event.player.name}> Attempted to say \" ${event.message()} \"" +
+                Main.discordBot.log(LogType.Verification, "<${event.player.name}> Attempted to say \" ${event.message()} \"" +
                         "\nbut user is not verified!")
                 Main.serverLogger.info(
                     "[MC-EVENT-PLAYERCHAT]: <${event.player.name}> Attempted to say \" ${event.message()} \"" +
@@ -94,7 +99,7 @@ class Event : Listener{
             }
 
             if (Main.database.checkIfPlayerMuted(event.player.uniqueId)) {
-                Main.discordBot.log("[pengcord]: [MC-EVENT-PLAYERCHAT]: <${event.player.name}> Attempted to say \" ${event.message()} \"" +
+                Main.discordBot.log(LogType.PlayerMuted, "<${event.player.name}> Attempted to say \" ${event.message()} \"" +
                         "\nbut user is muted!")
                 Main.serverLogger.info("[MC-EVENT-PLAYERCHAT]: <${event.player.name}> Attempted to say \" ${event.message()} \"" +
                         "\nbut user is muted!" )
@@ -105,15 +110,15 @@ class Event : Listener{
             if (Main.serverConfig.enableSync) {
                 if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message().toString().lowercase(Locale.getDefault()))){
                     Main.discordBot.sendMessagetoWebhook(event.message().toString(), event.player.displayName().toString(), null, event.player)
-                    Main.discordBot.log("[pengcord]: [MC-EVENT-PLAYERCHAT]: <${event.player.name}> ${event.message()}")
+                    Main.discordBot.log(LogType.PlayerChat, "<${event.player.name}> ${event.message()}")
                 }
                 else {
                     event.player.sendMessage(Main.serverConfig.filteredMessage)
-                    Main.discordBot.log("[pengcord]: [ChatFilter]: User ${event.player.name} (${event.player.uniqueId }) tripped chat filter with message ${event.message()}")
+                    Main.discordBot.log(LogType.ChatFilter, "User ${event.player.name} (${event.player.uniqueId }) tripped chat filter with message ${event.message()}")
                     val matchedWords = Main.discordBot.chatFilterRegex.findAll(event.message().toString()).joinToString()
                     Main.database.addFilterAlertToPlayer(player = event.player.uniqueId, w = matchedWords, event.message().toString()).onFailure { exception ->
                         Main.serverLogger.warning("[ChatFilter] [SQLError]: Failed to add filter alert to ${event.player.name} (${event.player.uniqueId }) due to error: $exception")
-                        Main.discordBot.log("[pengcord]: [ChatFilter] [SQLError]: Failed to add filter alert to ${event.player.name} (${event.player.uniqueId }) due to error: $exception")
+                        Main.discordBot.log(LogType.GenericError, "Failed to add filter alert to ${event.player.name} (${event.player.uniqueId }) due to error: $exception")
                     }
                     event.isCancelled = true
                 }
@@ -126,12 +131,12 @@ class Event : Listener{
     fun onBroadcastChatEvent(event: BroadcastMessageEvent){
         if (Main.serverConfig.enableSync){
             if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message().toString())){
-                Main.discordBot.log("[pengcord]: [MC-EVENT-BROADCAST]: ${event.message()}.")
+                Main.discordBot.log(LogType.Announcement, "${event.message()}.")
                 Main.discordBot.sendMessageToDiscordAnnouncement(event.message().toString())
                 event.isCancelled = false
             }
             else {
-                Main.discordBot.log("[pengcord]: [ChatFilter]: Message of unknown origin (Message Broadcast) tripped chat filter with message ${event.message()}.")
+                Main.discordBot.log(LogType.Announcement, "Message of unknown origin (Message Broadcast) tripped chat filter with message ${event.message()}.")
                 Main.serverLogger.info("[ChatFilter]: Message of unknown origin (Message Broadcast) tripped chat filter with message ${event.message()}.")
                 event.isCancelled = true
             }
@@ -142,7 +147,7 @@ class Event : Listener{
     @EventHandler
     fun onPlayerDeathEvent(event: PlayerDeathEvent){
         if(Main.serverConfig.enableSync) {
-            Main.discordBot.log("[pengcord]: [MC-EVENT-PLAYERDEATH]: ${event.deathMessage()}.")
+            Main.discordBot.log(LogType.InGameStuff, "${event.deathMessage()}.")
             Main.discordBot.sendMessageToDiscordInGame("${event.deathMessage()}")
         }
         Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {

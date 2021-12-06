@@ -25,6 +25,7 @@ import net.milkbowl.vault.chat.Chat
 import net.pengtul.pengcord.Utils.Companion.banPardon
 import net.pengtul.pengcord.Utils.Companion.pardonMute
 import net.pengtul.pengcord.bot.Bot
+import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.commands.*
 import net.pengtul.pengcord.data.ServerConfig
 import net.pengtul.pengcord.data.UserSQL
@@ -50,7 +51,6 @@ import java.util.logging.Level
 import javax.imageio.ImageIO
 import kotlin.collections.HashMap
 
-typealias DiscordId = Long
 typealias MinecraftId = UUID
 
 class Main : JavaPlugin(), Listener, CommandExecutor{
@@ -65,7 +65,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         lateinit var pengcord: Plugin
         val scheduler: BukkitScheduler = Bukkit.getScheduler()
         val neverHappenedDateTime: DateTime = DateTime(0)
-        var playersAwaitingVerification: HashMap<DiscordId, MinecraftId> = HashMap()
+        var playersAwaitingVerification: HashMap<Int, MinecraftId> = HashMap()
         var playersCurrentJoinTime: HashMap<MinecraftId, DateTime> = HashMap()
         val periodFormatter: PeriodFormatter = PeriodFormatterBuilder()
             .printZeroAlways()
@@ -82,6 +82,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
             .toFormatter()
         lateinit var vaultApi: Plugin
         lateinit var vaultChatApi: Chat
+        private var salty: String = UUID.randomUUID().toString()
 
         fun downloadSkin(usr: Player){
             val usrUUID: String = usr.uniqueId.toString()
@@ -137,6 +138,14 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
             } else {
                 uuid
             }
+        }
+
+        fun generateUniqueKey(): Int {
+            val rightNow = DateTime.now().toInstant().millis.toString()
+            if (rightNow.last() == '6' || rightNow.last() == '6') {
+                this.salty = UUID.randomUUID().toString()
+            }
+            return (salty+rightNow).hashCode()
         }
 
         fun startUnmuteTask(muteId: Long) {
@@ -220,6 +229,10 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         // General Commands
         this.getCommand("stopserver")?.setExecutor(StopServer())
         this.getCommand("info")?.setExecutor(Info())
+        this.getCommand("git")?.setExecutor(Git())
+        if (serverConfig.enableSync) {
+            this.getCommand("reply")?.setExecutor(Reply())
+        }
         // Verify
         this.getCommand("verify")?.setExecutor(Verify())
         this.getCommand("unverify")?.setExecutor(Unverify())
@@ -243,16 +256,16 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
             startUnbanTask(mute.muteId)
         }
 
-        discordBot.log("[pengcord]: Server Startup and Plugin Initialization successful.")
+        discordBot.log(LogType.ServerStartup, "Server Startup and Plugin Initialization successful.")
         serverLogger.info {
             "[Pengcord] Sucessfully Started!"
         }
     }
 
     override fun onDisable() {
-        //SqlDealer.getConnectionHandler().close();
-        discordBot.sendMessageToDiscord("Server Shutdown Event!")
-        discordBot.log("[pengcord]: Server Shutdown initiated.")
+        database.close()
+        discordBot.sendMessageToDiscord("Server Shutting Down! See you soon!")
+        discordBot.log(LogType.ServerShutdown, "Server Shutdown initiated.")
         discordBot.webhook.delete().join()
         discordBot.discordApi.disconnect()
         serverConfig.saveToConfigFile(this.config)

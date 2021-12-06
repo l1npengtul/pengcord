@@ -1,5 +1,6 @@
 package net.pengtul.pengcord.bot.commandhandler.default
 
+import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.main.Main
 import org.javacord.api.entity.message.Message
@@ -14,7 +15,7 @@ class Git: JCDiscordCommandExecutor {
         get() = "git"
 
     override fun executeCommand(msg: String, sender: User, message: Message, args: List<String>) {
-        sender.sendMessage("The git repository is available at https://gitlab.com/l1npengtul/pengcord. Please read the `LICENSE` and `README.md`")
-        Main.discordBot.log("[pengcord]: User ${sender.idAsString} (${sender.discriminatedName}) ran command `$commandName`")
+        sender.sendMessage("The git repository is available at https://github.com/l1npengtul/pengcord. Please read the `LICENSE` and `README.md`")
+        Main.discordBot.log(LogType.DSCComamndRan, "User ${sender.idAsString} (${sender.discriminatedName}) ran command `$commandName`")
     }
 }

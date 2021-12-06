@@ -1,6 +1,7 @@
 package net.pengtul.pengcord.commands
 
 import net.pengtul.pengcord.Utils.Companion.queryPlayerFromString
+import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.main.Main
 import org.bukkit.command.Command
@@ -18,14 +19,13 @@ class WhoIs: CommandExecutor {
         }
 
         if (sender.hasPermission("pengcord.command.whois")){
-            Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `whois` with argument ${args[0]}.")
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                 queryPlayerFromString(args[0])?.let { dbPlayer ->
                     val playerMutes = Main.database.queryPlayerMutesByPlayerMinecraft(dbPlayer.playerUUID)
                     val activePlayerMutes = Main.database.queryPlayerMutesByPlayerMinecraft(dbPlayer.playerUUID).filter {
                         it.expiryState == ExpiryState.OnGoing
                     }
-                    val playerWarns = Main.database.queryPlayerWarnsByPlayerDiscord(dbPlayer.playerUUID)
+                    val playerWarns = Main.database.queryPlayerWarnsByPlayerMinecraft(dbPlayer.playerUUID)
                     val playerBans = Main.database.queryPlayerBansByPlayerMinecraft(dbPlayer.playerUUID)
                     val activePlayerBans = Main.database.queryPlayerBansByPlayerMinecraft(dbPlayer.playerUUID).filter {
                         it.expiryState == ExpiryState.OnGoing
@@ -50,6 +50,8 @@ class WhoIs: CommandExecutor {
                             sender.sendMessage("§a# Of Mutes: ${activePlayerMutes.count()} active, ${playerMutes.count()} total")
                         }
                         sender.sendMessage("§aDeaths: ${dbPlayer.deaths}")
+                        Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `whois` with ${args[0]}.")
+                        Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `whois` with ${args[0]}.")
                         return@Runnable
                     }
                 }
@@ -57,7 +59,8 @@ class WhoIs: CommandExecutor {
             })
             return true
         } else {
-            Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `whois` with argument ${args[0]}. Failed due to invalid permission.")
+            Main.discordBot.log(LogType.MCComamndError, "User ${sender.name()} ran `whois` with argument ${args[0]}. Failed due to invalid permission.")
+            Main.serverLogger.info("User ${sender.name()} ran `whois` with argument ${args[0]}. Failed due to invalid permission.")
             sender.sendMessage("§cYou do not have permission to run this command.")
             return false
         }

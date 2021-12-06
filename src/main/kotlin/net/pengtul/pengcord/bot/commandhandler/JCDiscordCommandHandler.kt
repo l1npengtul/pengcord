@@ -32,11 +32,15 @@ class JCDiscordCommandHandler(api: DiscordApi, prefix: String, autoHelp: Boolean
     }
 
     fun addCommand(command: JCDiscordCommandExecutor){
-        if (!commandMap.containsKey(command)){
-            val commandListener = JCDiscordCommandEvent(commandPrefix, command.commandName, command, allowedCommandChannels)
-            commandMap[command] = commandListener
-            discordApi.addMessageCreateListener(commandListener)
-            Main.serverLogger.info("Added Command ${command.commandName}")
+        Main.serverConfig.botCommandChannel?.let { channelId ->
+            Main.discordBot.discordApi.getTextChannelById(channelId)?.ifPresent { textChannel ->
+                if (!commandMap.containsKey(command)){
+                    val commandListener = JCDiscordCommandEvent(commandPrefix, command.commandName, command, allowedCommandChannels)
+                    commandMap[command] = commandListener
+                    textChannel.addMessageCreateListener(commandListener)
+                    Main.serverLogger.info("Added Command ${command.commandName}")
+                }
+            }
         }
     }
 

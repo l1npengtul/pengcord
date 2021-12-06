@@ -21,16 +21,22 @@ package net.pengtul.pengcord.bot
 
 import com.vdurmont.emoji.EmojiParser
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.event.ClickEvent
+import net.kyori.adventure.text.event.HoverEvent
+import net.kyori.adventure.text.format.Style
+import net.kyori.adventure.text.format.TextColor
 import net.pengtul.pengcord.main.Main
+import net.pengtul.pengcord.toComponent
 import org.bukkit.Bukkit
 import org.javacord.api.entity.message.Message
 import org.javacord.api.event.message.MessageCreateEvent
 import org.javacord.api.listener.message.MessageCreateListener
+import java.awt.Color
 
 class DscMessageEvent: MessageCreateListener {
     override fun onMessageCreate(event: MessageCreateEvent?) {
-        val msg: Message? = event?.message
-        msg?.let {
+        val message: Message? = event?.message
+        message?.let { msg ->
             if (!(msg.author.isWebhook || msg.author.isBotUser || msg.author.isYourself) && Main.serverConfig.enableSync && !msg.content.startsWith("mc!")){
                 if (msg.channel.idAsString == Main.serverConfig.botChatSyncChannel.toString()){
                     try{
@@ -39,7 +45,7 @@ class DscMessageEvent: MessageCreateListener {
                             msg.delete().thenAccept {
                                 Main.serverLogger.info("Removed Message: ${msg.content} / ${msg.readableContent}")
                                 Main.serverLogger.info("from user ${msg.author.idAsString} / ${msg.author.discriminatedName}")
-                                Main.discordBot.log("[pengcord]: [ChatFilter]: User ${msg.author.idAsString} (${msg.author.discriminatedName}) tripped the word filter with message `${msg.content}` / `${msg.readableContent}`.")
+                                Main.discordBot.log(LogType.ChatFilter, "User ${msg.author.idAsString} (${msg.author.discriminatedName}) tripped the word filter with message `${msg.content}` / `${msg.readableContent}`.")
                                 msg.userAuthor.ifPresent { user ->
                                     user.sendMessage("You cannot say that.")
                                     Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
@@ -49,30 +55,53 @@ class DscMessageEvent: MessageCreateListener {
                                         }
                                     })
                                 }
-
                                 return@thenAccept
                             }
                         }
-                        else{
-                            val message = "§7[DSC]${msg.author.displayName}: ${EmojiParser.parseToAliases(msg.readableContent)}"
-                            if (EmojiParser.parseToAliases(msg.readableContent).isNotBlank()){
-                                Main.discordBot.log("[pengcord]: User ${msg.author.idAsString} (${msg.author.discriminatedName}) sync message `$message`.")
-                                Bukkit.getServer().sendMessage(Component.text(message))
-                            }
+                        else {
+                            val finalComponent = "".toComponent(
+                                HoverEvent.showText("Click to reply!".toComponent()),
+                                ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/pengcord:reply ${msg.id} ")
+                            )
+
+                            val senderColor = msg.author.roleColor.orElse(Color.gray)
+                            val dscMessageHeader = "[DSC]".toComponent()
+                            dscMessageHeader.style(Style.style(TextColor.fromHexString("151515")))
+                            finalComponent.append(dscMessageHeader)
+
+                            val sender = msg.author.displayName.toComponent()
+                            sender.style(Style.style(TextColor.color(senderColor.red, senderColor.green, senderColor.blue)))
+                            finalComponent.append(sender)
+
+                            val messageContent = EmojiParser.parseToAliases(msg.readableContent).toComponent()
+                            messageContent.style(Style.style(TextColor.color(255,255,255)))
+                            finalComponent.append(messageContent)
+
+
                             for (attachment in msg.attachments){
                                 if (attachment.isSpoiler){
-                                    Main.discordBot.log("[pengcord]: User ${msg.author.idAsString} (${msg.author.discriminatedName}) sync message `SPOILER: ${attachment.url}`.")
-                                    Bukkit.getServer().sendMessage(Component.text("§7[DSC]${msg.author.displayName}: SPOILER: ${attachment.url}"))
+                                    Main.discordBot.log(LogType.PlayerChat, "User ${msg.author.idAsString} (${msg.author.discriminatedName}) sync message `SPOILER: ${attachment.url}`.")
+                                    finalComponent.append(Component.newline())
+                                    finalComponent.append(dscMessageHeader)
+                                    val attachmentComponent = Component.text(" [SPOILER]: "+attachment.url.toString())
+                                    attachmentComponent.style(Style.style(TextColor.fromHexString("151515")))
+                                    finalComponent.append(attachmentComponent)
                                 }
                                 else {
-                                    Main.discordBot.log("[pengcord]: User ${msg.author.idAsString} (${msg.author.discriminatedName}) sync message `${attachment.url}`.")
-                                    Bukkit.getServer().sendMessage(Component.text("§7[DSC]${msg.author.displayName}: ${attachment.url}"))
+                                    Main.discordBot.log(LogType.PlayerChat, "User ${msg.author.idAsString} (${msg.author.discriminatedName}) sync message `${attachment.url}`.")
+                                    finalComponent.append(Component.newline())
+                                    finalComponent.append(dscMessageHeader)
+                                    val attachmentComponent = Component.text(attachment.url.toString())
+                                    attachmentComponent.style(Style.style(TextColor.fromHexString("151515")))
+                                    finalComponent.append(attachmentComponent)
                                 }
                             }
+
+                            Bukkit.broadcast(finalComponent)
                         }
                     }
                     catch (e: Exception){
-                        Main.discordBot.log("[pengcord]: User ${msg.author.idAsString} (${msg.author.discriminatedName}) message sync failed due to exception ${e}.")
+                        Main.discordBot.log(LogType.GenericError, "User ${msg.author.idAsString} (${msg.author.discriminatedName}) message sync failed due to exception ${e}.")
                         Main.serverLogger.severe("Failed to broadcast message! Exception $e")
                         Main.serverLogger.severe(e.stackTrace.toString())
                     }

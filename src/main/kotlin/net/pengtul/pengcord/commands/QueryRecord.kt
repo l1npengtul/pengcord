@@ -1,6 +1,7 @@
 package net.pengtul.pengcord.commands
 
 import net.pengtul.pengcord.Utils.Companion.queryPlayerFromString
+import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.main.Main
 import org.bukkit.command.Command
@@ -71,6 +72,9 @@ class QueryRecord: CommandExecutor {
                             sender.sendMessage("§a${pardonedBans.joinToString()}")
                             sender.sendMessage("§a====ONGOING====")
                             sender.sendMessage("§a${ongoingBans.joinToString()}")
+                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran ${this.javaClass.name}.")
+                            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran ${this.javaClass.name}.")
+
                         }
                     }
                     "filter", "filteralerts", "f" -> {
@@ -80,6 +84,8 @@ class QueryRecord: CommandExecutor {
                             }
                             sender.sendMessage("§a=========Filter Alert Query for player ${playerToQuery.currentUsername}=========")
                             sender.sendMessage("§a${alerts.joinToString()}")
+                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran ${this.javaClass.name}.")
+                            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran ${this.javaClass.name}.")
                         }
                     }
                     "warn", "warns", "w" -> {
@@ -89,6 +95,8 @@ class QueryRecord: CommandExecutor {
                             }
                             sender.sendMessage("§a=========Warns Query for player ${playerToQuery.currentUsername}=========")
                             sender.sendMessage("§a${warns.joinToString()}")
+                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                         }
                     }
                     "mute", "mutes", "m" -> {
@@ -110,6 +118,8 @@ class QueryRecord: CommandExecutor {
                             sender.sendMessage("§a${pardonedMutes.joinToString()}")
                             sender.sendMessage("§a====ONGOING====")
                             sender.sendMessage("§a${ongoingMutes.joinToString()}")
+                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                         }
                     }
                     "ban", "bans", "b" -> {
@@ -131,6 +141,8 @@ class QueryRecord: CommandExecutor {
                             sender.sendMessage("§a${pardonedBans.joinToString()}")
                             sender.sendMessage("§a====ONGOING====")
                             sender.sendMessage("§a${ongoingBans.joinToString()}")
+                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                         }
                     }
                     else -> {
@@ -140,8 +152,8 @@ class QueryRecord: CommandExecutor {
             })
             return true
         } else {
-            Main.discordBot.log("[pengcord]: User ${sender.name} ran `queryrecord`. Failed due to insufficient permissions.")
-            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `queryrecord`. Failed due to insufficient permissions.")
+            Main.discordBot.log(LogType.MCComamndError, "User ${sender.name()} ran `queryrecord`. Failed due to insufficient permissions.")
+            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `queryrecord`. Failed due to insufficient permissions.")
             return false
         }
     }

@@ -1,6 +1,7 @@
 package net.pengtul.pengcord.commands
 
 import net.pengtul.pengcord.Utils
+import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.main.Main
 import org.bukkit.command.Command
@@ -29,13 +30,16 @@ class Warn: CommandExecutor {
                     }
                     // else
                     Utils.warnPlayer(player.playerUUID, TypeOfUniqueID.Unknown(sender.name), reason)
+
+                    Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `warn` with ${args[0]}.")
+                    Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `warn` ${args[0]}.")
                 }
             })
 
             return true
         } else {
-            Main.discordBot.log("[pengcord]: User ${sender.name} ran `warn`. Failed due to insufficient permissions.")
-            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `warn`. Failed due to insufficient permissions.")
+            Main.discordBot.log(LogType.MCComamndError, "User ${sender.name()} ran `warn`. Failed due to insufficient permissions.")
+            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `warn`. Failed due to insufficient permissions.")
             return false
         }
     }

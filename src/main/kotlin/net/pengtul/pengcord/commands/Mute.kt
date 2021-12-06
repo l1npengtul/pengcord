@@ -3,9 +3,11 @@ package net.pengtul.pengcord.commands
 import net.pengtul.pengcord.Utils.Companion.banPlayer
 import net.pengtul.pengcord.Utils.Companion.mutePlayer
 import net.pengtul.pengcord.Utils.Companion.queryPlayerFromString
+import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.ExpiryDateTime
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.main.Main
+import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -26,18 +28,32 @@ class Mute: CommandExecutor {
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                 queryPlayerFromString(playerToBan)?.let { player ->
                     Main.database.playerGetByCurrentName(sender.name)?.let { senderPlayer ->
-                        banPlayer(player, TypeOfUniqueID.MinecraftTypeOfUniqueID(senderPlayer.playerUUID), until, reason)
+                        Bukkit.getPlayer(senderPlayer.playerUUID)?.let { bukkitPlayer ->
+                            if (bukkitPlayer.hasPermission("pengcord.punishments.mute") || bukkitPlayer.isOp) {
+                                sender.sendMessage("§cCannot ban another moderator!")
+                                Main.discordBot.log(LogType.MCComamndError, "User ${sender.name()} ran `pban`. Failed due to attempt mute other moderator.")
+                                Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `pban`. Failed due to attempt mute other moderator.")
+                                return@Runnable
+                            }
+                            mutePlayer(player, TypeOfUniqueID.MinecraftTypeOfUniqueID(senderPlayer.playerUUID), until, reason)
+
+                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                        }
                         return@Runnable
                     }
                     // else
-                    banPlayer(player, TypeOfUniqueID.Unknown(sender.name), until, reason)
+                    mutePlayer(player, TypeOfUniqueID.Unknown(sender.name), until, reason)
+
+                    Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                    Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                 }
             })
 
             return true
         } else {
-            Main.discordBot.log("[pengcord]: User ${sender.name} ran `pban`. Failed due to insufficient permissions.")
-            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `pban`. Failed due to insufficient permissions.")
+            Main.discordBot.log(LogType.MCComamndError, "User ${sender.name()} ran `mute`. Failed due to insufficient permissions.")
+            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `mute`. Failed due to insufficient permissions.")
             return false
         }
     }

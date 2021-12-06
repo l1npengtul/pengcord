@@ -1,0 +1,34 @@
+package net.pengtul.pengcord.bot
+
+import net.pengtul.pengcord.Utils.Companion.banPlayer
+import net.pengtul.pengcord.data.interact.ExpiryDateTime
+import net.pengtul.pengcord.data.interact.TypeOfUniqueID
+import net.pengtul.pengcord.data.interact.UpdateVerify
+import net.pengtul.pengcord.main.Main
+import org.javacord.api.event.server.member.ServerMemberBanEvent
+import org.javacord.api.listener.server.member.ServerMemberBanListener
+
+class DscServerMemberBannedEvent: ServerMemberBanListener {
+    override fun onServerMemberBan(event: ServerMemberBanEvent?) {
+        event?.let { serverMemberBanEvent ->
+            if (serverMemberBanEvent.server.equals(Main.discordBot.discordServer)) {
+                serverMemberBanEvent.requestBan().thenAccept { maybeBan ->
+                    maybeBan.ifPresent { ban ->
+                        Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
+                            Main.database.playerGetByDiscordUUID(ban.user.id)?.let { player ->
+                                Main.database.playerUpdateVerify(player.playerUUID, UpdateVerify.Unverify)
+                                val banReason = ban.reason.orElse("")
+                                val lastPlayerBan = Main.database.queryPlayerBansByPlayerDiscord(player.discordUUID).lastOrNull() ?: return@Runnable
+                                if (lastPlayerBan.reason == banReason) {
+                                    banPlayer(player, TypeOfUniqueID.Unknown("Discord Ban, Check Server Audit Log"), ExpiryDateTime.Permanent, banReason)
+                                }
+                                Main.discordBot.log(LogType.PlayerBanned, "Synced Discord ban for player ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}/${ban.user.discriminatedName})")
+                                Main.serverLogger.info("[pengcord]: Synced Discord ban for player ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}/${ban.user.discriminatedName})")
+                            }
+                        })
+                    }
+                }
+            }
+        }
+    }
+}

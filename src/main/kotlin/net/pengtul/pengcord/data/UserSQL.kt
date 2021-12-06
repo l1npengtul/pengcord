@@ -9,6 +9,7 @@ import net.pengtul.pengcord.main.Main
 import net.pengtul.pengcord.main.Main.Companion.uuidToString
 import org.javacord.api.entity.user.User
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -737,5 +738,9 @@ class UserSQL(path: File) {
                 }
             }
         }
+    }
+
+    fun close() {
+        TransactionManager.closeAndUnregister(this.database)
     }
 }

@@ -21,13 +21,15 @@ class JCDiscordCommandEvent(pre: String, commandToTrack: String, execute: JCDisc
                         }
                     }
 
-                    Main.ServerLogger.info(msgevent.messageContent.removePrefix("$prefix$cmd").split(" ").toString())
-                    exec.executeCommand(
+                    Main.serverLogger.info(msgevent.messageContent.removePrefix("$prefix$cmd").split(" ").toString())
+                    Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
+                        exec.executeCommand(
                             msg = msgevent.messageContent,
                             sender = auth,
                             message = msgevent.message,
                             args = processedArgs.toList()
-                    )
+                        )
+                    })
                 }
             }
         }

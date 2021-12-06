@@ -1,6 +1,12 @@
 package net.pengtul.pengcord.commands
 
+import net.kyori.adventure.text.event.ClickEvent
+import net.kyori.adventure.text.event.HoverEvent
+import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.main.Main
+import net.pengtul.pengcord.toComponent
+import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -52,15 +58,21 @@ class Verify: CommandExecutor {
                         Main.serverLogger.info("User ${serverMember.discriminatedName} found with user ID ${serverMember.id}")
                         Main.serverConfig.botCommandChannel?.let { cmdChannnelId ->
                             discordServer.getChannelById(cmdChannnelId).ifPresent { commandChannel ->
-                                if (!Main.playersAwaitingVerification.containsKey(serverMember.id) && !Main.playersAwaitingVerification.containsValue(sender.uniqueId)) {
-                                    Main.playersAwaitingVerification[serverMember.id] = sender.uniqueId
-                                    sender.sendMessage("§aPlease type `${Main.serverConfig.botPrefix}verify ${sender.name}` in ${discordServer.name}/#${commandChannel.name} to finish your verification!")
-                                    Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `verify` with arguments ${serverMember.idAsString} (${serverMember.discriminatedName}). Successful, awaiting verification.")
-                                }
-                                else {
-                                    Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `verify` with arguments ${serverMember.idAsString} (${serverMember.discriminatedName}). Already exists.")
-                                    sender.sendMessage("§cERROR: You already exist! Type `${Main.serverConfig.botPrefix}verify ${sender.name}` in ${discordServer.name}/#${commandChannel.name} to finish your verification!")
-                                }
+                                Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
+                                    if (!Main.playersAwaitingVerification.containsValue(sender.uniqueId) || Main.database.playerIsVerified(TypeOfUniqueID.MinecraftTypeOfUniqueID(sender.uniqueId))) {
+                                        val secretKey = Main.generateUniqueKey()
+                                        Main.playersAwaitingVerification[secretKey] = sender.uniqueId
+                                        sender.sendMessage("§aPlease type `${Main.serverConfig.botPrefix}verify $secretKey` in ${discordServer.name}/#${commandChannel.name} to finish your verification! Note that if you made a mistake, log out and log back in.\n§r§c§lDO NOT SHARE THIS KEY.".toComponent(
+                                            HoverEvent.showText("Click to copy command!".toComponent()),
+                                            ClickEvent.clickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, "${Main.serverConfig.botPrefix}verify $secretKey")
+                                        ))
+                                        Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `verify` with arguments ${serverMember.idAsString} (${serverMember.discriminatedName}). Successful, awaiting verification.")
+                                    }
+                                    else {
+                                        Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `verify` with arguments ${serverMember.idAsString} (${serverMember.discriminatedName}). Already exists.")
+                                        sender.sendMessage("§cERROR: You already exist! If you forgot your key, relog to generate a new one!")
+                                    }
+                                })
                             }
                         }
                     }
@@ -68,7 +80,8 @@ class Verify: CommandExecutor {
             }
             return true
          } else {
-            Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `verify` with arguments. Failed due to error.")
+            Main.discordBot.log(LogType.MCComamndError, "User ${sender.name()} ran `verify` with arguments. Failed due to error.")
+            Main.serverLogger.info("[pengcord]: [MC]: User ${sender.name()} ran `verify` with arguments. Failed due to error.")
             return false
         }
     }

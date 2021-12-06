@@ -1,12 +1,14 @@
 package net.pengtul.pengcord.commands
 
 import net.pengtul.pengcord.Utils.Companion.getUptime
+import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.main.Main
+import net.pengtul.pengcord.toComponentNewline
+import net.pengtul.pengcord.toComponent
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import kotlin.math.roundToLong
 
 /*   This is the class for getting server info from minecraft
@@ -31,27 +33,22 @@ class Info: CommandExecutor {
         if (sender.hasPermission("pengcord.command.info")){
             val currentUsedRAM : Long = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1048576L
             val maxRAM : Long = Runtime.getRuntime().totalMemory() /  1048576L
-            sender.sendMessage("§9-------§r§6[Server Info]§r§9-------§r")
-            sender.sendMessage("§aServer RAM usage: $currentUsedRAM §r§4MiB/$maxRAM MiB (${((currentUsedRAM.toDouble() / maxRAM.toDouble()) * 100).roundToLong() / 100.0}%)")
-            sender.sendMessage("§aServer Uptime (HH:MM:SS): ${getUptime()}")
-            sender.sendMessage("§aServer TPS: ${Bukkit.getServer().tps}")
-            sender.sendMessage("§aOnline: ${Bukkit.getOnlinePlayers()}/${Bukkit.getServer().maxPlayers}")
-            sender.sendMessage("§9-----------------------------------§r")
-            if (sender is Player){
-                Main.discordBot.log("[pengcord]: User ${sender.uniqueId} (${sender.name}) ran `info`.")
-            }
-            else {
-                Main.discordBot.log("[pengcord]: Console ran command `info`.")
-            }
+            val serverInfoText = "§9=======§r§6[Server Info]§r§9=======§r".toComponentNewline()
+            serverInfoText.append("§aServer RAM usage: $currentUsedRAM §r§4MiB/$maxRAM MiB (${((currentUsedRAM.toDouble() / maxRAM.toDouble()) * 100).roundToLong() / 100.0}%)".toComponentNewline())
+            serverInfoText.append("§aServer Uptime (HH:MM:SS): ${getUptime()}".toComponentNewline())
+            serverInfoText.append("§aServer TPS: ${Bukkit.getServer().tps}".toComponentNewline())
+            serverInfoText.append("§aOnline: ${Bukkit.getOnlinePlayers()}/${Bukkit.getServer().maxPlayers}".toComponentNewline())
+            serverInfoText.append("§9===================================§r".toComponent())
+            sender.sendMessage(serverInfoText)
+            
+            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
             return true
         }
         else {
-            if (sender is Player){
-                Main.discordBot.log("[pengcord]: User ${sender.uniqueId} (${sender.name}) ran `info`. Failed due to invalid permissions.")
-            }
-            else {
-                Main.discordBot.log("[pengcord]: Console ran command `info`. Failed due to invalid permissions.")
-            }
+            Main.discordBot.log(LogType.MCComamndError,"User ${sender.name()} ran `info`. Failed due to invalid permissions.")
+            Main.serverLogger.info("User ${sender.name()} ran `info`. Failed due to invalid permissions.")
+
             return true
         }
     }

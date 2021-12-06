@@ -1,11 +1,13 @@
 package net.pengtul.pengcord.commands
 
 import net.pengtul.pengcord.Utils.Companion.unverifyPlayer
+import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.main.Main
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 
 /*
 *    The Unverify and Kick command
@@ -29,35 +31,44 @@ import org.bukkit.command.CommandSender
 
 class Unverify: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (args.isEmpty()) {
-            Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
-                val player = if (args.isEmpty()) {
-                    Main.database.playerGetByCurrentName(sender.name) ?: return@Runnable
-                } else {
-                    Main.database.playerGetByCurrentName(args[0]) ?: return@Runnable
-                }
+        if (sender is Player) {
+            if (args.isEmpty() && sender.hasPermission("pengcord.verify.undoself")) {
+                Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
+                    val player = if (args.isEmpty()) {
+                        Main.database.playerGetByCurrentName(sender.name) ?: return@Runnable
+                    } else {
+                        Main.database.playerGetByCurrentName(args[0]) ?: return@Runnable
+                    }
 
-                unverifyPlayer(TypeOfUniqueID.MinecraftTypeOfUniqueID(player.playerUUID))
-            })
-            return true
-        }
+                    unverifyPlayer(TypeOfUniqueID.MinecraftTypeOfUniqueID(player.playerUUID))
+                    Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                    Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                })
+                return true
+            }
 
-        else if (sender.hasPermission("pengcord.verify.undo")){
-            Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
-                val player = if (args.isEmpty()) {
-                    Main.database.playerGetByCurrentName(sender.name) ?: return@Runnable
-                } else {
-                    Main.database.playerGetByCurrentName(args[0]) ?: return@Runnable
-                }
+            else if (sender.hasPermission("pengcord.verify.undo")){
+                Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
+                    val player = if (args.isEmpty()) {
+                        Main.database.playerGetByCurrentName(sender.name) ?: return@Runnable
+                    } else {
+                        Main.database.playerGetByCurrentName(args[0]) ?: return@Runnable
+                    }
 
-                unverifyPlayer(TypeOfUniqueID.MinecraftTypeOfUniqueID(player.playerUUID))
-            })
-            return true
-        }
-        else{
-            sender.sendMessage("§cYou do not have permission to run this command.")
-            Main.discordBot.log("[pengcord]: [MC]: User ${sender.name} ran `unverify`. Failed due to invalid permissions.")
-            Main.serverLogger.info("[MC]: User ${sender.name} ran `unverify`. Failed due to invalid permissions.")
+                    unverifyPlayer(TypeOfUniqueID.MinecraftTypeOfUniqueID(player.playerUUID))
+
+                    Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                    Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                })
+                return true
+            }
+            else{
+                sender.sendMessage("§cYou do not have permission to run this command.")
+                Main.discordBot.log(LogType.MCComamndError, "User ${sender.name()} ran `unverify`. Failed due to invalid permissions.")
+                Main.serverLogger.info("[MC-COMMAND-ERROR]: User ${sender.name()} ran `unverify`. Failed due to invalid permissions.")
+                return false
+            }
+        } else {
             return false
         }
     }

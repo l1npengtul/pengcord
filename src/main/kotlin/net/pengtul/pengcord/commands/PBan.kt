@@ -1,6 +1,7 @@
 package net.pengtul.pengcord.commands
 
 import net.pengtul.pengcord.Utils
+import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.ExpiryDateTime
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.main.Main
@@ -34,13 +35,15 @@ class PBan: CommandExecutor {
                     }
                     // else
                     Utils.mutePlayer(player, TypeOfUniqueID.Unknown(sender.name), until, reason)
+                    Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                    Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                 }
             })
 
             return true
         } else {
-            Main.discordBot.log("[pengcord]: User ${sender.name} ran `pban`. Failed due to insufficient permissions.")
-            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `pban`. Failed due to insufficient permissions.")
+            Main.discordBot.log(LogType.DSCComamndError, "User ${sender.name()} ran `pban`. Failed due to insufficient permissions.")
+            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `pban`. Failed due to insufficient permissions.")
             return false
         }
     }

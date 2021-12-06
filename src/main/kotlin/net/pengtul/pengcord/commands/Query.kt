@@ -1,5 +1,6 @@
 package net.pengtul.pengcord.commands
 
+import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.main.Main
 import org.bukkit.command.Command
@@ -28,6 +29,8 @@ class Query: CommandExecutor {
                             sender.sendMessage("§aIssued On: ${filterAlert.issuedOn}")
                             sender.sendMessage("§aMessage Context: ${filterAlert.context}")
                             sender.sendMessage("§aTriggered Words: ${filterAlert.word}")
+                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `query`.")
+                            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `query`.")
                             return@Runnable
                         }
                         sender.sendMessage("§cQuery failed: Invalid ID!")
@@ -41,6 +44,9 @@ class Query: CommandExecutor {
                             sender.sendMessage("§aIssued By: ${warn.issuedBy}")
                             sender.sendMessage("§aIssued On: ${warn.issuedOn}")
                             sender.sendMessage("§aReason: ${warn.reason}")
+                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `query`.")
+                            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `query`.")
+
                             return@Runnable
                         }
                         sender.sendMessage("§cQuery failed: Invalid ID!")
@@ -64,6 +70,8 @@ class Query: CommandExecutor {
                             } else {
                                 sender.sendMessage("§aMute Status: §c§l${mute.expiryState}")
                             }
+                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `query`.")
+                            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `query`.")
                             return@Runnable
                         }
                         sender.sendMessage("§cQuery failed: Invalid ID!")
@@ -87,6 +95,8 @@ class Query: CommandExecutor {
                             } else {
                                 sender.sendMessage("§aBan Status: §c§l${ban.expiryState}")
                             }
+                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `query`.")
+                            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `query`.")
                             return@Runnable
                         }
                         sender.sendMessage("§cQuery failed: Invalid ID!")
@@ -98,8 +108,8 @@ class Query: CommandExecutor {
             })
             return true
         } else {
-            Main.discordBot.log("[pengcord]: User ${sender.name} ran `queryrecord`. Failed due to insufficient permissions.")
-            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `queryrecord`. Failed due to insufficient permissions.")
+            Main.discordBot.log(LogType.MCComamndError, "User ${sender.name()} ran `query`. Failed due to insufficient permissions.")
+            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `query`. Failed due to insufficient permissions.")
             return false
         }
     }

@@ -1,6 +1,7 @@
 package net.pengtul.pengcord.commands
 
 import net.pengtul.pengcord.Utils.Companion.shutdown
+import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.main.Main
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
@@ -32,29 +33,28 @@ import org.bukkit.entity.Player
 class StopServer: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         var ret = false
-        val shutdownTimer = try {
-            args[0].toLong() * 20L
-        } catch (e: Exception) {
-            sender.sendMessage("§cPlease enter a valid time!")
-            return false
-        }
+        val shutdownTimer = (args[0].toIntOrNull() ?: 20).toLong()
 
         if (sender.hasPermission("pengcord.command.stopserver")) {
             shutdown(shutdownTimer)
             if (sender is Player){
-                Main.discordBot.log("[pengcord]: User ${sender.uniqueId} (${sender.name}) ran `stopserver`.")
+                Main.discordBot.log(LogType.MCComamndRan, "User ${sender.uniqueId} (${sender.name()}) ran `stopserver`.")
+                Main.serverLogger.info("[pengcord]: User ${sender.uniqueId} (${sender.name()}) ran `stopserver`.")
             }
             else {
-                Main.discordBot.log("[pengcord]: Console ran command `stopserver`.")
+                Main.discordBot.log(LogType.MCComamndRan, "Console ran command `stopserver`.")
+                Main.serverLogger.info("[pengcord]: Console ran command `stopserver`.")
             }
             ret = true
         }
         else {
             if (sender is Player){
-                Main.discordBot.log("[pengcord]: User ${sender.uniqueId} (${sender.name}) ran `stopserver`. Failed due to invalid permission.")
+                Main.discordBot.log(LogType.MCComamndError, "User ${sender.uniqueId} (${sender.name()}) ran `stopserver`. Failed due to invalid permission.")
+                Main.serverLogger.info("[pengcord]: User ${sender.uniqueId} (${sender.name()}) ran `stopserver`. Failed due to invalid permission.")
             }
             else {
-                Main.discordBot.log("[pengcord]: Console ran command `stopserver`. Failed due to invalid permission.")
+                Main.discordBot.log(LogType.MCComamndError, "Console ran command `stopserver`. Failed due to invalid permission.")
+                Main.serverLogger.info("[pengcord]: Console ran command `stopserver`. Failed due to invalid permission.")
             }
         }
         return ret

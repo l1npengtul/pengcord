@@ -35,6 +35,7 @@ import org.javacord.api.entity.server.Server
 import org.javacord.api.entity.webhook.Webhook
 import org.javacord.api.entity.webhook.WebhookBuilder
 import org.javacord.api.entity.webhook.WebhookUpdater
+import org.joda.time.DateTime
 import java.io.File
 import java.lang.Exception
 import java.lang.StringBuilder
@@ -57,6 +58,7 @@ class Bot {
     var commandHandler: JCDiscordCommandHandler
     var chatFilterRegex: Regex
     val regex: Regex = """(§.)""".toRegex()
+    lateinit var discordServer: Server
 
     init {
         Main.serverConfig.botChatSyncChannel?.let {
@@ -74,6 +76,10 @@ class Bot {
         webhookInit = this::webhook.isInitialized && this::webhookSender.isInitialized && this::webhookUpdater.isInitialized
         this.onSucessfulConnect()
         discordApi.addListener(DscMessageEvent())
+        if (Main.serverConfig.enableCrossMinecraftDiscordModeration) {
+            discordApi.addListener(DscServerMemberLeaveEvent())
+            discordApi.addListener(DscServerMemberBannedEvent())
+        }
 
         chatFilterRegex = if (Main.serverConfig.enableLiterallyNineteenEightyFour){
             if (Main.serverConfig.bannedWords.isNotEmpty()){
@@ -90,20 +96,28 @@ class Bot {
             Regex("(?!)", RegexOption.IGNORE_CASE)
         }
         val bc : MutableList<String> = ArrayList()
-        bc.add(Main.serverConfig.botChatSyncChannel
-!!.toString())
+        bc.add(Main.serverConfig.botChatSyncChannel!!.toString())
         bc.add(Main.serverConfig.botLoggingChannel!!.toString())
         commandHandler = JCDiscordCommandHandler(discordApi, Main.serverConfig.botPrefix, true, bc.toList())
-        commandHandler.addCommand(BanFromDiscord())
+        // General Commands
         commandHandler.addCommand(Info())
-        commandHandler.addCommand(Kick())
-        commandHandler.addCommand(Stop())
+        commandHandler.addCommand(StopServer())
+        // Users
         commandHandler.addCommand(Verify())
-        commandHandler.addCommand(Whois())
+        commandHandler.addCommand(Unverify())
+        commandHandler.addCommand(Me())
+        // Punishments
+        commandHandler.addCommand(Ban())
+        commandHandler.addCommand(UnBan())
+        commandHandler.addCommand(Me())
+        commandHandler.addCommand(Me())
         commandHandler.generateHelp()
     }
 
     private fun onSucessfulConnect() {
+        val botServerId = Main.serverConfig.botServer!!
+        val server = Main.discordBot.discordApi.getServerById(botServerId)!!
+        discordServer = if (server.isPresent) server.orElseThrow() else throw DiscordLoginFailException("Failed to get discord server")
         Main.serverLogger.info("[pengcord]: Successfully connected to Discord! Invite to server using:")
         Main.serverLogger.info(discordApi.createBotInvite())
     }
@@ -170,57 +184,64 @@ class Bot {
             discordApi.getTextChannelById(
                 it
             ).ifPresent { channel ->
-                Main.serverLogger.info("aaaaaa")
                 channel.sendMessage(message)
             }
         }
     }
 
-    fun log(message: String){
+    fun log(type: LogType, message: String){
         Main.serverConfig.botLoggingChannel?.let {
-            discordApi.getTextChannelById(it).ifPresent { channel ->
-                channel.sendMessage("[${System.currentTimeMillis() / 1000L}]: ${regex.replace(message, "")}")
-            }
-        }
-    }
-
-    fun logPlayerJoinLeave(message: String) {
-        if (!Main.serverConfig.filterJoinLeaveMessage) {
-            Main.serverConfig.botLoggingChannel?.let {
-                discordApi.getTextChannelById(it).ifPresent { channel ->
-                    channel.sendMessage("[${System.currentTimeMillis() / 1000L}]: ${regex.replace(message, "")}")
+            when (type) {
+                LogType.Announcement -> {
+                    if (!Main.serverConfig.filterAnnouncements) {
+                        discordApi.getTextChannelById(it).ifPresent { channel ->
+                            channel.sendMessage("[${DateTime.now()}]: [pengcord]: ${type}${regex.replace(message, "")}")
+                        }
+                    }
+                }
+                LogType.InGameStuff -> {
+                    if (!Main.serverConfig.filterInGameMessage) {
+                        discordApi.getTextChannelById(it).ifPresent { channel ->
+                            channel.sendMessage("[${DateTime.now()}]: [pengcord]: ${type}${regex.replace(message, "")}")
+                        }
+                    }
+                }
+                LogType.PlayerJoin -> {
+                    if (!Main.serverConfig.filterJoinLeaveMessage) {
+                        discordApi.getTextChannelById(it).ifPresent { channel ->
+                            channel.sendMessage("[${DateTime.now()}]: [pengcord]: ${type}${regex.replace(message, "")}")
+                        }
+                    }
+                }
+                LogType.PlayerLeave -> {
+                    if (!Main.serverConfig.filterJoinLeaveMessage) {
+                        discordApi.getTextChannelById(it).ifPresent { channel ->
+                            channel.sendMessage("[${DateTime.now()}]: [pengcord]: ${type}${regex.replace(message, "")}")
+                        }
+                    }
+                }
+                LogType.PlayerDie -> {
+                    if (!Main.serverConfig.filterInGameMessage) {
+                        discordApi.getTextChannelById(it).ifPresent { channel ->
+                            channel.sendMessage("[${DateTime.now()}]: [pengcord]: ${type}${regex.replace(message, "")}")
+                        }
+                    }
+                }
+                else -> {
+                    discordApi.getTextChannelById(it).ifPresent { channel ->
+                        channel.sendMessage("[${DateTime.now()}]: [pengcord]: ${type}${regex.replace(message, "")}")
+                    }
                 }
             }
         }
     }
-
-    fun logServerBroadcast(message: String) {
-        if (!Main.serverConfig.filterAnnouncements) {
-            Main.serverConfig.botLoggingChannel?.let {
-                discordApi.getTextChannelById(it).ifPresent { channel ->
-                    channel.sendMessage("[${System.currentTimeMillis() / 1000L}]: ${regex.replace(message, "")}")
-                }
-            }
-        }
-    }
-
-    fun logGameMessage(message: String) {
-        if (!Main.serverConfig.filterInGameMessage) {
-            Main.serverConfig.botLoggingChannel?.let {
-                discordApi.getTextChannelById(it).ifPresent { channel ->
-                    channel.sendMessage("[${System.currentTimeMillis() / 1000L}]: ${regex.replace(message, "")}")
-                }
-            }
-        }
-    }
-
 
     fun logEmbed(embed: EmbedBuilder){
         Main.serverConfig.botLoggingChannel?.let {
             discordApi.getTextChannelById(
                 it
             ).ifPresent {channel ->
-                embed.addField("Time Log:", "UnixTime: ${System.currentTimeMillis() / 1000L}.")
+                embed.addField("Time Log:", "UnixTime: ${DateTime.now()}.")
                 channel.sendMessage(embed)
             }
         }

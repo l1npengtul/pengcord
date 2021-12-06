@@ -24,16 +24,15 @@ import java.util.concurrent.TimeUnit
  */
 object CommandHelper {
     fun deleteAfterSend(message: String?, duration: Int, msg: Message) {
-        msg.channel
-            .sendMessage(message)
-            .thenAccept { sent: Message ->
-                sent.api.threadPool.scheduler
-                    .schedule(
-                        Callable { sent.delete().exceptionally(ExceptionLogger.get()) },
-                        duration.toLong(),
-                        TimeUnit.SECONDS
-                    )
-            }
-            .exceptionally(ExceptionLogger.get())
+        msg.reply(message)
+            .thenAccept { sent ->
+                sent.api.threadPool.scheduler.schedule(
+                    Runnable {
+                        sent.delete().exceptionally(ExceptionLogger.get())
+                    },
+                    duration.toLong(),
+                    TimeUnit.SECONDS
+                )
+            }.exceptionally (ExceptionLogger.get())
     }
 }
