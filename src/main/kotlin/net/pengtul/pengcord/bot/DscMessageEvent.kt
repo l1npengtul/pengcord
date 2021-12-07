@@ -64,6 +64,7 @@ class DscMessageEvent: MessageCreateListener {
                             }
                         }
                         else {
+                            // TODO: Parse Markdown
                             val finalComponent = Component.text()
 
                             if (EmojiParser.parseToAliases(msg.readableContent).isNotBlank()) {
@@ -80,65 +81,39 @@ class DscMessageEvent: MessageCreateListener {
                             }
 
                             for (attachment in msg.attachments){
-                                val attachmentComponent = Component.text()
-                                if (!attachment.isSpoiler){
+
+                                val initialContent = if (attachment.isSpoiler){
                                     Main.discordBot.log(LogType.PlayerChat, "User ${msg.author.idAsString} (${msg.author.discriminatedName}) sync message `SPOILER: ${attachment.url}`.")
                                     finalComponent.append(Component.newline())
-                                    attachmentComponent
-                                        .content("[DSC] ")
-                                        .style(Style.style()
-                                            .decorate(TextDecoration.UNDERLINED)
-                                            .color(NamedTextColor.DARK_GRAY)
-                                            .build())
-                                        .append(
-                                            Component.text("${msg.author.displayName}: ")
-                                                .style(Style.style()
-                                                    .decorate(TextDecoration.UNDERLINED)
-                                                    .color(msg.author.roleColor.orElse(Color.DARK_GRAY).toTextColor())
-                                                    .build()))
-                                        .append(
-                                            Component.text(" ${attachment.fileName}")
-                                                .style(Style.style()
-                                                    .decorate(TextDecoration.UNDERLINED)
-                                                    .color(NamedTextColor.DARK_GRAY)
-                                                    .build()))
-                                        .hoverEvent(
-                                            HoverEvent.showText("Click to open".toComponent())
-                                        )
-                                        .clickEvent(
-                                            ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, attachment.url.toString())
-                                        )
-                                }
-                                else {
+                                    "[DSC] [SPOILER] "
+                                } else {
                                     Main.discordBot.log(LogType.PlayerChat, "User ${msg.author.idAsString} (${msg.author.discriminatedName}) sync message `${attachment.url}`.")
-                                    attachmentComponent
-                                        .content("[DSC] [SPOILER] ")
-                                        .style(Style.style()
-                                            .decorate(TextDecoration.UNDERLINED)
-                                            .color(NamedTextColor.DARK_GRAY)
-                                            .build())
-                                        .append(
-                                            Component.text("${msg.author.displayName}:")
-                                                .style(Style.style()
-                                                    .decorate(TextDecoration.UNDERLINED)
-                                                    .color(msg.author.roleColor.orElse(Color.DARK_GRAY).toTextColor())
-                                                    .build()))
-                                        .append(
-                                            Component.text(" ${attachment.fileName}")
-                                                .style(Style.style()
-                                                    .decorate(TextDecoration.UNDERLINED)
-                                                    .color(NamedTextColor.DARK_GRAY)
-                                                    .build()))
-                                        .hoverEvent(
-                                            HoverEvent.showText("Click to open".toComponent())
-                                        )
-                                        .clickEvent(
-                                            ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, attachment.url.toString())
-                                        )
+                                    "[DSC]"
                                 }
+                                val attachmentComponent = Component.text()
+                                    .content(initialContent)
+                                    .style(Style.style()
+                                        .color(NamedTextColor.DARK_GRAY)
+                                        .build())
+                                    .append(
+                                        Component.text("${msg.author.displayName}: ")
+                                            .style(Style.style()
+                                                .color(msg.author.roleColor.orElse(Color.DARK_GRAY).toTextColor())
+                                                .build()))
+                                    .append(
+                                        Component.text(attachment.fileName)
+                                            .style(Style.style()
+                                                .decorate(TextDecoration.UNDERLINED)
+                                                .color(NamedTextColor.DARK_GRAY)
+                                                .build()))
+                                    .hoverEvent(
+                                        HoverEvent.showText("Click to open".toComponent())
+                                    )
+                                    .clickEvent(
+                                        ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, attachment.url.toString())
+                                    )
                                 finalComponent.append(attachmentComponent.build())
                             }
-
                             Bukkit.broadcast(finalComponent.build())
                         }
                     }
