@@ -28,7 +28,6 @@ dependencies {
     implementation 'io.michaelrocks.bimap:bimap:1.1.0'
     implementation 'com.vdurmont:emoji-java:5.1.1'
     implementation "net.kyori:adventure-api:4.9.3"
-    implementation "net.axay:kspigot:1.17.4"
     compileOnly "io.papermc.paper:paper-api:1.18-R0.1-SNAPSHOT"
     compileOnly "com.github.MilkBowl:VaultAPI:1.7"
 }

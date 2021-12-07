@@ -13,6 +13,7 @@ import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import org.joda.time.Duration
+import java.io.File
 import java.lang.Exception
 import java.lang.IllegalArgumentException
 import java.util.*
@@ -23,11 +24,12 @@ class UserSQL() {
 
     init {
         transaction(database) {
-            if (Main.serverConfig.firstTime) {
-                SchemaUtils.create(Players, Warns, Mutes, Bans, FilterAlerts)
-                Main.serverConfig.firstTime = false
-            } else {
+            val databaseDir = File(Main.pengcord.dataFolder.path+File.pathSeparator+"pengcordstore.mv.db")
+            Main.serverLogger.info(Main.pengcord.dataFolder.path)
+            if (databaseDir.isFile) {
                 SchemaUtils.createMissingTablesAndColumns(Players, Warns, Mutes, Bans, FilterAlerts)
+            } else {
+                SchemaUtils.create(Players, Warns, Mutes, Bans, FilterAlerts)
             }
         }
     }
@@ -38,6 +40,7 @@ class UserSQL() {
             // Check if player exists, if they do return early
             val checkExistanceQuery = Players.select { Players.playerUUID eq uuid }
             if (checkExistanceQuery.empty()) {
+                Main.serverLogger.info("[pengcord]: Attempt add $username (${uuid}) to table. Creating user.")
                 Players.insert {
                     it[playerUUID] = uuid
                     it[discordUUID] = 0
@@ -45,9 +48,18 @@ class UserSQL() {
                     it[firstJoinDateTime] = DateTime.now()
                 }
             } else {
+                Main.serverLogger.info("[pengcord]: Attempt add $username (${uuid}) to table. Already exists.")
                 Players.update ({Players.playerUUID eq uuid}) {
                     it[currentUsername] = username
                 }
+            }
+        }
+    }
+
+    fun queryAllPlayers(): List<Player> {
+        return transaction(this.database) {
+            return@transaction Players.selectAll().map {
+                playerFromResultRow(it)
             }
         }
     }
@@ -88,7 +100,6 @@ class UserSQL() {
                 }
                 is UpdateVerify.Unverify -> {
                     Players.update ({Players.playerUUID eq uuid}) {
-                        it[discordUUID] = 0
                         it[verifiedDateTime] = Main.neverHappenedDateTime
                     }
                 }
@@ -120,9 +131,8 @@ class UserSQL() {
     fun playerGetByUUID(uuid: UUID): Player? {
         return transaction(this.database) {
             try {
-                val resultrow = Players.select { Players.playerUUID eq uuid }.single()
-                return@transaction playerFromResultRow(resultrow)
-            } catch (_: Exception) {
+                return@transaction playerFromResultRow(Players.select { Players.playerUUID eq uuid }.single())
+            } catch (e: Exception) {
                 return@transaction null
             }
         }
@@ -144,13 +154,12 @@ class UserSQL() {
 
     fun playerGetCurrentTimePlayed(player: UUID): Result<Long> {
         this.playerUpdateTimePlayed(player)
-        transaction(this.database) {
+        return transaction(this.database) {
             this@UserSQL.playerGetByUUID(player)?.let { dbPlayer ->
                 return@transaction Result.success(dbPlayer.secondsPlayed)
             }
             return@transaction Result.failure(IllegalArgumentException("Player not found!"))
         }
-        return Result.failure(IllegalArgumentException("Player not found!"))
     }
 
     fun playerGetByCurrentName(player: String): Player? {

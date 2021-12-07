@@ -28,14 +28,22 @@ class QueryRecord: CommandExecutor {
                             val alerts = Main.database.queryPlayerFilterAlertsByPlayerMinecraft(it).map { filterAlert ->
                                 "§r§5${filterAlert.filterAlertId}§r§a(${filterAlert.word})"
                             }
-                            sender.sendMessage("§a=========Filter Alert Query for player ${playerToQuery.currentUsername}=========")
-                            sender.sendMessage("§a${alerts.joinToString()}")
+                            if (alerts.isNotEmpty()) {
+                                sender.sendMessage("§a=====Filter Alert Query for player ${playerToQuery.currentUsername}=====")
+                                sender.sendMessage("§a${alerts.joinToString()}")
+                            } else {
+                                sender.sendMessage("§aNo filter alerts for player ${playerToQuery.currentUsername}")
+                            }
 
                             val warns = Main.database.queryPlayerWarnsByPlayerMinecraft(it).map { warn ->
                                 "§r§5${warn.warnId}§r§a(${warn.issuedBy})"
                             }
-                            sender.sendMessage("§a=========Warns Query for player ${playerToQuery.currentUsername}=========")
-                            sender.sendMessage("§a${warns.joinToString()}")
+                            if (warns.isNotEmpty()) {
+                                sender.sendMessage("§a=====Warns Query for player ${playerToQuery.currentUsername}=====")
+                                sender.sendMessage("§a${warns.joinToString()}")
+                            } else {
+                                sender.sendMessage("§aNo warns for player ${playerToQuery.currentUsername}")
+                            }
 
                             val mutes = Main.database.queryPlayerMutesByPlayerMinecraft(it)
                             val expiredMutes = mutes.filter { mute -> mute.expiryState == ExpiryState.Expired }.map { mute ->
@@ -47,13 +55,18 @@ class QueryRecord: CommandExecutor {
                             val ongoingMutes = mutes.filter { mute -> mute.expiryState == ExpiryState.OnGoing }.map { mute ->
                                 "§r§5${mute.muteId}§r§a(${mute.issuedBy})"
                             }
-                            sender.sendMessage("§a=========Mutes Query for player ${playerToQuery.currentUsername}=========")
-                            sender.sendMessage("§a====EXPIRED====")
-                            sender.sendMessage("§a${expiredMutes.joinToString()}")
-                            sender.sendMessage("§a====PARDONED====")
-                            sender.sendMessage("§a${pardonedMutes.joinToString()}")
-                            sender.sendMessage("§a====ONGOING====")
-                            sender.sendMessage("§a${ongoingMutes.joinToString()}")
+
+                            if (mutes.isNotEmpty()) {
+                                sender.sendMessage("§a=====Mutes Query for player ${playerToQuery.currentUsername}=====")
+                                sender.sendMessage("§a====EXPIRED====")
+                                sender.sendMessage("§a${expiredMutes.joinToString()}")
+                                sender.sendMessage("§a====PARDONED====")
+                                sender.sendMessage("§a${pardonedMutes.joinToString()}")
+                                sender.sendMessage("§a====ONGOING====")
+                                sender.sendMessage("§a${ongoingMutes.joinToString()}")
+                            } else {
+                                sender.sendMessage("§aNo mutes for player ${playerToQuery.currentUsername}")
+                            }
 
                             val bans = Main.database.queryPlayerBansByPlayerMinecraft(it)
                             val expiredBans = bans.filter { mute -> mute.expiryState == ExpiryState.Expired }.map { ban ->
@@ -65,15 +78,21 @@ class QueryRecord: CommandExecutor {
                             val ongoingBans = bans.filter { mute -> mute.expiryState == ExpiryState.OnGoing }.map { ban ->
                                 "§r§5${ban.banId}§r§a(${ban.issuedBy})"
                             }
-                            sender.sendMessage("§a=========Bans Query for player ${playerToQuery.currentUsername}=========")
-                            sender.sendMessage("§a====EXPIRED====")
-                            sender.sendMessage("§a${expiredBans.joinToString()}")
-                            sender.sendMessage("§a====PARDONED====")
-                            sender.sendMessage("§a${pardonedBans.joinToString()}")
-                            sender.sendMessage("§a====ONGOING====")
-                            sender.sendMessage("§a${ongoingBans.joinToString()}")
-                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran ${this.javaClass.name}.")
-                            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran ${this.javaClass.name}.")
+
+                            if (bans.isNotEmpty()) {
+                                sender.sendMessage("§a=========Bans Query for player ${playerToQuery.currentUsername}=========")
+                                sender.sendMessage("§a====EXPIRED====")
+                                sender.sendMessage("§a${expiredBans.joinToString()}")
+                                sender.sendMessage("§a====PARDONED====")
+                                sender.sendMessage("§a${pardonedBans.joinToString()}")
+                                sender.sendMessage("§a====ONGOING====")
+                                sender.sendMessage("§a${ongoingBans.joinToString()}")
+                            } else {
+                                sender.sendMessage("§aNo bans for player ${playerToQuery.currentUsername}")
+                            }
+
+                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran ${this.javaClass.name}.")
+                            Main.serverLogger.info("[pengcord]: User ${sender.name} ran ${this.javaClass.name}.")
 
                         }
                     }
@@ -84,8 +103,8 @@ class QueryRecord: CommandExecutor {
                             }
                             sender.sendMessage("§a=========Filter Alert Query for player ${playerToQuery.currentUsername}=========")
                             sender.sendMessage("§a${alerts.joinToString()}")
-                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran ${this.javaClass.name}.")
-                            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran ${this.javaClass.name}.")
+                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran ${this.javaClass.name}.")
+                            Main.serverLogger.info("[pengcord]: User ${sender.name} ran ${this.javaClass.name}.")
                         }
                     }
                     "warn", "warns", "w" -> {
@@ -95,8 +114,8 @@ class QueryRecord: CommandExecutor {
                             }
                             sender.sendMessage("§a=========Warns Query for player ${playerToQuery.currentUsername}=========")
                             sender.sendMessage("§a${warns.joinToString()}")
-                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                         }
                     }
                     "mute", "mutes", "m" -> {
@@ -118,8 +137,8 @@ class QueryRecord: CommandExecutor {
                             sender.sendMessage("§a${pardonedMutes.joinToString()}")
                             sender.sendMessage("§a====ONGOING====")
                             sender.sendMessage("§a${ongoingMutes.joinToString()}")
-                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                         }
                     }
                     "ban", "bans", "b" -> {
@@ -141,8 +160,8 @@ class QueryRecord: CommandExecutor {
                             sender.sendMessage("§a${pardonedBans.joinToString()}")
                             sender.sendMessage("§a====ONGOING====")
                             sender.sendMessage("§a${ongoingBans.joinToString()}")
-                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                         }
                     }
                     else -> {
@@ -152,8 +171,8 @@ class QueryRecord: CommandExecutor {
             })
             return true
         } else {
-            Main.discordBot.log(LogType.MCComamndError, "User ${sender.name()} ran `queryrecord`. Failed due to insufficient permissions.")
-            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `queryrecord`. Failed due to insufficient permissions.")
+            Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `queryrecord`. Failed due to insufficient permissions.")
+            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `queryrecord`. Failed due to insufficient permissions.")
             return false
         }
     }

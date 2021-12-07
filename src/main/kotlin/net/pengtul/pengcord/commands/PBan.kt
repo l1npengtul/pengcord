@@ -42,8 +42,8 @@ class PBan: CommandExecutor {
 
             return true
         } else {
-            Main.discordBot.log(LogType.DSCComamndError, "User ${sender.name()} ran `pban`. Failed due to insufficient permissions.")
-            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `pban`. Failed due to insufficient permissions.")
+            Main.discordBot.log(LogType.DSCComamndError, "User ${sender.name} ran `pban`. Failed due to insufficient permissions.")
+            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `pban`. Failed due to insufficient permissions.")
             return false
         }
     }

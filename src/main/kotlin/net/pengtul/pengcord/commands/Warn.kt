@@ -31,15 +31,15 @@ class Warn: CommandExecutor {
                     // else
                     Utils.warnPlayer(player.playerUUID, TypeOfUniqueID.Unknown(sender.name), reason)
 
-                    Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `warn` with ${args[0]}.")
-                    Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `warn` ${args[0]}.")
+                    Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `warn` with ${args[0]}.")
+                    Main.serverLogger.info("[pengcord]: User ${sender.name} ran `warn` ${args[0]}.")
                 }
             })
 
             return true
         } else {
-            Main.discordBot.log(LogType.MCComamndError, "User ${sender.name()} ran `warn`. Failed due to insufficient permissions.")
-            Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `warn`. Failed due to insufficient permissions.")
+            Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `warn`. Failed due to insufficient permissions.")
+            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `warn`. Failed due to insufficient permissions.")
             return false
         }
     }

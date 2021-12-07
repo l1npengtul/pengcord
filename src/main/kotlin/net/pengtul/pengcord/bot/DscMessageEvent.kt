@@ -23,10 +23,12 @@ import com.vdurmont.emoji.EmojiParser
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
+import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
-import net.kyori.adventure.text.format.TextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.pengtul.pengcord.main.Main
 import net.pengtul.pengcord.toComponent
+import net.pengtul.pengcord.toTextColor
 import org.bukkit.Bukkit
 import org.javacord.api.entity.message.Message
 import org.javacord.api.event.message.MessageCreateEvent
@@ -40,7 +42,8 @@ class DscMessageEvent: MessageCreateListener {
             if (!(msg.author.isWebhook || msg.author.isBotUser || msg.author.isYourself) && Main.serverConfig.enableSync && !msg.content.startsWith("mc!")){
                 if (msg.channel.idAsString == Main.serverConfig.botChatSyncChannel.toString()){
                     try{
-                        if (Main.discordBot.chatFilterRegex.containsMatchIn(msg.readableContent)
+                        if ((Main.discordBot.chatFilterRegex.containsMatchIn(msg.readableContent) || Main.discordBot.chatFilterRegex.containsMatchIn(
+                                msg.attachments.joinToString { "${it.fileName}(${it.url}" }))
                                 && Main.serverConfig.enableLiterallyNineteenEightyFour) {
                             msg.delete().thenAccept {
                                 Main.serverLogger.info("Removed Message: ${msg.content} / ${msg.readableContent}")
@@ -50,7 +53,9 @@ class DscMessageEvent: MessageCreateListener {
                                     user.sendMessage("You cannot say that.")
                                     Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                                         Main.database.playerGetByDiscordUUID(user.id)?.let { player ->
-                                            val matchedWords = Main.discordBot.chatFilterRegex.findAll(msg.content).joinToString()
+                                            val matchedWords = Main.discordBot.chatFilterRegex.findAll(msg.content).map {
+                                                it.value
+                                            }.joinToString()
                                             Main.database.addFilterAlertToPlayer(player.playerUUID, matchedWords, msg.content)
                                         }
                                     })
@@ -59,45 +64,82 @@ class DscMessageEvent: MessageCreateListener {
                             }
                         }
                         else {
-                            val finalComponent = "".toComponent(
-                                HoverEvent.showText("Click to reply!".toComponent()),
-                                ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/pengcord:reply ${msg.id} ")
-                            )
+                            val finalComponent = Component.text()
 
-                            val senderColor = msg.author.roleColor.orElse(Color.gray)
-                            val dscMessageHeader = "[DSC]".toComponent()
-                            dscMessageHeader.style(Style.style(TextColor.fromHexString("151515")))
-                            finalComponent.append(dscMessageHeader)
-
-                            val sender = msg.author.displayName.toComponent()
-                            sender.style(Style.style(TextColor.color(senderColor.red, senderColor.green, senderColor.blue)))
-                            finalComponent.append(sender)
-
-                            val messageContent = EmojiParser.parseToAliases(msg.readableContent).toComponent()
-                            messageContent.style(Style.style(TextColor.color(255,255,255)))
-                            finalComponent.append(messageContent)
-
+                            if (EmojiParser.parseToAliases(msg.readableContent).isNotBlank()) {
+                                finalComponent
+                                    .content("[DSC] ")
+                                    .style(Style.style(NamedTextColor.DARK_GRAY))
+                                    .append(
+                                        Component.text("${msg.author.displayName}: ")
+                                            .style(Style.style(msg.author.roleColor.orElse(Color.DARK_GRAY).toTextColor())))
+                                    .append(
+                                        Component.text(EmojiParser.parseToAliases(msg.readableContent))
+                                            .style(Style.style(NamedTextColor.DARK_GRAY))
+                                    )
+                            }
 
                             for (attachment in msg.attachments){
-                                if (attachment.isSpoiler){
+                                val attachmentComponent = Component.text()
+                                if (!attachment.isSpoiler){
                                     Main.discordBot.log(LogType.PlayerChat, "User ${msg.author.idAsString} (${msg.author.discriminatedName}) sync message `SPOILER: ${attachment.url}`.")
                                     finalComponent.append(Component.newline())
-                                    finalComponent.append(dscMessageHeader)
-                                    val attachmentComponent = Component.text(" [SPOILER]: "+attachment.url.toString())
-                                    attachmentComponent.style(Style.style(TextColor.fromHexString("151515")))
-                                    finalComponent.append(attachmentComponent)
+                                    attachmentComponent
+                                        .content("[DSC] ")
+                                        .style(Style.style()
+                                            .decorate(TextDecoration.UNDERLINED)
+                                            .color(NamedTextColor.DARK_GRAY)
+                                            .build())
+                                        .append(
+                                            Component.text("${msg.author.displayName}: ")
+                                                .style(Style.style()
+                                                    .decorate(TextDecoration.UNDERLINED)
+                                                    .color(msg.author.roleColor.orElse(Color.DARK_GRAY).toTextColor())
+                                                    .build()))
+                                        .append(
+                                            Component.text(" ${attachment.fileName}")
+                                                .style(Style.style()
+                                                    .decorate(TextDecoration.UNDERLINED)
+                                                    .color(NamedTextColor.DARK_GRAY)
+                                                    .build()))
+                                        .hoverEvent(
+                                            HoverEvent.showText("Click to open".toComponent())
+                                        )
+                                        .clickEvent(
+                                            ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, attachment.url.toString())
+                                        )
                                 }
                                 else {
                                     Main.discordBot.log(LogType.PlayerChat, "User ${msg.author.idAsString} (${msg.author.discriminatedName}) sync message `${attachment.url}`.")
-                                    finalComponent.append(Component.newline())
-                                    finalComponent.append(dscMessageHeader)
-                                    val attachmentComponent = Component.text(attachment.url.toString())
-                                    attachmentComponent.style(Style.style(TextColor.fromHexString("151515")))
-                                    finalComponent.append(attachmentComponent)
+                                    attachmentComponent
+                                        .content("[DSC] [SPOILER] ")
+                                        .style(Style.style()
+                                            .decorate(TextDecoration.UNDERLINED)
+                                            .color(NamedTextColor.DARK_GRAY)
+                                            .build())
+                                        .append(
+                                            Component.text("${msg.author.displayName}:")
+                                                .style(Style.style()
+                                                    .decorate(TextDecoration.UNDERLINED)
+                                                    .color(msg.author.roleColor.orElse(Color.DARK_GRAY).toTextColor())
+                                                    .build()))
+                                        .append(
+                                            Component.text(" ${attachment.fileName}")
+                                                .style(Style.style()
+                                                    .decorate(TextDecoration.UNDERLINED)
+                                                    .color(NamedTextColor.DARK_GRAY)
+                                                    .build()))
+                                        .hoverEvent(
+                                            HoverEvent.showText("Click to open".toComponent())
+                                        )
+                                        .clickEvent(
+                                            ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, attachment.url.toString())
+                                        )
                                 }
+                                finalComponent.append(attachmentComponent.build())
                             }
 
-                            Bukkit.broadcast(finalComponent)
+                            Bukkit.broadcast(finalComponent.build())
                         }
                     }
                     catch (e: Exception){

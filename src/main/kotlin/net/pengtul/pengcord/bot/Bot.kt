@@ -58,23 +58,21 @@ class Bot {
     init {
         this.onSucessfulConnect()
 
-        if (Main.serverConfig.webhookURL.isNullOrBlank()) {
-            // create new webhook
+        try {
+            webhook = JavacordWebhookClient.withUrl(Main.serverConfig.webhookURL.toString())
+        } catch (_: Exception) {
             Main.serverConfig.botChatSyncChannel?.let { channelId ->
                 discordApi.getServerTextChannelById(channelId).ifPresentOrElse({ channel ->
-                        webhook = JavacordWebhookClient.from(
-                            WebhookBuilder(channel)
-                                .setName("DSC-SYNC")
-                                .create()
-                                .join()
-                        )
-                    }, {
-                        throw DiscordLoginFailException("Sync Channel Cannot be null!")
-                    }
+                webhook = JavacordWebhookClient.from(
+                    WebhookBuilder(channel)
+                        .setName("DSC-SYNC")
+                        .create()
+                        .join()
                 )
+                }, {
+                    throw DiscordLoginFailException("Sync Channel Cannot be null!")
+                })
             }
-        } else {
-            webhook = JavacordWebhookClient.withUrl(Main.serverConfig.webhookURL!!)
         }
 
         Main.serverConfig.webhookURL = webhook.url
@@ -314,7 +312,8 @@ class Bot {
     }
 
     fun sendMessagetoWebhook(message: String, usrname: String, player: Player){
-        if (this::webhook.isInitialized) {
+        Main.serverLogger.info(message)
+        if (this::webhook.isInitialized && message.isNotBlank() && usrname.isNotBlank()) {
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                 val senderUsername = if (usrname.lowercase() != "clyde") usrname else "BlydE"
                 val webhookMessage = WebhookMessageBuilder()

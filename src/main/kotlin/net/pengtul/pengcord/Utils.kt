@@ -2,8 +2,12 @@ package net.pengtul.pengcord
 
 import net.kyori.adventure.audience.MessageType
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextComponent
+import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.title.Title
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.ExpiryDateTime
@@ -130,28 +134,24 @@ class Utils {
         fun queryPlayerFromString(user: String): Player? {
             // Discriminated Name
             if (user.contains("#")) {
-                val discordServerId = Main.serverConfig.botServer ?: return null
-                val maybeServer = Main.discordBot.discordApi.getServerById(discordServerId) ?: return null
+                val server = Main.discordBot.discordServer
                 lateinit var usr: User
-                maybeServer.ifPresent { server ->
-                    server.getMemberByDiscriminatedNameIgnoreCase(user).ifPresent { u ->
-                        usr = u
-                    }
+                server.getMemberByDiscriminatedName(user).ifPresent { u ->
+                    usr = u
                 }
-                return try {
-                    Main.database.playerGetByDiscordUUID(usr.id)
-                } catch (_: Exception) {
-                    null
-                }
+                return Main.database.playerGetByDiscordUUID(usr.id)
             }
             // Minecraft UUID with dash
             else if (user.contains("-")) {
-                val noDashUUID = user.replace("-", "")
-                return Main.database.playerGetByUUID(UUID.fromString(noDashUUID))
+                return Main.database.playerGetByUUID(UUID.fromString(user))
             }
-            // Discord or Minecraft UUID
-            else if (user.toIntOrNull() != null) {
-                return Main.database.playerGetByDiscordUUID(user.toLong()) ?: Main.database.playerGetByUUID(UUID.fromString(user))
+            // Discord UUID
+            else if (user.toLongOrNull() != null) {
+                return Main.database.playerGetByDiscordUUID(user.toLong())
+            }
+            // Minecraft UUID without dash
+            else if (user.length == 32) {
+                return Main.database.playerGetByUUID(UUID.fromString(Main.insertDashUUID(user)))
             }
             // Minecraft Username
             else {
@@ -649,39 +649,53 @@ class Utils {
     }
 }
 
-fun String.toComponent(): Component {
+fun String.toComponent(): TextComponent {
     return Component.text(this)
 }
 
 
-fun String.toComponentNewline(): Component {
+fun String.toComponentNewline(): TextComponent {
     return Component.text(this+"\n")
 }
 
-fun String.toComponentNewline(hover: HoverEvent<Component>): Component {
+fun String.toComponentNewline(hover: HoverEvent<Component>): TextComponent {
     val c = Component.text(this+"\n")
     c.hoverEvent(hover)
     return c
 }
 
-fun String.toComponentNewline(click: ClickEvent): Component {
+fun String.toComponentNewline(click: ClickEvent): TextComponent {
     val c = Component.text(this+"\n")
     c.clickEvent(click)
     return c
 }
 
 fun String.toComponent(hover: HoverEvent<Component>, click: ClickEvent): Component {
-    val c = Component.text(this)
-    c.clickEvent(click)
-    c.hoverEvent(hover)
-    return c
+    return Component.text().content(this)
+        .clickEvent(click)
+        .hoverEvent(hover)
+        .build()
 }
 
-fun Component.toString(): String {
-    val childrenContents = StringBuilder()
-    this.children().forEach {
-        childrenContents.append(Component.text().append(it).content())
+fun Component.toStr(): String {
+    return when (this) {
+        is TextComponent -> {
+            this.content()
+        }
+        is TranslatableComponent -> {
+            val trans = Main.translationProvider.getFormatString(this.key()) ?: ""
+            val arguments = this.args().map {
+                it.toStr()
+            }.toTypedArray()
+            trans.format(*arguments)
+        }
+        else -> {
+            ""
+        }
     }
-    return childrenContents.toString()
+}
+
+fun Color.toTextColor(): TextColor {
+    return TextColor.color(this.red, this.green, this.blue)
 }
 

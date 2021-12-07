@@ -39,8 +39,6 @@ class ServerConfig(rawConfig: FileConfiguration) {
     val discordMutedRole: Long
     val discordBanDeleteMessageDays: Int
 
-    var firstTime: Boolean
-
     init {
         enableVerify = rawConfig.getBoolean("enable-verify")
         discordServerLink = rawConfig.getString("discord-server-link")
@@ -86,7 +84,6 @@ class ServerConfig(rawConfig: FileConfiguration) {
         }
         discordBanDeleteMessageDays = days
 
-        firstTime = rawConfig.getBoolean("first-time")
     }
 
     companion object {
@@ -108,6 +105,5 @@ class ServerConfig(rawConfig: FileConfiguration) {
         rawConfig.set("bot-server", botServer)
         rawConfig.set("webhook-url", webhookURL)
         rawConfig.set("banned-words", bannedWords)
-        rawConfig.set("first-time", firstTime)
     }
 }

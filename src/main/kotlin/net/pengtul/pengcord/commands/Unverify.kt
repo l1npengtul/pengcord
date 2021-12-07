@@ -31,44 +31,28 @@ import org.bukkit.entity.Player
 
 class Unverify: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (sender is Player) {
-            if (args.isEmpty() && sender.hasPermission("pengcord.verify.undoself")) {
-                Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
-                    val player = if (args.isEmpty()) {
-                        Main.database.playerGetByCurrentName(sender.name) ?: return@Runnable
-                    } else {
-                        Main.database.playerGetByCurrentName(args[0]) ?: return@Runnable
-                    }
+        if (sender is Player && args.isEmpty() && sender.hasPermission("pengcord.verify.undoself")) {
+            Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
+                val player = Main.database.playerGetByCurrentName(sender.name) ?: return@Runnable
 
-                    unverifyPlayer(TypeOfUniqueID.MinecraftTypeOfUniqueID(player.playerUUID))
-                    Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                    Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                })
-                return true
-            }
+                unverifyPlayer(TypeOfUniqueID.MinecraftTypeOfUniqueID(player.playerUUID))
+                Main.removePlayerFromVerifiedCache(player.playerUUID)
+                Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+            })
+            return true
+        } else if (sender.hasPermission("pengcord.verify.undo") && args.isNotEmpty()) {
+            Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
+                val player = Main.database.playerGetByCurrentName(args[0]) ?: return@Runnable
 
-            else if (sender.hasPermission("pengcord.verify.undo")){
-                Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
-                    val player = if (args.isEmpty()) {
-                        Main.database.playerGetByCurrentName(sender.name) ?: return@Runnable
-                    } else {
-                        Main.database.playerGetByCurrentName(args[0]) ?: return@Runnable
-                    }
-
-                    unverifyPlayer(TypeOfUniqueID.MinecraftTypeOfUniqueID(player.playerUUID))
-
-                    Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                    Main.serverLogger.info("[pengcord]: User ${sender.name()} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                })
-                return true
-            }
-            else{
-                sender.sendMessage("§cYou do not have permission to run this command.")
-                Main.discordBot.log(LogType.MCComamndError, "User ${sender.name()} ran `unverify`. Failed due to invalid permissions.")
-                Main.serverLogger.info("[MC-COMMAND-ERROR]: User ${sender.name()} ran `unverify`. Failed due to invalid permissions.")
-                return false
-            }
+                unverifyPlayer(TypeOfUniqueID.MinecraftTypeOfUniqueID(player.playerUUID))
+                Main.removePlayerFromVerifiedCache(player.playerUUID)
+                Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+            })
+            return true
         } else {
+            sender.sendMessage("§cInvalid arguments!")
             return false
         }
     }

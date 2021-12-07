@@ -18,7 +18,11 @@ enum class LogType(val log: String) {
     PlayerUnMuted("[PL-UNMUTED]: "),
     PlayerBanned("[PL-BANNED]: "),
     PlayerUnBanned("[PL-UNBANNED]: "),
-    PlayerJoin("[PL-JOIN]"),
-    PlayerLeave("[PL-LEAVE]"),
-    PlayerDie("[PL-DIE]"),
+    PlayerJoin("[PL-JOIN]: "),
+    PlayerLeave("[PL-LEAVE]: "),
+    PlayerDie("[PL-DIE]: "),;
+
+    override fun toString(): String {
+        return this.log
+    }
 }

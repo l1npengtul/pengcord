@@ -85,7 +85,8 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         lateinit var vaultApi: Plugin
         lateinit var vaultChatApi: Chat
         private var salty: String = UUID.randomUUID().toString()
-        val verifiedPlayerCache = HashSet<UUID>()
+        private val verifiedPlayerCache = HashSet<UUID>()
+        val translationProvider = TranslationProvider()
 
         fun downloadSkin(usr: Player){
             val usrUUID: String = usr.uniqueId.toString()
@@ -124,7 +125,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         }
 
         fun getDownloadSkinURL(uuid: UUID): String {
-            return "https://minotar.net/helm/${uuid.toString()}/100.png"
+            return "https://minotar.net/helm/${uuid}/100.png"
         }
 
         fun uuidToString(uuid: UUID): String {
@@ -168,7 +169,6 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
                             pardonMute(mute, false)
                         }, Duration(DateTime.now().toInstant(), mute.expiresOn.toInstant()).toStandardSeconds().seconds * 20L)
                     }
-
                 }
             })
         }
@@ -186,7 +186,6 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
                             banPardon(ban, false)
                         }, Duration(DateTime.now().toInstant(), ban.expiresOn.toInstant()).toStandardSeconds().seconds * 20L)
                     }
-
                 }
             })
         }
@@ -290,14 +289,20 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
     }
 
     override fun onDisable() {
+        scheduler.cancelTasks(pengcord)
+        // Save player playtimes
+        playersCurrentJoinTime.forEach {
+            database.playerUpdateTimePlayed(it.key)
+        }
+
         serverConfig.saveToConfigFile(this.config)
         this.saveConfig()
+        database.close()
         try {
             discordBot.sendMessageToDiscord("Server Shutting Down! See you soon!")
             discordBot.log(LogType.ServerShutdown, "Server Shutdown initiated.")
             discordBot.cleanUpWebhook()
             discordBot.discordApi.disconnect()
-            database.close()
         } catch (_: Exception) {}
     }
 }
