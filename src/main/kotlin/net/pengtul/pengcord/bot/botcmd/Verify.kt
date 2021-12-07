@@ -1,5 +1,7 @@
 package net.pengtul.pengcord.bot.botcmd
 
+import net.kyori.adventure.key.Key
+import net.kyori.adventure.sound.Sound
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.data.interact.UpdateVerify
@@ -41,16 +43,25 @@ class Verify: JCDiscordCommandExecutor {
 
             if (Main.playersAwaitingVerification[inputKey] == bukkitPlayer.uniqueId) {
                 Main.database.playerUpdateVerify(bukkitPlayer.uniqueId, UpdateVerify.NewlyVerified(sender.id))
-                message.addReaction("\uD83C\uDF89").thenAccept {
-                    sender.sendMessage("Welcome to the Server ${bukkitPlayer.name}(${sender.getDisplayName(Main.discordBot.discordServer)})! We hope you enjoy your stay!")
-                    Main.pengcord.server.broadcast("§aWelcome ${sender.getDisplayName(Main.discordBot.discordServer)}(${bukkitPlayer.name}) to the server!".toComponent())
+                if (Main.database.playerIsVerified(TypeOfUniqueID.MinecraftTypeOfUniqueID(bukkitPlayer.uniqueId))) {
+                    message.addReaction("\uD83C\uDF89").thenAccept {
+                        sender.sendMessage("Welcome to the Server ${bukkitPlayer.name}(${sender.getDisplayName(Main.discordBot.discordServer)})! We hope you enjoy your stay!")
+                        Main.pengcord.server.broadcast("§aWelcome ${sender.getDisplayName(Main.discordBot.discordServer)}(${bukkitPlayer.name}) to the server!".toComponent())
+                        bukkitPlayer.playSound(Sound.sound(Key.key("entity.player.levelup"), Sound.Source.PLAYER, 1.0F, 1.0F))
+                        bukkitPlayer.sendMessage("§aYou were sucessfully verified!".toComponent())
+                        Main.playersAwaitingVerification.remove(inputKey)
+                        Main.insertIntoVerifiedCache(bukkitPlayer.uniqueId)
+                    }
+                } else {
+                    message.addReaction("❌").thenAccept {
+                        CommandHelper.deleteAfterSend("Could not confirm sucessful verification! Please try again in a moment!", 10, message)
+                    }
                 }
             } else {
                 message.addReaction("❌").thenAccept {
                     CommandHelper.deleteAfterSend("Make sure you join the server and ran /verify <discord name> first!", 10, message)
                 }
             }
-
         }
     }
 }

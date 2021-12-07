@@ -4,6 +4,9 @@ version: 0.0.1
 depend:
   - LuckPerms
   - Vault
+api-version: 1.18
+description: Discord <-> Minecraft Verification and Sync Plugin
+load: STARTUP
 commands:
   verify:
     description: Verify Player

@@ -13,18 +13,22 @@ import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import org.joda.time.Duration
-import java.io.File
 import java.lang.Exception
 import java.lang.IllegalArgumentException
 import java.util.*
 
 // WARNING: Every one of these must be done **inside** of a AsyncRun in bukkit!
 class UserSQL() {
-    private val database: Database = Database.connect(url = "jdbc:h2:./plugins/pengcord/data;DB_CLOSE_DELAY=-1;", driver = "org.h2.Driver")
+    private val database: Database = Database.connect(url = "jdbc:h2:./plugins/pengcord/pengcordstore;DB_CLOSE_DELAY=-1;", driver = "org.h2.Driver")
 
     init {
         transaction(database) {
-            SchemaUtils.create(Players, Warns, Mutes, Bans, FilterAlerts)
+            if (Main.serverConfig.firstTime) {
+                SchemaUtils.create(Players, Warns, Mutes, Bans, FilterAlerts)
+                Main.serverConfig.firstTime = false
+            } else {
+                SchemaUtils.createMissingTablesAndColumns(Players, Warns, Mutes, Bans, FilterAlerts)
+            }
         }
     }
 

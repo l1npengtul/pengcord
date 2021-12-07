@@ -34,8 +34,7 @@ bot-logging-channel: 0
 bot-server: 0
 
 # Webhook ID to manage. Do not edit, managed by bot
-webhook-id: 0
-webhook-token: 0
+webhook-url: 0
 
 # A list of admin roles on the Discord Server. They can run history and moderation commands
 # This should be a long number, such as 741365968336322711
@@ -48,6 +47,7 @@ enable-literally-nineteen-eighty-four: true
 # A chat filter. Case-insensitive, but won't work if you use capital letters.
 # Does not sync to discord (will ignore uses of these words in discrd. get yourself a proper moderation bot)
 # Every word **must** be less than 50 characters.
+# NOTE: ***BAD*** THINGS HAPPEN IF FILTER IS ENABLED BUT `banned-words` IS EMPTY!
 banned-words:
   - ""
 # Message to send to the user when the chat filter is triggered in Minecraft
@@ -65,3 +65,7 @@ discord-muted-role: 0
 # Delete number of days of messages
 # Must be between 0-7
 discord-onban-delete-message-days: 0
+
+# first time booting (does DB exist?)
+# Do not edit
+first-time: true

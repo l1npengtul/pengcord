@@ -19,28 +19,24 @@ package net.pengtul.pengcord.bot
  */
 
 
-import club.minnced.discord.webhook.WebhookClient
+import club.minnced.discord.webhook.external.JavacordWebhookClient
+import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import net.pengtul.pengcord.bot.botcmd.*
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandHandler
-import net.pengtul.pengcord.data.ServerConfig
 import net.pengtul.pengcord.error.DiscordLoginFailException
 import net.pengtul.pengcord.main.Main
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import org.bukkit.plugin.Plugin
 import org.javacord.api.DiscordApi
 import org.javacord.api.DiscordApiBuilder
-import org.javacord.api.entity.channel.ServerTextChannel
+import org.javacord.api.entity.activity.ActivityType
 import org.javacord.api.entity.message.embed.EmbedBuilder
+import org.javacord.api.entity.permission.PermissionType
+import org.javacord.api.entity.permission.PermissionsBuilder
 import org.javacord.api.entity.server.Server
-import org.javacord.api.entity.webhook.Webhook
+import org.javacord.api.entity.user.UserStatus
 import org.javacord.api.entity.webhook.WebhookBuilder
-import org.javacord.api.entity.webhook.WebhookUpdater
 import org.joda.time.DateTime
-import java.io.File
-import java.lang.Exception
 import java.lang.StringBuilder
-import java.util.*
 import kotlin.collections.ArrayList
 
 
@@ -53,38 +49,41 @@ class Bot {
                 throw DiscordLoginFailException("Failed to log into discord!")
             }
             .join()
-    private var webhookInit: Boolean
-    lateinit var webhook: Webhook
-    private lateinit var webhookUpdater: WebhookUpdater
-    private lateinit var webhookSender: WebhookClient
+    private lateinit var webhook: JavacordWebhookClient
     var commandHandler: JCDiscordCommandHandler
     var chatFilterRegex: Regex
     private val regex: Regex = """(§.)""".toRegex()
     lateinit var discordServer: Server
 
     init {
-        Main.serverLogger.info("aaaa")
-        Main.serverConfig.botChatSyncChannel?.let {
-            discordApi.getServerTextChannelById(
-                it
-            ).ifPresent { serverTextChannel: ServerTextChannel ->
-                this.webhook = WebhookBuilder(serverTextChannel)
-                    .setName("DSC-SYNC")
-                    .create()
-                    .join()
-                this.webhookUpdater = webhook.createUpdater()
-            }
-        }
-        Main.serverLogger.info("aaaa")
-        webhookInit = this::webhook.isInitialized && this::webhookSender.isInitialized && this::webhookUpdater.isInitialized
         this.onSucessfulConnect()
-        Main.serverLogger.info("aaaa")
+
+        if (Main.serverConfig.webhookURL.isNullOrBlank()) {
+            // create new webhook
+            Main.serverConfig.botChatSyncChannel?.let { channelId ->
+                discordApi.getServerTextChannelById(channelId).ifPresentOrElse({ channel ->
+                        webhook = JavacordWebhookClient.from(
+                            WebhookBuilder(channel)
+                                .setName("DSC-SYNC")
+                                .create()
+                                .join()
+                        )
+                    }, {
+                        throw DiscordLoginFailException("Sync Channel Cannot be null!")
+                    }
+                )
+            }
+        } else {
+            webhook = JavacordWebhookClient.withUrl(Main.serverConfig.webhookURL!!)
+        }
+
+        Main.serverConfig.webhookURL = webhook.url
+
         discordApi.addListener(DscMessageEvent())
         if (Main.serverConfig.enableCrossMinecraftDiscordModeration) {
             discordApi.addListener(DscServerMemberLeaveEvent())
             discordApi.addListener(DscServerMemberBannedEvent())
         }
-        Main.serverLogger.info("aaaa")
 
         chatFilterRegex = if (Main.serverConfig.enableLiterallyNineteenEightyFour){
             if (Main.serverConfig.bannedWords.isNotEmpty()){
@@ -95,15 +94,20 @@ class Bot {
                 regexString.deleteAt(regexString.length-1) // Drop the last |
                 Regex(regexString.toString(), RegexOption.IGNORE_CASE)
             } else {
-                Regex("(?!)", RegexOption.IGNORE_CASE)
+                Regex("", RegexOption.LITERAL)
             }
         } else {
-            Regex("(?!)", RegexOption.IGNORE_CASE)
+            Regex("", RegexOption.LITERAL)
         }
-        Main.serverLogger.info("aaaa")
+
+        this.discordApi.updateStatus(
+            UserStatus.ONLINE
+        )
+        this.discordApi.updateActivity(ActivityType.PLAYING, Main.serverConfig.botPlayingStatus)
+
         val bc : MutableList<String> = ArrayList()
-        bc.add(Main.serverConfig.botChatSyncChannel!!.toString())
-        bc.add(Main.serverConfig.botLoggingChannel!!.toString())
+        bc.add(Main.serverConfig.botChatSyncChannel.toString())
+        bc.add(Main.serverConfig.botLoggingChannel.toString())
         commandHandler = JCDiscordCommandHandler(discordApi, Main.serverConfig.botPrefix, true, bc.toList())
         // General Commands
         commandHandler.addCommand(Info())
@@ -122,21 +126,62 @@ class Bot {
         commandHandler.addCommand(Query())
         commandHandler.addCommand(QueryRecord())
         commandHandler.generateHelp()
-        Main.serverLogger.info("aaaa")
     }
 
     private fun onSucessfulConnect() {
+        if (Main.serverConfig.botServer == 0L) {
+            val permissions = PermissionsBuilder()
+                .setAllowed(PermissionType.CREATE_INSTANT_INVITE)
+                .setAllowed(PermissionType.SEND_MESSAGES)
+                .setAllowed(PermissionType.READ_MESSAGES)
+                .setAllowed(PermissionType.READ_MESSAGE_HISTORY)
+                .setAllowed(PermissionType.MANAGE_WEBHOOKS)
+                .setAllowed(PermissionType.EMBED_LINKS)
+                .setAllowed(PermissionType.ADD_REACTIONS)
+
+            if (Main.serverConfig.enableCrossMinecraftDiscordModeration) {
+                permissions.setAllowed(PermissionType.BAN_MEMBERS)
+                permissions.setAllowed(PermissionType.KICK_MEMBERS)
+                permissions.setAllowed(PermissionType.MANAGE_ROLES)
+            }
+
+            if (Main.serverConfig.enableLiterallyNineteenEightyFour) {
+                permissions.setAllowed(PermissionType.MANAGE_MESSAGES)
+            }
+
+            Main.serverLogger.info("[pengcord]: Invite to server using:")
+            Main.serverLogger.info(discordApi.createBotInvite(permissions.build()))
+            throw DiscordLoginFailException("Failed to get discord server")
+        }
         Main.serverConfig.botServer?.let {
             this.discordApi.getServerById(it).ifPresentOrElse (
                 {
                     server ->
-                    Main.serverLogger.info("[pengcord]: Invite to server using:")
-                    Main.serverLogger.info(discordApi.createBotInvite())
+                    Main.serverLogger.info("[pengcord]: Connected to discord server ${server.name}")
                     discordServer = server
                 },
                 {
+                    val permissions = PermissionsBuilder()
+                        .setAllowed(PermissionType.CREATE_INSTANT_INVITE)
+                        .setAllowed(PermissionType.SEND_MESSAGES)
+                        .setAllowed(PermissionType.READ_MESSAGES)
+                        .setAllowed(PermissionType.READ_MESSAGE_HISTORY)
+                        .setAllowed(PermissionType.MANAGE_WEBHOOKS)
+                        .setAllowed(PermissionType.EMBED_LINKS)
+                        .setAllowed(PermissionType.ADD_REACTIONS)
+
+                    if (Main.serverConfig.enableCrossMinecraftDiscordModeration) {
+                        permissions.setAllowed(PermissionType.BAN_MEMBERS)
+                        permissions.setAllowed(PermissionType.KICK_MEMBERS)
+                        permissions.setAllowed(PermissionType.MANAGE_ROLES)
+                    }
+
+                    if (Main.serverConfig.enableLiterallyNineteenEightyFour) {
+                        permissions.setAllowed(PermissionType.MANAGE_MESSAGES)
+                    }
+
                     Main.serverLogger.info("[pengcord]: Invite to server using:")
-                    Main.serverLogger.info(discordApi.createBotInvite())
+                    Main.serverLogger.info(discordApi.createBotInvite(permissions.build()))
                     throw DiscordLoginFailException("Failed to get discord server")
                 }
             )
@@ -151,7 +196,7 @@ class Bot {
         Main.serverConfig.botChatSyncChannel?.let {
             discordApi.getTextChannelById(it).ifPresent { channel ->
                 if (!regex.replace(message,"").startsWith("[DSC]")){
-                    channel.sendMessage("${Main.serverConfig.botPrefix}${regex.replace(message,"")}")
+                    channel.sendMessage(regex.replace(message,""))
                 }
             }
         }
@@ -165,7 +210,7 @@ class Bot {
         Main.serverConfig.botChatSyncChannel?.let {
             discordApi.getTextChannelById(it).ifPresent { channel ->
                 if (!regex.replace(message,"").startsWith("[DSC]")){
-                    channel.sendMessage("[GAME]: ${Main.serverConfig.botPrefix}${regex.replace(message,"")}")
+                    channel.sendMessage("[GAME]: ${regex.replace(message,"")}")
                 }
             }
         }
@@ -179,7 +224,7 @@ class Bot {
         Main.serverConfig.botChatSyncChannel?.let {
             discordApi.getTextChannelById(it).ifPresent { channel ->
                 if (!regex.replace(message,"").startsWith("[DSC]")){
-                    channel.sendMessage("[GAME]: ${Main.serverConfig.botPrefix}${regex.replace(message,"")}")
+                    channel.sendMessage("[GAME]: ${regex.replace(message,"")}")
                 }
             }
         }
@@ -193,7 +238,7 @@ class Bot {
         Main.serverConfig.botChatSyncChannel?.let {
             discordApi.getTextChannelById(it).ifPresent { channel ->
                 if (!regex.replace(message,"").startsWith("[DSC]")){
-                    channel.sendMessage("[BROADCAST]: ${Main.serverConfig.botPrefix}${regex.replace(message,"")}")
+                    channel.sendMessage("[BROADCAST]: ${regex.replace(message,"")}")
                 }
             }
         }
@@ -269,28 +314,21 @@ class Bot {
     }
 
     fun sendMessagetoWebhook(message: String, usrname: String, player: Player){
-        if(webhookInit){
-            val currentPlugin: Plugin? = Bukkit.getServer().pluginManager.getPlugin("pengcord")
-            currentPlugin?.let {
-                Bukkit.getScheduler().runTaskAsynchronously(currentPlugin, Runnable {
-                    val msg: String = message
-                    webhookUpdater = if (usrname.lowercase(Locale.getDefault()) == "clyde"){
-                        webhookUpdater.setName("cly de")
-                    } else {
-                        webhookUpdater.setName(usrname)
-                    }
-                    try {
-                        webhookUpdater.setAvatar(File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${player.uniqueId}.png"))
-                    }
-                    catch (e: Exception){
-                        Main.serverLogger.severe("Failed to get PlayerIcon for player ${player.name}: Exception $e")
-                    }
-                    webhook = webhookUpdater.update().join()
-
-                    this.webhookSender.send(msg)
-                })
-            }
+        if (this::webhook.isInitialized) {
+            Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
+                val senderUsername = if (usrname.lowercase() != "clyde") usrname else "BlydE"
+                val webhookMessage = WebhookMessageBuilder()
+                    .setUsername(senderUsername)
+                    .setAvatarUrl(Main.getDownloadSkinURL(player.uniqueId))
+                    .setContent(message)
+                    .build()
+                webhook.send(webhookMessage)
+            })
         }
+    }
+
+    fun cleanUpWebhook() {
+        this.webhook.close()
     }
 }
 

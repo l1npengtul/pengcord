@@ -10,7 +10,6 @@ import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.server.BroadcastMessageEvent
 import org.bukkit.event.player.*
 import org.joda.time.DateTime
-import java.util.*
 import kotlin.collections.HashMap
 
 /*
@@ -35,13 +34,16 @@ import kotlin.collections.HashMap
 class Event : Listener{
     @EventHandler
     fun onPlayerPreLogin(event: AsyncPlayerPreLoginEvent) {
-        if (Main.serverConfig.enableLiterallyNineteenEightyFour) {
-            if (Main.discordBot.chatFilterRegex.containsMatchIn(event.name.lowercase())) {
+        if (Main.serverConfig.enableLiterallyNineteenEightyFour && Main.serverConfig.bannedWords.isNotEmpty()) {
+            if (Main.discordBot.chatFilterRegex.containsMatchIn(event.name.lowercase()) &&  Main.serverConfig.bannedWords.isNotEmpty()) {
                 event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, "Please change your minecraft username!".toComponent())
             } else {
                 event.allow()
             }
         }
+        Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
+            Main.insertIntoVerifiedCache(event.uniqueId)
+        })
     }
 
     // Player Leave/Join
@@ -72,9 +74,11 @@ class Event : Listener{
 
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                 Main.database.playerUpdateTimePlayed(event.player.uniqueId)
+                Main.removePlayerFromVerifiedCache(event.player.uniqueId)
             })
         }
     }
+
     @EventHandler
     fun onPlayerKickEvent(event: PlayerKickEvent){
         Main.playersAwaitingVerification = Main.playersAwaitingVerification.filterValues { v ->
@@ -94,72 +98,81 @@ class Event : Listener{
 
     // Chat Events
     @EventHandler
-    fun onPlayerChatEvent(event: AsyncChatEvent){
-        var playerVerified = false
-        var playerMuted = false
+    fun onPlayerChatEvent(event: AsyncChatEvent) {
         Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
-            playerVerified = Main.database.playerIsVerified(TypeOfUniqueID.MinecraftTypeOfUniqueID(
-                event.player.uniqueId
-            ))
-            playerMuted = Main.database.checkIfPlayerMuted(event.player.uniqueId)
-        })
-
-        if (!playerVerified) {
-            Main.discordBot.log(LogType.Verification, "<${event.player.name}> Attempted to say \" ${event.message()} \"" +
-                    "\nbut user is not verified!")
-            Main.serverLogger.info(
-                "[MC-EVENT-PLAYERCHAT]: <${event.player.name}> Attempted to say \" ${event.message()} \"" +
-                        "\nbut user is not verified!"
-            )
-            event.isCancelled = true
-            return
-        }
-
-        if (playerMuted) {
-            Main.discordBot.log(LogType.PlayerMuted, "<${event.player.name}> Attempted to say \" ${event.message()} \"" +
-                    "\nbut user is muted!")
-            Main.serverLogger.info("[MC-EVENT-PLAYERCHAT]: <${event.player.name}> Attempted to say \" ${event.message()} \"" +
-                    "\nbut user is muted!" )
-            event.isCancelled = true
-            return
-        }
-
-        if (Main.serverConfig.enableSync) {
-            if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message().toString().lowercase(Locale.getDefault()))){
-                val prefix = Main.vaultChatApi.getPlayerPrefix(event.player)
-                Main.discordBot.sendMessagetoWebhook(
-                    event.message().toString(),
-                    "[${prefix}] ${event.player.displayName()}",
-                    event.player
+            if (!Main.database.playerIsVerified(TypeOfUniqueID.MinecraftTypeOfUniqueID(event.player.uniqueId))) {
+                Main.discordBot.log(LogType.Verification, "<${event.player.name}> Attempted to say \" ${event.message()} \"" +
+                        "\nbut user is not verified!")
+                Main.serverLogger.info(
+                    "[MC-EVENT-PLAYERCHAT]: <${event.player.name}> Attempted to say \" ${event.message()} \"" +
+                            "\nbut user is not verified!"
                 )
-                Main.discordBot.log(LogType.PlayerChat, "<${event.player.name}> ${event.message()}")
-            }
-            else {
-                event.player.sendMessage(Main.serverConfig.filteredMessage)
-                Main.discordBot.log(LogType.ChatFilter, "User ${event.player.name} (${event.player.uniqueId }) tripped chat filter with message ${event.message()}")
-                val matchedWords = Main.discordBot.chatFilterRegex.findAll(event.message().toString().lowercase()).joinToString()
-                Main.database.addFilterAlertToPlayer(player = event.player.uniqueId, w = matchedWords, event.message().toString()).onFailure { exception ->
-                    Main.serverLogger.warning("[ChatFilter] [SQLError]: Failed to add filter alert to ${event.player.name} (${event.player.uniqueId }) due to error: $exception")
-                    Main.discordBot.log(LogType.GenericError, "Failed to add filter alert to ${event.player.name} (${event.player.uniqueId }) due to error: $exception")
-                }
                 event.isCancelled = true
+                return@Runnable
             }
-        }
 
+            if (Main.database.checkIfPlayerMuted(event.player.uniqueId)) {
+                Main.discordBot.log(LogType.PlayerMuted, "<${event.player.name}> Attempted to say \" ${event.message()} \"" +
+                        "\nbut user is muted!")
+                Main.serverLogger.info("[MC-EVENT-PLAYERCHAT]: <${event.player.name}> Attempted to say \" ${event.message()} \"" +
+                        "\nbut user is muted!" )
+                event.isCancelled = true
+                return@Runnable
+            }
 
+            if (Main.serverConfig.enableSync) {
+                if (Main.serverConfig.enableLiterallyNineteenEightyFour) {
+                    if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message().toString().lowercase())){
+                        val prefix = Main.vaultChatApi.getPlayerPrefix(event.player)
+                        Main.discordBot.sendMessagetoWebhook(
+                            event.message().toString(),
+                            "[${prefix}] ${event.player.displayName()}",
+                            event.player
+                        )
+                        Main.discordBot.log(LogType.PlayerChat, "<${event.player.name}> ${event.message()}")
+                    }
+                    else if (Main.serverConfig.bannedWords.isNotEmpty()){
+                        event.player.sendMessage(Main.serverConfig.filteredMessage)
+                        Main.discordBot.log(LogType.ChatFilter, "User ${event.player.name} (${event.player.uniqueId }) tripped chat filter with message ${event.message()}")
+                        val matchedWords = Main.discordBot.chatFilterRegex.findAll(event.message().toString().lowercase()).joinToString()
+                        Main.database.addFilterAlertToPlayer(player = event.player.uniqueId, w = matchedWords, event.message().toString()).onFailure { exception ->
+                            Main.serverLogger.warning("[ChatFilter] [SQLError]: Failed to add filter alert to ${event.player.name} (${event.player.uniqueId }) due to error: $exception")
+                            Main.discordBot.log(LogType.GenericError, "Failed to add filter alert to ${event.player.name} (${event.player.uniqueId }) due to error: $exception")
+                        }
+                        event.isCancelled = true
+                    }
+                } else {
+                    val prefix = Main.vaultChatApi.getPlayerPrefix(event.player)
+                    Main.discordBot.sendMessagetoWebhook(
+                        event.message().toString(),
+                        "[${prefix}] ${event.player.displayName()}",
+                        event.player
+                    )
+                    Main.discordBot.log(LogType.PlayerChat, "<${event.player.name}> ${event.message()}")
+                }
+            }
+        })
     }
+
     @EventHandler
     fun onBroadcastChatEvent(event: BroadcastMessageEvent){
         if (Main.serverConfig.enableSync){
-            if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message().toString())){
+            if (Main.serverConfig.enableLiterallyNineteenEightyFour) {
+                if (!Main.discordBot.chatFilterRegex.containsMatchIn(event.message().toString())){
+                    Main.discordBot.log(LogType.Announcement, "${event.message()}.")
+                    Main.discordBot.sendMessageToDiscordAnnouncement(event.message().toString())
+                    event.isCancelled = false
+                }
+                else if (Main.serverConfig.bannedWords.isNotEmpty()) {
+                    Main.discordBot.log(LogType.Announcement, "Message of unknown origin (Message Broadcast) tripped chat filter with message ${event.message()}.")
+                    Main.serverLogger.info("[ChatFilter]: Message of unknown origin (Message Broadcast) tripped chat filter with message ${event.message()}.")
+                    event.isCancelled = true
+                }
+            } else {
                 Main.discordBot.log(LogType.Announcement, "${event.message()}.")
                 Main.discordBot.sendMessageToDiscordAnnouncement(event.message().toString())
                 event.isCancelled = false
-            }
-            else {
-                Main.discordBot.log(LogType.Announcement, "Message of unknown origin (Message Broadcast) tripped chat filter with message ${event.message()}.")
-                Main.serverLogger.info("[ChatFilter]: Message of unknown origin (Message Broadcast) tripped chat filter with message ${event.message()}.")
-                event.isCancelled = true
+
             }
         }
     }
@@ -180,13 +193,23 @@ class Event : Listener{
     @EventHandler
     fun onPlayerMoveEvent(event: PlayerMoveEvent){
         if (Main.serverConfig.enableVerify){
-            if (!Main.database.playerIsVerified(TypeOfUniqueID.MinecraftTypeOfUniqueID(event.player.uniqueId))) {
+            if (Main.checkIfPlayerVerifiedCache(event.player.uniqueId)) {
                 event.player.sendMessage("§cYou are not verified! Do `/verify <discord tag>` to start!")
                 event.player.sendMessage("§ce.g. /verify clyde#0000 (replace clyde#0000 with your own discord username and tag)")
                 if (!event.player.isInvulnerable) {
                     event.player.isInvulnerable = true
                 }
+                if (!event.player.isInvisible) {
+                    event.player.isInvisible = true
+                }
                 event.isCancelled = true
+            } else {
+                if (event.player.isInvulnerable) {
+                    event.player.isInvulnerable = false
+                }
+                if (event.player.isInvisible) {
+                    event.player.isInvisible = false
+                }
             }
         }
     }
@@ -195,13 +218,23 @@ class Event : Listener{
     @EventHandler
     fun onPlayerInteractEvent(event: PlayerInteractEvent){
         if (Main.serverConfig.enableVerify){
-            if (!Main.database.playerIsVerified(TypeOfUniqueID.MinecraftTypeOfUniqueID(event.player.uniqueId))) {
+            if (Main.checkIfPlayerVerifiedCache(event.player.uniqueId)) {
                 event.player.sendMessage("§cYou are not verified! Do `/verify <discord tag>` to start!")
                 event.player.sendMessage("§ce.g. /verify clyde#0000 (replace clyde#0000 with your own discord username and tag)")
                 if (!event.player.isInvulnerable) {
                     event.player.isInvulnerable = true
                 }
+                if (!event.player.isInvisible) {
+                    event.player.isInvisible = true
+                }
                 event.isCancelled = true
+            } else {
+                if (event.player.isInvulnerable) {
+                    event.player.isInvulnerable = false
+                }
+                if (event.player.isInvisible) {
+                    event.player.isInvisible = false
+                }
             }
         }
     }

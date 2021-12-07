@@ -27,8 +27,7 @@ class ServerConfig(rawConfig: FileConfiguration) {
     var botServer: Long?
 
     // Bot-Managed Discord Settings
-    var webhookId: Long?
-    var webhookToken: Long?
+    var webhookURL: String?
 
     // Word Filter Settings
     val enableLiterallyNineteenEightyFour: Boolean
@@ -39,6 +38,8 @@ class ServerConfig(rawConfig: FileConfiguration) {
     val enableCrossMinecraftDiscordModeration: Boolean
     val discordMutedRole: Long
     val discordBanDeleteMessageDays: Int
+
+    var firstTime: Boolean
 
     init {
         enableVerify = rawConfig.getBoolean("enable-verify")
@@ -61,8 +62,7 @@ class ServerConfig(rawConfig: FileConfiguration) {
         botBioText = rawConfig.getString("bot-bio-text") ?:  "A link between worlds..."
         botPlayingStatus = rawConfig.getString("bot-playing-status") ?: "Vanguard of the Minecraft Server"
 
-        webhookId = rawConfig.getLong("webhook-id")
-        webhookToken = rawConfig.getLong("webhook-token")
+        webhookURL = rawConfig.getString("webhook-url")
 
         enableLiterallyNineteenEightyFour = rawConfig.getBoolean("enable-literally-nineteen-eighty-four")
         val banWords = rawConfig.getStringList("banned-words")
@@ -71,7 +71,9 @@ class ServerConfig(rawConfig: FileConfiguration) {
                 throw IllegalArgumentException("One word is greater than 50 character!")
             }
         }
-        bannedWords = banWords
+        bannedWords = banWords.filter {
+            it.length < 50 && it.isNotBlank()
+        }
         filteredMessage = rawConfig.getString("filtered-message") ?: "§c§oSorry, but you are not allowed to say that as it violates our rules."
 
         enableCrossMinecraftDiscordModeration = rawConfig.getBoolean("enable-bot-moderation-features")
@@ -83,6 +85,8 @@ class ServerConfig(rawConfig: FileConfiguration) {
             days = 0
         }
         discordBanDeleteMessageDays = days
+
+        firstTime = rawConfig.getBoolean("first-time")
     }
 
     companion object {
@@ -102,8 +106,8 @@ class ServerConfig(rawConfig: FileConfiguration) {
         rawConfig.set("bot-command-channel", botCommandChannel)
         rawConfig.set("bot-logging-channel", botLoggingChannel)
         rawConfig.set("bot-server", botServer)
-        rawConfig.set("webhook-id", webhookId)
-        rawConfig.set("webhook-token", webhookToken)
-        rawConfig.set("banned-words", this.bannedWords)
+        rawConfig.set("webhook-url", webhookURL)
+        rawConfig.set("banned-words", bannedWords)
+        rawConfig.set("first-time", firstTime)
     }
 }

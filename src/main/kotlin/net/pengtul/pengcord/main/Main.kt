@@ -30,6 +30,7 @@ import net.pengtul.pengcord.commands.*
 import net.pengtul.pengcord.data.ServerConfig
 import net.pengtul.pengcord.data.UserSQL
 import net.pengtul.pengcord.data.interact.ExpiryState
+import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandExecutor
 import org.bukkit.configuration.file.FileConfiguration
@@ -50,6 +51,7 @@ import java.util.*
 import java.util.logging.Level
 import javax.imageio.ImageIO
 import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 
 typealias MinecraftId = UUID
 
@@ -83,6 +85,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         lateinit var vaultApi: Plugin
         lateinit var vaultChatApi: Chat
         private var salty: String = UUID.randomUUID().toString()
+        val verifiedPlayerCache = HashSet<UUID>()
 
         fun downloadSkin(usr: Player){
             val usrUUID: String = usr.uniqueId.toString()
@@ -118,6 +121,10 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
                 return null
             }
             return pngFile
+        }
+
+        fun getDownloadSkinURL(uuid: UUID): String {
+            return "https://minotar.net/helm/${uuid.toString()}/100.png"
         }
 
         fun uuidToString(uuid: UUID): String {
@@ -182,6 +189,23 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
 
                 }
             })
+        }
+
+        fun insertIntoVerifiedCache(uuid: UUID) {
+            if (database.playerIsVerified(TypeOfUniqueID.MinecraftTypeOfUniqueID(uuid))) {
+                verifiedPlayerCache.add(uuid)
+            }
+        }
+
+        fun checkIfPlayerVerifiedCache(uuid: UUID): Boolean {
+            if (verifiedPlayerCache.contains(uuid)) {
+                return true
+            }
+            return false
+        }
+
+        fun removePlayerFromVerifiedCache(uuid: UUID) {
+            verifiedPlayerCache.remove(uuid)
         }
     }
 
@@ -266,12 +290,14 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
     }
 
     override fun onDisable() {
-        database.close()
-        discordBot.sendMessageToDiscord("Server Shutting Down! See you soon!")
-        discordBot.log(LogType.ServerShutdown, "Server Shutdown initiated.")
-        discordBot.webhook.delete().join()
-        discordBot.discordApi.disconnect()
         serverConfig.saveToConfigFile(this.config)
         this.saveConfig()
+        try {
+            discordBot.sendMessageToDiscord("Server Shutting Down! See you soon!")
+            discordBot.log(LogType.ServerShutdown, "Server Shutdown initiated.")
+            discordBot.cleanUpWebhook()
+            discordBot.discordApi.disconnect()
+            database.close()
+        } catch (_: Exception) {}
     }
 }

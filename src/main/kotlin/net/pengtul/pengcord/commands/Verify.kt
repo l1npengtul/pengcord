@@ -7,7 +7,6 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.main.Main
-import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -63,7 +62,7 @@ class Verify: CommandExecutor {
                                         )
                                     )
 
-                                sender.sendMessage(message.content())
+                                sender.sendMessage(message)
 
                                 Main.discordBot.log(
                                     LogType.MCComamndRan,
