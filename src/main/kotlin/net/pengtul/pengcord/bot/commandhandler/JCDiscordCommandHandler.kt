@@ -32,7 +32,7 @@ class JCDiscordCommandHandler(api: DiscordApi, prefix: String, autoHelp: Boolean
     }
 
     fun addCommand(command: JCDiscordCommandExecutor){
-        Main.serverConfig.botCommandChannel?.let { channelId ->
+        Main.serverConfig.botCommandChannel.forEach { channelId ->
             this.discordApi.getTextChannelById(channelId)?.ifPresent { textChannel ->
                 if (!commandMap.containsKey(command)){
                     val commandListener = JCDiscordCommandEvent(commandPrefix, command.commandName, command, allowedCommandChannels)

@@ -30,6 +30,8 @@ import net.pengtul.pengcord.main.Main
 import net.pengtul.pengcord.toComponent
 import net.pengtul.pengcord.toTextColor
 import org.bukkit.Bukkit
+import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
+import org.intellij.markdown.parser.MarkdownParser
 import org.javacord.api.entity.message.Message
 import org.javacord.api.event.message.MessageCreateEvent
 import org.javacord.api.listener.message.MessageCreateListener
@@ -66,8 +68,11 @@ class DscMessageEvent: MessageCreateListener {
                         else {
                             // TODO: Parse Markdown
                             val finalComponent = Component.text()
+                            val textToSend = EmojiParser.parseToAliases(msg.readableContent)
+                            if (textToSend.isNotBlank()) {
+                                var textSendComponent = Component.text()
+                                Main.markdownParser.parse(textToSend).
 
-                            if (EmojiParser.parseToAliases(msg.readableContent).isNotBlank()) {
                                 finalComponent
                                     .content("[DSC] ")
                                     .style(Style.style(NamedTextColor.DARK_GRAY))

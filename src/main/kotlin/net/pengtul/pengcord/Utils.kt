@@ -154,8 +154,41 @@ class Utils {
                 return Main.database.playerGetByUUID(UUID.fromString(Main.insertDashUUID(user)))
             }
             // Minecraft Username
-            else {
+            else if (user.length >= 3 || user.length <= 16){
                 return Main.database.playerGetByCurrentName(user)
+            }
+            // Minecraft/Discord format issuer string
+            // Minecraft Issuer: M [username-16] [uuid-32]
+            // Discord Issuer: D [username-32]#[discriminator-4] [long-20]
+            else if (user.startsWith("M ") || user.startsWith("D ")) {
+                val parts = user.split(" ")
+                return if (parts.size == 3) {
+                    queryPlayerFromString(parts[2])
+                } else {
+                    null
+                }
+            }
+            else if (user.startsWith("U ")) {
+                val parts = user.split(" ")
+                return if (parts.size >= 2) {
+                    queryPlayerFromString(parts[1])
+                } else {
+                    null
+                }
+            }
+            else {
+                return null
+            }
+        }
+
+        fun timeToOrSinceDateTime(dateTime: DateTime): String {
+            val now = DateTime.now()
+            return if (dateTime.isAfterNow) {
+                val difference = Duration(now.toInstant(), dateTime.toInstant()).toPeriod()
+                "Time to $dateTime (HH:MM:SS): ${Main.periodFormatter.print(difference)}"
+            } else {
+                val difference = Duration(dateTime.toInstant(), now.toInstant()).toPeriod()
+                "Time Since $dateTime (HH:MM:SS): ${Main.periodFormatter.print(difference)}"
             }
         }
 
@@ -650,24 +683,16 @@ class Utils {
 }
 
 fun String.toComponent(): TextComponent {
-    return Component.text(this)
+    return Component.text().content(this).build()
 }
 
-
-fun String.toComponentNewline(): TextComponent {
-    return Component.text(this+"\n")
-}
-
-fun String.toComponentNewline(hover: HoverEvent<Component>): TextComponent {
-    val c = Component.text(this+"\n")
-    c.hoverEvent(hover)
-    return c
+fun String.toComponent(hover: HoverEvent<Component>): TextComponent {
+    return Component.text().content(this).hoverEvent(hover).build()
 }
 
 fun String.toComponentNewline(click: ClickEvent): TextComponent {
-    val c = Component.text(this+"\n")
-    c.clickEvent(click)
-    return c
+    return Component.text().content(this).clickEvent(click).build()
+
 }
 
 fun String.toComponent(hover: HoverEvent<Component>, click: ClickEvent): Component {

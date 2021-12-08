@@ -3,6 +3,7 @@ package net.pengtul.pengcord.commands
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
 import net.pengtul.pengcord.Utils.Companion.queryPlayerFromString
+import net.pengtul.pengcord.Utils.Companion.timeToOrSinceDateTime
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.main.Main
@@ -54,14 +55,14 @@ class WhoIs: CommandExecutor {
 
                         if (dbPlayer.firstJoinDateTime != Main.neverHappenedDateTime) {
                             sender.sendMessage("§aFirst Join Date Time: ${dbPlayer.firstJoinDateTime}".toComponent(
-                                HoverEvent.showText("Click to copy!".toComponent()),
+                                HoverEvent.showText(timeToOrSinceDateTime(dbPlayer.firstJoinDateTime).toComponent()),
                                 ClickEvent.clickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, dbPlayer.firstJoinDateTime.toString())
                             ))
                         }
 
                         if (dbPlayer.verifiedDateTime != Main.neverHappenedDateTime) {
                             sender.sendMessage("§aLatest Verification Date Time: ${dbPlayer.verifiedDateTime}".toComponent(
-                                HoverEvent.showText("Click to copy!".toComponent()),
+                                HoverEvent.showText(timeToOrSinceDateTime(dbPlayer.verifiedDateTime).toComponent()),
                                 ClickEvent.clickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, dbPlayer.verifiedDateTime.toString())
                             ))
                         }
@@ -73,19 +74,19 @@ class WhoIs: CommandExecutor {
 
                         if (sender.hasPermission("pengcord.punishments.query")) {
                             sender.sendMessage("§a# Of Filter Alerts: ${playerFilterAlerts.count()}".toComponent(
-                                HoverEvent.showText("Click to copy!".toComponent()),
-                                ClickEvent.clickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, playerFilterAlerts.count().toString())
+                                HoverEvent.showText("Click to query!".toComponent()),
+                                ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/pengcord:queryrecord f ${dbPlayer.playerUUID}")
                             ))
 
                             sender.sendMessage("§a# Of Warns: ${playerWarns.count()}".toComponent(
-                                HoverEvent.showText("Click to copy!".toComponent()),
-                                ClickEvent.clickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, playerWarns.count().toString())
+                                HoverEvent.showText("Click to query!".toComponent()),
+                                ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/pengcord:queryrecord w ${dbPlayer.playerUUID}")
                             ))
 
 
                             sender.sendMessage("§aBanned Status: ${dbPlayer.isBanned}".toComponent(
-                                HoverEvent.showText("Click to copy!".toComponent()),
-                                ClickEvent.clickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, dbPlayer.isBanned.toString())
+                                HoverEvent.showText("Click to query!".toComponent()),
+                                ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/pengcord:queryrecord b ${dbPlayer.playerUUID}")
                             ))
 
                             sender.sendMessage("§a# Of Bans: ${activePlayerBans.count()} active, ${playerBans.count()} total".toComponent(
@@ -94,8 +95,8 @@ class WhoIs: CommandExecutor {
                             ))
 
                             sender.sendMessage("§aMuted Status: ${dbPlayer.isMuted}".toComponent(
-                                HoverEvent.showText("Click to copy!".toComponent()),
-                                ClickEvent.clickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, dbPlayer.isMuted.toString())
+                                HoverEvent.showText("Click to query!".toComponent()),
+                                ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/pengcord:queryrecord m ${dbPlayer.playerUUID}")
                             ))
 
                             sender.sendMessage("§a# Of Mutes: ${activePlayerMutes.count()} active, ${playerMutes.count()} total".toComponent(

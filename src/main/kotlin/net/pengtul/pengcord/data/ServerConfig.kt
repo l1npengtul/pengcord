@@ -22,7 +22,7 @@ class ServerConfig(rawConfig: FileConfiguration) {
     val serverMessagePrefix: String
     var discordAdminRoles: List<Long>
     var botChatSyncChannel: Long?
-    var botCommandChannel: Long?
+    var botCommandChannel: List<Long>
     var botLoggingChannel: Long?
     var botServer: Long?
 
@@ -54,7 +54,7 @@ class ServerConfig(rawConfig: FileConfiguration) {
         serverMessagePrefix = "${rawConfig.getString("server-message-prefix") ?: "[Server]:"} "
         discordAdminRoles = rawConfig.getList("discord-admin-roles")?.mapNotNull { it?.toString()?.toLong() } ?: emptyList()
         botChatSyncChannel = rawConfig.getLong("bot-chat-sync-channel")
-        botCommandChannel = rawConfig.getLong("bot-command-channel")
+        botCommandChannel = rawConfig.getList("bot-command-channel")?.mapNotNull { it?.toString()?.toLong() } ?: emptyList()
         botLoggingChannel = rawConfig.getLong("bot-logging-channel")
         botServer = rawConfig.getLong("bot-server")
         botBioText = rawConfig.getString("bot-bio-text") ?:  "A link between worlds..."

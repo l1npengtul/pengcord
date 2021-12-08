@@ -8,8 +8,8 @@ group 'net.pengtul.pengcord'
 version '2.0-SNAPSHOT'
 
 repositories {
-    mavenCentral()
     maven {
+    mavenCentral()
         url "https://papermc.io/repo/repository/maven-public/"
     }
     maven { url 'https://jitpack.io' }
@@ -28,6 +28,7 @@ dependencies {
     implementation 'io.michaelrocks.bimap:bimap:1.1.0'
     implementation 'com.vdurmont:emoji-java:5.1.1'
     implementation "net.kyori:adventure-api:4.9.3"
+    implementation 'com.vladsch.flexmark:flexmark-all:0.62.2'
     compileOnly "io.papermc.paper:paper-api:1.18-R0.1-SNAPSHOT"
     compileOnly "com.github.MilkBowl:VaultAPI:1.7"
 }

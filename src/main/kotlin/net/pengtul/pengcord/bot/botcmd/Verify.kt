@@ -2,11 +2,14 @@ package net.pengtul.pengcord.bot.botcmd
 
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.sound.Sound
+import net.kyori.adventure.text.event.ClickEvent
+import net.kyori.adventure.text.event.HoverEvent
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.data.interact.UpdateVerify
 import net.pengtul.pengcord.main.Main
 import net.pengtul.pengcord.toComponent
+import net.pengtul.pengcord.toComponentNewline
 import org.bukkit.Bukkit
 import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.user.User
@@ -46,7 +49,10 @@ class Verify: JCDiscordCommandExecutor {
                 if (Main.database.playerIsVerified(TypeOfUniqueID.MinecraftTypeOfUniqueID(bukkitPlayer.uniqueId))) {
                     message.addReaction("\uD83C\uDF89").thenAccept {
                         sender.sendMessage("Welcome to the Server ${bukkitPlayer.name}(${sender.getDisplayName(Main.discordBot.discordServer)})! We hope you enjoy your stay!")
-                        Main.pengcord.server.broadcast("§aWelcome ${sender.getDisplayName(Main.discordBot.discordServer)}(${bukkitPlayer.name}) to the server!".toComponent())
+                        Main.pengcord.server.broadcast("§aWelcome ${sender.getDisplayName(Main.discordBot.discordServer)}(${bukkitPlayer.name}) to the server!".toComponent(
+                            HoverEvent.showText("/tell ${bukkitPlayer.name}".toComponent()),
+                            ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tell ${bukkitPlayer.name}")
+                        ))
                         bukkitPlayer.playSound(Sound.sound(Key.key("entity.player.levelup"), Sound.Source.PLAYER, 1.0F, 1.0F))
                         bukkitPlayer.sendMessage("§aYou were sucessfully verified!".toComponent())
                         Main.playersAwaitingVerification.remove(inputKey)

@@ -27,9 +27,11 @@ filter_announcements: false
 # What server broadcasts will be prefixed with. The space at the end is automatically appended.
 server-message-prefix: "[Server]:"
 
-# Channels for the bot, do not edit (unless you know what you are doing)
+# Channels for the bot, copy and paste desired channels here
+# You may have multiple command channels.
 bot-chat-sync-channel: 0
-bot-command-channel: 0
+bot-command-channels:
+  - 0
 bot-logging-channel: 0
 bot-server: 0
 

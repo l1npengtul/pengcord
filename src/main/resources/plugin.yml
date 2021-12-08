@@ -64,9 +64,9 @@ commands:
     description: Query punishment history of a player. b -> Bans, m -> Mutes, w -> Warns, f -> Filter Alerts, a -> All
     usage: /queryrecord <b|m|w|f|a> <player>
     permission: pengcord.punishments.query
-  query:
+  querypunishment:
     description: Query a specific punishment. b -> Bans, m -> Mutes, w -> Warns, f -> Filter Alerts,
-    usage: /query <b|m|w|f> <punishmentId>
+    usage: /querypunishment <b|m|w|f> <punishmentId>
     permission: pengcord.punishments.query
 
 permissions:

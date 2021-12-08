@@ -21,6 +21,12 @@ package net.pengtul.pengcord.main
 // If you're reviewing this, or have to read this
 // I'm sorry.
 
+import com.vladsch.flexmark.ext.tables.TablesExtension
+import com.vladsch.flexmark.html.HtmlRenderer
+import com.vladsch.flexmark.parser.Parser
+import com.vladsch.flexmark.util.ast.KeepType
+import com.vladsch.flexmark.util.data.DataHolder
+import com.vladsch.flexmark.util.data.MutableDataSet
 import net.milkbowl.vault.chat.Chat
 import net.pengtul.pengcord.Utils.Companion.banPardon
 import net.pengtul.pengcord.Utils.Companion.pardonMute
@@ -50,8 +56,7 @@ import java.net.URL
 import java.util.*
 import java.util.logging.Level
 import javax.imageio.ImageIO
-import kotlin.collections.HashMap
-import kotlin.collections.HashSet
+
 
 typealias MinecraftId = UUID
 
@@ -87,6 +92,10 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         private var salty: String = UUID.randomUUID().toString()
         private val verifiedPlayerCache = HashSet<UUID>()
         val translationProvider = TranslationProvider()
+        val PARSER_OPTIONS: DataHolder = MutableDataSet()
+            .set(Parser.EXTENSIONS, Arrays.asList())
+            .toImmutable()
+        val markdownParser = Parser.builder().build()
 
         fun downloadSkin(usr: Player){
             val usrUUID: String = usr.uniqueId.toString()
@@ -250,8 +259,6 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
             serverLogger.severe("Exception ${e}. Disabling plugin!")
             this.pluginLoader.disablePlugin(this)
         }
-
-        discordBot.sendMessageToDiscord("Server Started!")
         // General Commands
         this.getCommand("stopserver")?.setExecutor(StopServer())
         this.getCommand("info")?.setExecutor(Info())
@@ -272,7 +279,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         this.getCommand("pban")?.setExecutor(PBan())
         this.getCommand("punban")?.setExecutor(PUnban())
         this.getCommand("queryrecords")?.setExecutor(QueryRecord())
-        this.getCommand("query")?.setExecutor(Query())
+        this.getCommand("querypunishment")?.setExecutor(QueryPunishment())
 
         // Start tasks to unban/unmute players
         database.queryPlayerBansByStatus(ExpiryState.OnGoing).filter { !it.isPermanent }.forEach {ban ->
@@ -285,6 +292,12 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         discordBot.log(LogType.ServerStartup, "Server Startup and Plugin Initialization successful.")
         serverLogger.info {
             "[Pengcord] Sucessfully Started!"
+        }
+
+        if (serverConfig.minecraftServerIp.isNullOrEmpty()) {
+            discordBot.sendMessageToDiscord("Server Started!")
+        } else {
+            discordBot.sendMessageToDiscord("Server Started, get on at ${server.minecraftVersion}")
         }
     }
 
