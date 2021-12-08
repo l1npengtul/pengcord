@@ -21,15 +21,16 @@ package net.pengtul.pengcord.main
 // If you're reviewing this, or have to read this
 // I'm sorry.
 
-import com.vladsch.flexmark.ext.tables.TablesExtension
+import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
 import com.vladsch.flexmark.html.HtmlRenderer
 import com.vladsch.flexmark.parser.Parser
-import com.vladsch.flexmark.util.ast.KeepType
+import com.vladsch.flexmark.parser.ParserEmulationProfile
 import com.vladsch.flexmark.util.data.DataHolder
 import com.vladsch.flexmark.util.data.MutableDataSet
+import com.vladsch.flexmark.util.misc.Extension
 import net.milkbowl.vault.chat.Chat
-import net.pengtul.pengcord.Utils.Companion.banPardon
-import net.pengtul.pengcord.Utils.Companion.pardonMute
+import net.pengtul.pengcord.util.Utils.Companion.banPardon
+import net.pengtul.pengcord.util.Utils.Companion.pardonMute
 import net.pengtul.pengcord.bot.Bot
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.commands.*
@@ -37,6 +38,7 @@ import net.pengtul.pengcord.data.ServerConfig
 import net.pengtul.pengcord.data.UserSQL
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
+import net.pengtul.pengcord.mdparse.SpoilerExtension
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandExecutor
 import org.bukkit.configuration.file.FileConfiguration
@@ -92,10 +94,12 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         private var salty: String = UUID.randomUUID().toString()
         private val verifiedPlayerCache = HashSet<UUID>()
         val translationProvider = TranslationProvider()
-        val PARSER_OPTIONS: DataHolder = MutableDataSet()
-            .set(Parser.EXTENSIONS, Arrays.asList())
+        private val PARSER_OPTIONS: DataHolder = MutableDataSet()
+            .setFrom(ParserEmulationProfile.COMMONMARK)
+            .set(Parser.EXTENSIONS, listOf(SpoilerExtension.create(), StrikethroughExtension.create()) as Collection<Extension>)
             .toImmutable()
-        val markdownParser = Parser.builder().build()
+        val markdownParser = Parser.builder(PARSER_OPTIONS).build()
+        val htmlRenderer = HtmlRenderer.builder(PARSER_OPTIONS).build()
 
         fun downloadSkin(usr: Player){
             val usrUUID: String = usr.uniqueId.toString()
@@ -215,6 +219,13 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         fun removePlayerFromVerifiedCache(uuid: UUID) {
             verifiedPlayerCache.remove(uuid)
         }
+
+        fun checkIfPlayerPendingVerification(uuid: UUID): Boolean {
+            if (playersAwaitingVerification.containsValue(uuid)) {
+                return false
+            }
+            return true
+        }
     }
 
     override fun onEnable() {
@@ -278,7 +289,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         this.getCommand("unmute")?.setExecutor(UnMute())
         this.getCommand("pban")?.setExecutor(PBan())
         this.getCommand("punban")?.setExecutor(PUnban())
-        this.getCommand("queryrecords")?.setExecutor(QueryRecord())
+        this.getCommand("queryrecord")?.setExecutor(QueryRecord())
         this.getCommand("querypunishment")?.setExecutor(QueryPunishment())
 
         // Start tasks to unban/unmute players

@@ -143,8 +143,13 @@ class UserSQL() {
             this@UserSQL.playerGetByUUID(player)?.let { dbPlayer ->
                 Main.playersCurrentJoinTime[player]?.let { joinTime ->
                     val joinToNow = Duration(joinTime.millis, DateTime.now().millis).plus(dbPlayer.secondsPlayed * 1000).toPeriod().seconds.toLong()
+                    val upUntilNow = try {
+                        Players.select {Players.playerUUID eq player}.single()[Players.secondsPlayed]
+                    } catch (_: Exception) {
+                        0
+                    }
                     Players.update ({Players.playerUUID eq player}) {
-                        it[secondsPlayed] = joinToNow
+                        it[secondsPlayed] = joinToNow + upUntilNow
                     }
                     Main.playersCurrentJoinTime[player] = DateTime.now()
                 }

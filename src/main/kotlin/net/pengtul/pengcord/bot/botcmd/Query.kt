@@ -1,6 +1,6 @@
 package net.pengtul.pengcord.bot.botcmd
 
-import net.pengtul.pengcord.Utils
+import net.pengtul.pengcord.util.Utils
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.data.interact.ExpiryState
@@ -41,6 +41,9 @@ class Query: JCDiscordCommandExecutor {
                         .addInlineField("Issued On:", "${filterAlert.issuedOn}")
                         .addInlineField("Message Context:", filterAlert.context)
                         .addInlineField("Words:", filterAlert.word)
+                    Main.getDownloadedSkinAsFile(filterAlert.playerUUID)?.let {
+                        embedBuilder.setImage(it)
+                    }
                     message.addReaction("✅").thenAccept {
                         message.reply(embedBuilder)
                         Main.discordBot.log(LogType.DSCComamndRan, "User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\".")
@@ -63,6 +66,9 @@ class Query: JCDiscordCommandExecutor {
                         .addInlineField("Issued On:", "${warn.issuedOn}")
                         .addInlineField("Issued By:", warn.issuedBy)
                         .addInlineField("Reason:", warn.reason)
+                    Main.getDownloadedSkinAsFile(warn.playerUUID)?.let {
+                        embedBuilder.setImage(it)
+                    }
                     message.addReaction("✅").thenAccept {
                         message.reply(embedBuilder)
                         Main.discordBot.log(LogType.DSCComamndRan, "User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\".")
@@ -85,6 +91,9 @@ class Query: JCDiscordCommandExecutor {
                         .addInlineField("Issued On:", "${mute.issuedOn}")
                         .addInlineField("Issued By:", mute.issuedBy)
                         .addInlineField("Reason:", mute.reason)
+                    Main.getDownloadedSkinAsFile(mute.playerUUID)?.let {
+                        embedBuilder.setImage(it)
+                    }
                     if (mute.isPermanent) {
                         embedBuilder.addInlineField("Expires:", "Never, Permanent Mute")
                     } else {
@@ -114,6 +123,9 @@ class Query: JCDiscordCommandExecutor {
                         .addInlineField("Issued On:", "${ban.issuedOn}")
                         .addInlineField("Issued By:", ban.issuedBy)
                         .addInlineField("Reason:", ban.reason)
+                    Main.getDownloadedSkinAsFile(ban.playerUUID)?.let {
+                        embedBuilder.setImage(it)
+                    }
                     if (ban.isPermanent) {
                         embedBuilder.addInlineField("Expires:", "Never, Permanent Mute")
                     } else {
@@ -131,11 +143,13 @@ class Query: JCDiscordCommandExecutor {
                 message.addReaction("❌").thenAccept {
                     CommandHelper.deleteAfterSend("Invalid Player!", 5, message)
                 }
+                return
             }
             else -> {
                 message.addReaction("❌").thenAccept {
                     CommandHelper.deleteAfterSend("Invalid Query Type!", 5, message)
                 }
+                return
             }
         }
     }

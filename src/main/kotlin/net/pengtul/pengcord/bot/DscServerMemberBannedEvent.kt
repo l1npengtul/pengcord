@@ -1,6 +1,6 @@
 package net.pengtul.pengcord.bot
 
-import net.pengtul.pengcord.Utils.Companion.banPlayer
+import net.pengtul.pengcord.util.Utils.Companion.banPlayer
 import net.pengtul.pengcord.data.interact.ExpiryDateTime
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.data.interact.UpdateVerify

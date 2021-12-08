@@ -1,9 +1,9 @@
 package net.pengtul.pengcord.bot.botcmd
 
-import net.pengtul.pengcord.Utils.Companion.doesUserHavePermission
-import net.pengtul.pengcord.Utils.Companion.mutePlayer
-import net.pengtul.pengcord.Utils.Companion.parseTimeFromString
-import net.pengtul.pengcord.Utils.Companion.queryPlayerFromString
+import net.pengtul.pengcord.util.Utils.Companion.doesUserHavePermission
+import net.pengtul.pengcord.util.Utils.Companion.mutePlayer
+import net.pengtul.pengcord.util.Utils.Companion.parseTimeFromString
+import net.pengtul.pengcord.util.Utils.Companion.queryPlayerFromString
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
@@ -35,13 +35,13 @@ class Mute: JCDiscordCommandExecutor {
             args[0]
         }
         val reason = args[1]
-        var time = parseTimeFromString(args[2])
+        val time = parseTimeFromString(args[2])
         if (time == null) {
             message.addReaction("❌").thenAccept {
                 CommandHelper.deleteAfterSend("Invaid Time Frame! Timeframes are <amount><unit> such as 10d (10 days) or \"perm\" for permanent mute!", 5, message)
             }
+            return
         }
-        time = time ?: return
         queryPlayerFromString(toQuery)?.let { player ->
             Main.discordBot.discordServer.getMemberById(player.discordUUID)?.ifPresent {
                 if (!doesUserHavePermission(it, "pengcord.punishment.mute")) {

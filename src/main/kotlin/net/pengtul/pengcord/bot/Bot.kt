@@ -123,6 +123,7 @@ class Bot {
         commandHandler.addCommand(UnMute())
         commandHandler.addCommand(Query())
         commandHandler.addCommand(QueryRecord())
+
         commandHandler.generateHelp()
     }
 

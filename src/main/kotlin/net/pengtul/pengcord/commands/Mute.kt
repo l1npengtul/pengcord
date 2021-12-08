@@ -1,8 +1,8 @@
 package net.pengtul.pengcord.commands
 
-import net.pengtul.pengcord.Utils.Companion.mutePlayer
-import net.pengtul.pengcord.Utils.Companion.parseTimeFromString
-import net.pengtul.pengcord.Utils.Companion.queryPlayerFromString
+import net.pengtul.pengcord.util.Utils.Companion.mutePlayer
+import net.pengtul.pengcord.util.Utils.Companion.parseTimeFromString
+import net.pengtul.pengcord.util.Utils.Companion.queryPlayerFromString
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.ExpiryDateTime
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID

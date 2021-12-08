@@ -12,7 +12,6 @@ class JCDiscordCommandHandler(api: DiscordApi, prefix: String, autoHelp: Boolean
     private var commandPrefix = prefix
     private val discordApi: DiscordApi = api
     private var commandMap: HashMap<JCDiscordCommandExecutor, JCDiscordCommandEvent> = HashMap()
-    val genHelp = autoHelp
     private var helpMessage = MessageBuilder()
 
     init {
@@ -31,15 +30,23 @@ class JCDiscordCommandHandler(api: DiscordApi, prefix: String, autoHelp: Boolean
         addCommand(Git())
     }
 
-    fun addCommand(command: JCDiscordCommandExecutor){
-        Main.serverConfig.botCommandChannel.forEach { channelId ->
-            this.discordApi.getTextChannelById(channelId)?.ifPresent { textChannel ->
-                if (!commandMap.containsKey(command)){
-                    val commandListener = JCDiscordCommandEvent(commandPrefix, command.commandName, command, allowedCommandChannels)
-                    commandMap[command] = commandListener
-                    textChannel.addMessageCreateListener(commandListener)
-                    Main.serverLogger.info("Added Command ${command.commandName}")
+    fun addCommand(vararg commands: JCDiscordCommandExecutor){
+        val commandChannels = Main.serverConfig.botCommandChannel.mapNotNull {
+            this.discordApi.getServerTextChannelById(it)
+        }.filter {
+            it.isPresent
+        }.map {
+            it.orElseThrow()
+        }
+
+        for (command in commands) {
+            if (!commandMap.contains(command)) {
+                val commandListener = JCDiscordCommandEvent(commandPrefix, command.commandName, command, commandChannels)
+                commandMap[command] = commandListener
+                commandChannels.forEach {
+                    it.addMessageCreateListener(commandListener)
                 }
+                Main.serverLogger.info("[pengcord]: Added Command ${command.commandName}")
             }
         }
     }
@@ -53,8 +60,5 @@ class JCDiscordCommandHandler(api: DiscordApi, prefix: String, autoHelp: Boolean
             helpMessage.appendNewLine()
             helpMessage.append("- *Description: ${cmd.commandDescription}")
         }
-        helpMessage.appendNewLine()
-        helpMessage.append("```")
-        addCommand(Help(helpMessage))
     }
 }

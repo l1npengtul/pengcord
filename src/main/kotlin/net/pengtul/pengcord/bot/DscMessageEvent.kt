@@ -27,11 +27,9 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextDecoration
 import net.pengtul.pengcord.main.Main
-import net.pengtul.pengcord.toComponent
-import net.pengtul.pengcord.toTextColor
+import net.pengtul.pengcord.util.toComponent
+import net.pengtul.pengcord.util.toTextColor
 import org.bukkit.Bukkit
-import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
-import org.intellij.markdown.parser.MarkdownParser
 import org.javacord.api.entity.message.Message
 import org.javacord.api.event.message.MessageCreateEvent
 import org.javacord.api.listener.message.MessageCreateListener
@@ -66,60 +64,58 @@ class DscMessageEvent: MessageCreateListener {
                             }
                         }
                         else {
-                            // TODO: Parse Markdown
-                            val finalComponent = Component.text()
-                            val textToSend = EmojiParser.parseToAliases(msg.readableContent)
-                            if (textToSend.isNotBlank()) {
-                                var textSendComponent = Component.text()
-                                Main.markdownParser.parse(textToSend).
-
-                                finalComponent
-                                    .content("[DSC] ")
-                                    .style(Style.style(NamedTextColor.DARK_GRAY))
-                                    .append(
-                                        Component.text("${msg.author.displayName}: ")
-                                            .style(Style.style(msg.author.roleColor.orElse(Color.DARK_GRAY).toTextColor())))
-                                    .append(
-                                        Component.text(EmojiParser.parseToAliases(msg.readableContent))
-                                            .style(Style.style(NamedTextColor.DARK_GRAY))
-                                    )
-                            }
-
-                            for (attachment in msg.attachments){
-
-                                val initialContent = if (attachment.isSpoiler){
-                                    Main.discordBot.log(LogType.PlayerChat, "User ${msg.author.idAsString} (${msg.author.discriminatedName}) sync message `SPOILER: ${attachment.url}`.")
-                                    finalComponent.append(Component.newline())
-                                    "[DSC] [SPOILER] "
-                                } else {
-                                    Main.discordBot.log(LogType.PlayerChat, "User ${msg.author.idAsString} (${msg.author.discriminatedName}) sync message `${attachment.url}`.")
-                                    "[DSC]"
+                            Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
+                                // TODO: Parse Markdown
+                                val finalComponent = Component.text()
+                                val textToSend = EmojiParser.parseToAliases(msg.readableContent)
+                                if (textToSend.isNotBlank()) {
+                                    finalComponent
+                                        .content("[DSC] ")
+                                        .style(Style.style(NamedTextColor.DARK_GRAY))
+                                        .append(
+                                            Component.text("${msg.author.displayName}: ")
+                                                .style(Style.style(msg.author.roleColor.orElse(Color.DARK_GRAY).toTextColor())))
+                                        .append(
+                                            Component.text(EmojiParser.parseToAliases(msg.readableContent))
+                                                .style(Style.style(NamedTextColor.DARK_GRAY))
+                                        )
                                 }
-                                val attachmentComponent = Component.text()
-                                    .content(initialContent)
-                                    .style(Style.style()
-                                        .color(NamedTextColor.DARK_GRAY)
-                                        .build())
-                                    .append(
-                                        Component.text("${msg.author.displayName}: ")
-                                            .style(Style.style()
-                                                .color(msg.author.roleColor.orElse(Color.DARK_GRAY).toTextColor())
-                                                .build()))
-                                    .append(
-                                        Component.text(attachment.fileName)
-                                            .style(Style.style()
-                                                .decorate(TextDecoration.UNDERLINED)
-                                                .color(NamedTextColor.DARK_GRAY)
-                                                .build()))
-                                    .hoverEvent(
-                                        HoverEvent.showText("Click to open".toComponent())
-                                    )
-                                    .clickEvent(
-                                        ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, attachment.url.toString())
-                                    )
-                                finalComponent.append(attachmentComponent.build())
-                            }
-                            Bukkit.broadcast(finalComponent.build())
+
+                                for (attachment in msg.attachments){
+                                    val initialContent = if (attachment.isSpoiler){
+                                        Main.discordBot.log(LogType.PlayerChat, "User ${msg.author.idAsString} (${msg.author.discriminatedName}) sync message `SPOILER: ${attachment.url}`.")
+                                        finalComponent.append(Component.newline())
+                                        "[DSC] [SPOILER] "
+                                    } else {
+                                        Main.discordBot.log(LogType.PlayerChat, "User ${msg.author.idAsString} (${msg.author.discriminatedName}) sync message `${attachment.url}`.")
+                                        "[DSC]"
+                                    }
+                                    val attachmentComponent = Component.text()
+                                        .content(initialContent)
+                                        .style(Style.style()
+                                            .color(NamedTextColor.DARK_GRAY)
+                                            .build())
+                                        .append(
+                                            Component.text("${msg.author.displayName}: ")
+                                                .style(Style.style()
+                                                    .color(msg.author.roleColor.orElse(Color.DARK_GRAY).toTextColor())
+                                                    .build()))
+                                        .append(
+                                            Component.text(attachment.fileName)
+                                                .style(Style.style()
+                                                    .decorate(TextDecoration.UNDERLINED)
+                                                    .color(NamedTextColor.DARK_GRAY)
+                                                    .build()))
+                                        .hoverEvent(
+                                            HoverEvent.showText("Click to open".toComponent())
+                                        )
+                                        .clickEvent(
+                                            ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, attachment.url.toString())
+                                        )
+                                    finalComponent.append(attachmentComponent.build())
+                                }
+                                Bukkit.broadcast(finalComponent.build())
+                            })
                         }
                     }
                     catch (e: Exception){

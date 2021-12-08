@@ -1,7 +1,7 @@
 package net.pengtul.pengcord.bot.botcmd
 
-import net.pengtul.pengcord.Utils
-import net.pengtul.pengcord.Utils.Companion.shutdown
+import net.pengtul.pengcord.util.Utils
+import net.pengtul.pengcord.util.Utils.Companion.shutdown
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.main.Main
@@ -29,7 +29,5 @@ class StopServer: JCDiscordCommandExecutor {
         shutdown(shutdownTimer)
         Main.discordBot.log(LogType.DSCComamndRan, "User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\".")
         Main.serverLogger.info("[pengcord]: User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-
-
     }
 }

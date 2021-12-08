@@ -1,6 +1,6 @@
 package net.pengtul.pengcord.commands
 
-import net.pengtul.pengcord.Utils
+import net.pengtul.pengcord.util.Utils
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.main.Main

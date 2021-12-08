@@ -1,7 +1,7 @@
 package net.pengtul.pengcord.bot.botcmd
 
-import net.pengtul.pengcord.Utils
-import net.pengtul.pengcord.Utils.Companion.pardonMute
+import net.pengtul.pengcord.util.Utils
+import net.pengtul.pengcord.util.Utils.Companion.pardonMute
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.data.interact.ExpiryState

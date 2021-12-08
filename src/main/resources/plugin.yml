@@ -60,7 +60,7 @@ commands:
     description: Pardon by a ban Id. This can be obtained by using `/query b <player>`. Alternatively, pass in "all" for the first argument then a player for the second to pardon all their bans.
     usage: /punban <ban Id/all> <player?>
     permission: pengcord.punishments.ban
-  queryrecords:
+  queryrecord:
     description: Query punishment history of a player. b -> Bans, m -> Mutes, w -> Warns, f -> Filter Alerts, a -> All
     usage: /queryrecord <b|m|w|f|a> <player>
     permission: pengcord.punishments.query

@@ -1,4 +1,4 @@
-package net.pengtul.pengcord
+package net.pengtul.pengcord.util
 
 import net.kyori.adventure.audience.MessageType
 import net.kyori.adventure.text.Component
@@ -23,9 +23,12 @@ import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.entity.user.User
 import org.joda.time.DateTime
 import org.joda.time.Duration
+import org.jsoup.nodes.Document
+import org.jsoup.select.Elements
 import java.awt.Color
 import java.lang.management.ManagementFactory
 import java.util.*
+import kotlin.time.Duration.Companion.seconds
 
 /*
 *    This code creates and defines all discord commands
@@ -213,6 +216,8 @@ class Utils {
             server.sendMessage(Component.text("§c§l§nThis minecraft server is restarting soon! (${shutdownTimer} seconds)."), MessageType.SYSTEM)
             server.sendMessage(Component.text("§c§l§nPlease reconnect after the reboot!"), MessageType.SYSTEM)
             server.sendMessage(Component.text("§k--------------------------------------------------------------"), MessageType.SYSTEM)
+
+            Main.discordBot.sendMessageToDiscordAnnouncement("Server shutdown in ${shutdownTimer.seconds}. Please reconnect after the reboot!")
 
             scheduler.runTaskLaterAsynchronously(pengcord, Runnable {
                 scheduler.runTask(pengcord, Runnable {

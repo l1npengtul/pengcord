@@ -1,6 +1,6 @@
 package net.pengtul.pengcord.commands
 
-import net.pengtul.pengcord.Utils.Companion.shutdown
+import net.pengtul.pengcord.util.Utils.Companion.shutdown
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.main.Main
 import org.bukkit.Bukkit

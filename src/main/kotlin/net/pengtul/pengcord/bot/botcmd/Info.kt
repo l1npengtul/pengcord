@@ -1,6 +1,6 @@
 package net.pengtul.pengcord.bot.botcmd
 
-import net.pengtul.pengcord.Utils.Companion.getUptime
+import net.pengtul.pengcord.util.Utils.Companion.getUptime
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.main.Main
@@ -8,6 +8,7 @@ import org.bukkit.Bukkit
 import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.entity.user.User
+import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 /*   This is the class for getting server misc info
@@ -42,10 +43,11 @@ class Info: JCDiscordCommandExecutor {
         val embed = EmbedBuilder()
                 .setAuthor("Server Info")
                 .setTitle("Server TPS, Server Playerlist, Server RAM usage, Server Uptime")
-                .addInlineField("Server TPS 1M, 5M, 15M:", Bukkit.getTPS().joinToString())
+                .addInlineField("Server TPS 1M, 5M, 15M:", Bukkit.getTPS().map { (it * 100).roundToInt() / 100.0 }.joinToString())
                 .addInlineField("Server RAM Usage:", "$currentUsedRAM MiB / $maxRAM MiB (${((currentUsedRAM.toDouble() / maxRAM.toDouble()) * 100).roundToLong() / 100.0}%)")
                 .addInlineField("Server Uptime (HH:MM:SS): ", getUptime())
-                .addField("Users Online (${playerList.size}/${Bukkit.getMaxPlayers()}):", playerList.joinToString())
+                .addField("Users Online (${playerList.size}/${Bukkit.getMaxPlayers()}):",
+                    playerList.joinToString { it.name })
 
         message.reply(embed).thenAccept {
             Main.discordBot.log(LogType.DSCComamndRan, "User ${sender.idAsString} (${sender.discriminatedName}) ran command `$commandName`.")

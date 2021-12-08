@@ -1,11 +1,12 @@
 package net.pengtul.pengcord.bot.commandhandler
 
 import net.pengtul.pengcord.main.Main
+import org.javacord.api.entity.channel.ServerTextChannel
 import org.javacord.api.entity.channel.TextChannel
 import org.javacord.api.event.message.MessageCreateEvent
 import org.javacord.api.listener.message.MessageCreateListener
 
-class JCDiscordCommandEvent(pre: String, commandToTrack: String, execute: JCDiscordCommandExecutor, binds: List<TextChannel>) : MessageCreateListener {
+class JCDiscordCommandEvent(pre: String, commandToTrack: String, execute: JCDiscordCommandExecutor, binds: List<ServerTextChannel>) : MessageCreateListener {
     private val prefix = pre
     val cmd = commandToTrack
     private val exec = execute

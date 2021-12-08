@@ -1,7 +1,7 @@
 package net.pengtul.pengcord.commands
 
-import net.pengtul.pengcord.Utils.Companion.banPardon
-import net.pengtul.pengcord.Utils.Companion.queryPlayerFromString
+import net.pengtul.pengcord.util.Utils.Companion.banPardon
+import net.pengtul.pengcord.util.Utils.Companion.queryPlayerFromString
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.main.Main

@@ -6,10 +6,10 @@ import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextDecoration
-import net.pengtul.pengcord.Utils.Companion.timeToOrSinceDateTime
+import net.pengtul.pengcord.util.Utils.Companion.timeToOrSinceDateTime
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.main.Main
-import net.pengtul.pengcord.toComponent
+import net.pengtul.pengcord.util.toComponent
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender

@@ -1,8 +1,8 @@
 package net.pengtul.pengcord.bot.botcmd
 
-import net.pengtul.pengcord.Utils.Companion.banPardon
-import net.pengtul.pengcord.Utils.Companion.doesUserHavePermission
-import net.pengtul.pengcord.Utils.Companion.queryPlayerFromString
+import net.pengtul.pengcord.util.Utils.Companion.banPardon
+import net.pengtul.pengcord.util.Utils.Companion.doesUserHavePermission
+import net.pengtul.pengcord.util.Utils.Companion.queryPlayerFromString
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.data.interact.ExpiryState

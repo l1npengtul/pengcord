@@ -1,6 +1,6 @@
 package net.pengtul.pengcord.commands
 
-import net.pengtul.pengcord.Utils.Companion.unverifyPlayer
+import net.pengtul.pengcord.util.Utils.Companion.unverifyPlayer
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.main.Main

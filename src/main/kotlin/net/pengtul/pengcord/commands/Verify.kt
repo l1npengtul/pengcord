@@ -38,7 +38,7 @@ class Verify: CommandExecutor {
             Main.serverLogger.info("Got valid verification request... Attempting verify MC Player ${sender.uniqueId} with discord tag ${args[0]}")
             Main.discordBot.discordServer.getMemberByDiscriminatedName(args[0]).ifPresentOrElse ({ serverMember ->
                 Main.serverLogger.info("User ${serverMember.discriminatedName} found with user ID ${serverMember.id}")
-                Main.serverConfig.botCommandChannel?.let { cmdChannnelId ->
+                Main.serverConfig.botCommandChannel.forEach { cmdChannnelId ->
                     Main.discordBot.discordServer.getChannelById(cmdChannnelId).ifPresent { commandChannel ->
                         Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                             if (!Main.playersAwaitingVerification.containsValue(sender.uniqueId) && !Main.database.playerIsVerified(

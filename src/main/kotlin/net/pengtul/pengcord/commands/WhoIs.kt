@@ -2,12 +2,12 @@ package net.pengtul.pengcord.commands
 
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
-import net.pengtul.pengcord.Utils.Companion.queryPlayerFromString
-import net.pengtul.pengcord.Utils.Companion.timeToOrSinceDateTime
+import net.pengtul.pengcord.util.Utils.Companion.queryPlayerFromString
+import net.pengtul.pengcord.util.Utils.Companion.timeToOrSinceDateTime
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.main.Main
-import net.pengtul.pengcord.toComponent
+import net.pengtul.pengcord.util.toComponent
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender

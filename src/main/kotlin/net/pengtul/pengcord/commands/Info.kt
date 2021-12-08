@@ -1,15 +1,16 @@
 package net.pengtul.pengcord.commands
 
 import net.kyori.adventure.text.Component
-import net.pengtul.pengcord.Utils.Companion.getUptime
+import net.pengtul.pengcord.util.Utils.Companion.getUptime
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.main.Main
-import net.pengtul.pengcord.toComponentNewline
-import net.pengtul.pengcord.toComponent
+import net.pengtul.pengcord.util.toComponentNewline
+import net.pengtul.pengcord.util.toComponent
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
+import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 /*   This is the class for getting server info from minecraft
@@ -40,7 +41,7 @@ class Info: CommandExecutor {
                 .append(Component.newline())
                 .append("§aServer RAM usage: $currentUsedRAM MiB/$maxRAM MiB (${((currentUsedRAM.toDouble() / maxRAM.toDouble()) * 100).roundToLong() / 100.0}%)".toComponent())
                 .append("§aServer Uptime (HH:MM:SS): ${getUptime()}".toComponent())
-                .append("§aServer TPS: ${Bukkit.getServer().tps}".toComponent())
+                .append("§aServer TPS [1M, 5M, 15M]: ${Bukkit.getTPS().map { (it * 100).roundToInt() / 100.0 }.joinToString()}".toComponent())
                 .append("§aOnline: ${Bukkit.getOnlinePlayers().joinToString { it.name }}\nout of ${Bukkit.getServer().maxPlayers}".toComponent())
                 .append("§9==========================§r".toComponent())
                 .build()

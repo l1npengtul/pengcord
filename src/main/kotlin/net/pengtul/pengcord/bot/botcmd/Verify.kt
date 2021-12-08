@@ -8,8 +8,8 @@ import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.data.interact.UpdateVerify
 import net.pengtul.pengcord.main.Main
-import net.pengtul.pengcord.toComponent
-import net.pengtul.pengcord.toComponentNewline
+import net.pengtul.pengcord.util.toComponent
+import net.pengtul.pengcord.util.toComponentNewline
 import org.bukkit.Bukkit
 import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.user.User
@@ -28,13 +28,15 @@ class Verify: JCDiscordCommandExecutor {
             message.addReaction("❌").thenAccept {
                 CommandHelper.deleteAfterSend("Invalid Player!", 5, message)
             }
+            return
         }
         // check to see if player already verified
-        playerId?.let { bukkitPlayer ->
+        playerId.let { bukkitPlayer ->
             if (Main.database.playerIsVerified(TypeOfUniqueID.MinecraftTypeOfUniqueID(bukkitPlayer.uniqueId))) {
                 message.addReaction("❌").thenAccept {
                     CommandHelper.deleteAfterSend("Player Already Verified!", 5, message)
                 }
+                return
             }
 
             val inputKey = args[1].toIntOrNull()
@@ -42,6 +44,7 @@ class Verify: JCDiscordCommandExecutor {
                 message.addReaction("❌").thenAccept {
                     CommandHelper.deleteAfterSend("Invalid Key!", 5, message)
                 }
+                return
             }
 
             if (Main.playersAwaitingVerification[inputKey] == bukkitPlayer.uniqueId) {
@@ -55,6 +58,7 @@ class Verify: JCDiscordCommandExecutor {
                         ))
                         bukkitPlayer.playSound(Sound.sound(Key.key("entity.player.levelup"), Sound.Source.PLAYER, 1.0F, 1.0F))
                         bukkitPlayer.sendMessage("§aYou were sucessfully verified!".toComponent())
+                        Main.discordBot.sendMessageToDiscordAnnouncement("Welcome ${sender.getDisplayName(Main.discordBot.discordServer)}(${bukkitPlayer.name}) to the server!")
                         Main.playersAwaitingVerification.remove(inputKey)
                         Main.insertIntoVerifiedCache(bukkitPlayer.uniqueId)
                     }

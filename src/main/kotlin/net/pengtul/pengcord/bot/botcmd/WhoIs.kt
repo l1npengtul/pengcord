@@ -1,7 +1,7 @@
 package net.pengtul.pengcord.bot.botcmd
 
-import net.pengtul.pengcord.Utils.Companion.doesUserHavePermission
-import net.pengtul.pengcord.Utils.Companion.queryPlayerFromString
+import net.pengtul.pengcord.util.Utils.Companion.doesUserHavePermission
+import net.pengtul.pengcord.util.Utils.Companion.queryPlayerFromString
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.data.interact.ExpiryState
@@ -21,21 +21,16 @@ class WhoIs: JCDiscordCommandExecutor {
         get() = "whois <player>"
 
     override fun executeCommand(msg: String, sender: User, message: Message, args: List<String>) {
-        if (doesUserHavePermission(sender, "pengcord.command.whois")) {
-            message.addReaction("\uD83D\uDEAB").thenAccept {
-                Main.discordBot.log(LogType.DSCComamndError, "User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
-                Main.serverLogger.info("[pengcord]: User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
-                CommandHelper.deleteAfterSend("\uD83D\uDEAB: You are not a moderator!", 5, message)
-            }
-        }
-
         val toQuery = queryPlayerFromString(args[0])
         if (toQuery == null) {
             message.addReaction("❌").thenAccept {
                 CommandHelper.deleteAfterSend("❌: Cannot find player!", 5, message)
             }
+            return
         }
-        toQuery?.let { player ->
+        toQuery.let { player ->
+            val hasPermission = doesUserHavePermission(sender, "pengcord.command.whois")
+            val playerFilterAlerts = Main.database.queryPlayerFilterAlertsByPlayerMinecraft(player.playerUUID)
             val playerMutes = Main.database.queryPlayerMutesByPlayerMinecraft(player.playerUUID)
             val activePlayerMutes = Main.database.queryPlayerMutesByPlayerMinecraft(player.playerUUID).filter {
                 it.expiryState == ExpiryState.OnGoing
@@ -61,11 +56,17 @@ class WhoIs: JCDiscordCommandExecutor {
                 if (player.verifiedDateTime != Main.neverHappenedDateTime) {
                     userInfoEmbed.addInlineField("Latest Verification Date Time:", "${player.verifiedDateTime}")
                 }
-                userInfoEmbed.addField("# Of Warns:", "${playerWarns.count()}")
-                userInfoEmbed.addField("Muted Status:", "${player.isMuted}")
-                userInfoEmbed.addField("# Of Mutes:", "${activePlayerMutes.count()} active, ${playerMutes.count()} total")
-                userInfoEmbed.addField("Banned Status:", "${player.isBanned}")
-                userInfoEmbed.addField("# Of Bans:", "${activePlayerBans.count()} active, ${playerBans.count()} total")
+                if (hasPermission) {
+                    userInfoEmbed.addField("# Of Filter Alerts:", "${playerFilterAlerts.count()}")
+                    userInfoEmbed.addField("# Of Warns:", "${playerWarns.count()}")
+                    userInfoEmbed.addField("Muted Status:", "${player.isMuted}")
+                    userInfoEmbed.addField("# Of Mutes:", "${activePlayerMutes.count()} active, ${playerMutes.count()} total")
+                    userInfoEmbed.addField("Banned Status:", "${player.isBanned}")
+                    userInfoEmbed.addField("# Of Bans:", "${activePlayerBans.count()} active, ${playerBans.count()} total")
+                }
+                Main.getDownloadedSkinAsFile(player.playerUUID)?.let {
+                    userInfoEmbed.setImage(it)
+                }
                 message.addReaction("✅").thenAccept {
                     message.reply(userInfoEmbed).thenAccept {
                         Main.discordBot.log(LogType.DSCComamndRan,"User ${sender.discriminatedName} ran command `me`.")

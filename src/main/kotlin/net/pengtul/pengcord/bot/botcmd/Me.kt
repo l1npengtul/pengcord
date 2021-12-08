@@ -13,9 +13,9 @@ class Me: JCDiscordCommandExecutor {
     override val commandDescription: String
         get() = "Gets Info on yourself (Only if you are verified on server)"
     override val commandName: String
-        get() = "info"
+        get() = "me"
     override val commandUsage: String
-        get() = "info"
+        get() = "me"
 
     override fun executeCommand(msg: String, sender: User, message: Message, args: List<String>) {
         Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
@@ -30,6 +30,9 @@ class Me: JCDiscordCommandExecutor {
                         .addInlineField("Muted Status:", "${dbPlayer.isMuted}")
                         .addInlineField("Deaths:", "${dbPlayer.deaths}")
                         .addInlineField("Time Played:", Main.periodFormatter.print(Period(Duration(time * 1000))))
+                    Main.getDownloadedSkinAsFile(dbPlayer.playerUUID)?.let {
+                        userInfoEmbed.setImage(it)
+                    }
                     if (dbPlayer.firstJoinDateTime != Main.neverHappenedDateTime) {
                         userInfoEmbed.addInlineField("First Join Date Time:", "${dbPlayer.firstJoinDateTime}")
                     }
@@ -43,16 +46,19 @@ class Me: JCDiscordCommandExecutor {
                             Main.serverLogger.info("[pengcord]: User ${sender.discriminatedName} ran command `me`.")
                         }
                     }
+                    return@Runnable
                 }
                 message.addReaction("❌").thenAccept {
                     Main.discordBot.log(LogType.DSCComamndError,"Could not get user played time.")
                     CommandHelper.deleteAfterSend("Could not find your played time!", 5, message)
                 }
+                return@Runnable
             }
             message.addReaction("❌").thenAccept {
                 Main.discordBot.log(LogType.DSCComamndError,"Invalid User.")
                 CommandHelper.deleteAfterSend("Could not find you! Are you verified on the server?", 5, message)
             }
+            return@Runnable
         })
     }
 }
