@@ -1,8 +1,11 @@
 package net.pengtul.pengcord.util
 
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.ComponentLike
+import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
+import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.pengtul.pengcord.main.Main
 import org.jsoup.nodes.Document
@@ -14,47 +17,21 @@ import org.jsoup.select.NodeVisitor
 class PengMDHTMLParser() {
     private val validNodes = mutableListOf<String>()
 
-    enum class TokenType(val style: Style) {
-        Normal(Style.style(NamedTextColor.WHITE)),
+    enum class TokenType(val decoration: TextDecoration) {
         Italic(
-            Style.style()
-                .decorate(TextDecoration.ITALIC)
-                .color(NamedTextColor.WHITE)
-                .build()
+            TextDecoration.ITALIC
         ),
         Bold(
-            Style.style()
-                .decorate(TextDecoration.BOLD)
-                .color(NamedTextColor.WHITE)
-                .build()
+            TextDecoration.BOLD
         ),
         Underscore(
-            Style.style()
-                .decorate(TextDecoration.UNDERLINED)
-                .color(NamedTextColor.WHITE)
-                .build()
+            TextDecoration.UNDERLINED
         ),
         Strikethrough(
-            Style.style()
-                .decorate(TextDecoration.STRIKETHROUGH)
-                .color(NamedTextColor.WHITE)
-                .build()
+            TextDecoration.STRIKETHROUGH
         ),
         Spoiler(
-            Style.style()
-                .decorate(TextDecoration.OBFUSCATED)
-                .color(NamedTextColor.WHITE)
-                .build()
-        ),
-        CodeBlock(
-            Style.style()
-                .color(NamedTextColor.DARK_GRAY)
-                .build()
-        ),
-        Quote(
-            Style.style()
-                .color(NamedTextColor.GREEN)
-                .build()
+            TextDecoration.OBFUSCATED
         ),
     }
 
@@ -71,57 +48,73 @@ class PengMDHTMLParser() {
 
     class NodeFinder: NodeVisitor {
         val textComponent = Component.text()
-        private val formattingStack = mutableListOf<Style>()
+        private val formattingStack = mutableListOf<TextDecoration>()
         private var insideQuote = false
         private var insideCodeBlock = false
+        private var insideSpoiler = false
         private var lastExitName = ""
-
+        private var spoilerQuote = Component.text()
+        private var spoiler = Component.text()
+        private var blockQuoteQuote = Component.text()
 
         override fun head(node: Node, depth: Int) {
-            Main.serverLogger.info("Entering node ${node.nodeName()}, ${node}")
             when (node.nodeName().lowercase()) {
-                "p" -> {
-                    formattingStack.add(TokenType.Normal.style)
-                }
                 "em" -> {
-                    formattingStack.add(TokenType.Italic.style)
+                    formattingStack.add(TokenType.Italic.decoration)
                 }
                 "strong" -> {
-                    formattingStack.add(TokenType.Bold.style)
+                    formattingStack.add(TokenType.Bold.decoration)
                 }
                 "u" -> {
-                    formattingStack.add(TokenType.Underscore.style)
+                    formattingStack.add(TokenType.Underscore.decoration)
                 }
                 "del" -> {
-                    formattingStack.add(TokenType.Strikethrough.style)
+                    formattingStack.add(TokenType.Strikethrough.decoration)
                 }
                 "details" -> {
-                    formattingStack.add(TokenType.Spoiler.style)
+                    insideSpoiler = true
+                    formattingStack.add(TokenType.Spoiler.decoration)
                 }
                 "code" -> {
                     insideCodeBlock = true
-                    formattingStack.add(TokenType.CodeBlock.style)
                 }
                 "blockquote" -> {
                     insideQuote = true
-                    formattingStack.add(TokenType.Quote.style)
                 }
                 "#text" -> {
-                    if (node is TextNode && node.textBeforeChildren() != "") {
-                        Main.serverLogger.info("Format text ${node.wholeText}")
-                        val compToAdd =
-                            node.textBeforeChildren().toComponent()
+                    if (node is TextNode && node.wholeText.isNotBlank()) {
+                        Main.serverLogger.info("Processing node ${node.wholeText}")
+                        val compToAdd = Component.text()
+                            .content(node.wholeText)
                         if (insideQuote) {
-                            compToAdd.style(formattingStack.lastOrNull() ?: TokenType.Normal.style)
-                            compToAdd.color(NamedTextColor.GREEN)
+                              compToAdd.color(NamedTextColor.GREEN)
+                        } else if (insideCodeBlock) {
+                            compToAdd.style(Style.style(TextDecoration.ITALIC))
+                            compToAdd.color(NamedTextColor.DARK_GRAY)
+                        } else if (insideSpoiler) {
+                            formattingStack.forEach {
+                                if (it != TextDecoration.OBFUSCATED) {
+                                    compToAdd.decorate(it)
+                                }
+                            }
+                        } else {
+                            formattingStack.forEach {
+                                if (it != TextDecoration.OBFUSCATED) {
+                                    compToAdd.decorate(it)
+                                } else {
+                                    compToAdd.style(Style.style(TextDecoration.OBFUSCATED))
+                                }
+                            }
                         }
-                        if (insideCodeBlock) {
-                            compToAdd.style(TokenType.CodeBlock.style)
+                        val finalBuilt = compToAdd.build()
+                        if (insideSpoiler) {
+                            spoiler.append(finalBuilt)
+                            spoilerQuote.append(finalBuilt)
+                        } else if (insideQuote) {
+                            blockQuoteQuote.append(finalBuilt)
+                        } else {
+                            textComponent.append(finalBuilt)
                         }
-                        textComponent
-                            .append(
-                                compToAdd
-                            )
                     }
                 }
                 else -> {
@@ -130,36 +123,40 @@ class PengMDHTMLParser() {
         }
 
         override fun tail(node: Node, depth: Int) {
-            Main.serverLogger.info("Exiting node ${node.nodeName()}, ${node}")
-            if (node is TextNode && node.textAfterChildren() != "" && node.textAfterChildren() != node.textBeforeChildren()) {
-                Main.serverLogger.info("Format text ${node.wholeText}")
-                val compToAdd =
-                    node.textAfterChildren().toComponent()
-                if (insideQuote) {
-                    compToAdd.style(formattingStack.lastOrNull() ?: TokenType.Normal.style)
-                    compToAdd.color(NamedTextColor.GREEN)
+            when (node.nodeName()) {
+                "em", "strong", "u", "del", "details" -> {
+                    formattingStack.removeLastOrNull()
                 }
-                if (insideCodeBlock) {
-                    compToAdd.style(TokenType.CodeBlock.style)
+                else -> {
+
                 }
-                textComponent
-                    .append(
-                        compToAdd
-                    )
-                formattingStack.removeLastOrNull()
             }
-            if (lastExitName == "code") {
-                Main.serverLogger.info("No more code")
-                insideCodeBlock = false
-            }
-            else if (lastExitName == "blockquote") {
-                Main.serverLogger.info("No more quote")
-                insideQuote = false
+            when (lastExitName) {
+                "code" -> {
+                    insideCodeBlock = false
+                }
+                "blockquote" -> {
+                    insideQuote = false
+                    textComponent.append(this.blockQuoteQuote.color(NamedTextColor.GREEN))
+                    this.blockQuoteQuote = Component.text()
+                }
+                "details" -> {
+                    insideSpoiler = false
+                    val spoiler = Component.text()
+                        .append(this.spoilerQuote)
+                        .style(Style.style(NamedTextColor.WHITE))
+                        .build()
+                    textComponent.append(
+                        this.spoiler
+                            .decorate(TextDecoration.OBFUSCATED)
+                            .hoverEvent(HoverEvent.showText(spoiler)))
+                    this.spoiler = Component.text()
+                    this.spoilerQuote = Component.text()
+                }
             }
 
             lastExitName = node.nodeName()
         }
-
     }
 
 //    fun preProcessHtml(html: String): String {
@@ -186,29 +183,5 @@ class PengMDHTMLParser() {
         val traverser = NodeFinder()
         document.traverse(traverser)
         return traverser.textComponent.build()
-    }
-}
-
-fun TextNode.textBeforeChildren(): String {
-    val whole = this.wholeText
-    val posOfFirstChild = whole.indexOfFirst {
-        it == '<'
-    }
-    return if (posOfFirstChild == -1) {
-        whole
-    } else {
-        whole.substring(0, posOfFirstChild)
-    }
-}
-
-fun TextNode.textAfterChildren(): String {
-    val whole = this.wholeText
-    val posOfLastChild = whole.indexOfLast {
-        it == '>'
-    }
-    return if (posOfLastChild == -1) {
-        whole
-    } else {
-        whole.substring(posOfLastChild, whole.length-1)
     }
 }

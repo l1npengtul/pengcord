@@ -22,12 +22,14 @@ package net.pengtul.pengcord.main
 // I'm sorry.
 
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
+import com.vladsch.flexmark.ext.tables.TablesExtension
 import com.vladsch.flexmark.html.HtmlRenderer
 import com.vladsch.flexmark.parser.Parser
-import com.vladsch.flexmark.parser.ParserEmulationProfile
 import com.vladsch.flexmark.util.data.DataHolder
 import com.vladsch.flexmark.util.data.MutableDataSet
 import com.vladsch.flexmark.util.misc.Extension
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.TextDecoration
 import net.milkbowl.vault.chat.Chat
 import net.pengtul.pengcord.util.Utils.Companion.banPardon
 import net.pengtul.pengcord.util.Utils.Companion.pardonMute
@@ -38,7 +40,8 @@ import net.pengtul.pengcord.data.ServerConfig
 import net.pengtul.pengcord.data.UserSQL
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
-import net.pengtul.pengcord.mdparse.SpoilerExtension
+import net.pengtul.pengcord.mdparse.spoiler.SpoilerExtension
+import net.pengtul.pengcord.mdparse.underline.UnderlineExtension
 import net.pengtul.pengcord.util.PengMDHTMLParser
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandExecutor
@@ -97,8 +100,9 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         private val verifiedPlayerCache = HashSet<UUID>()
         val translationProvider = TranslationProvider()
         private val PARSER_OPTIONS: DataHolder = MutableDataSet()
-            .setFrom(ParserEmulationProfile.COMMONMARK)
-            .set(Parser.EXTENSIONS, listOf(SpoilerExtension.create(), StrikethroughExtension.create()) as Collection<Extension>)
+            .set(Parser.BLOCK_QUOTE_PARSER, false)
+            .set(Parser.UNDERSCORE_DELIMITER_PROCESSOR, false)
+            .set(Parser.EXTENSIONS, listOf(SpoilerExtension.create(), StrikethroughExtension.create(), UnderlineExtension.create()) as Collection<Extension>)
             .toImmutable()
         val markdownParser = Parser.builder(PARSER_OPTIONS).build()
         val htmlRenderer = HtmlRenderer.builder(PARSER_OPTIONS).build()
@@ -166,7 +170,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
 
         fun generateUniqueKey(): Int {
             val rightNow = DateTime.now().toInstant().millis.toString()
-            if (rightNow.last() == '6' || rightNow.last() == '6') {
+            if (rightNow.last() == '6' || rightNow.last() == '9') {
                 this.salty = UUID.randomUUID().toString()
             }
             return (salty+rightNow).hashCode()

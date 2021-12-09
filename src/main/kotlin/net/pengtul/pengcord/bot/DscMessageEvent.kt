@@ -70,9 +70,7 @@ class DscMessageEvent: MessageCreateListener {
 
                                 val finalComponent = Component.text()
                                 val textToSend = EmojiParser.parseToAliases(msg.readableContent)
-                                val html = Main.htmlRenderer.render(Main.markdownParser.parse(textToSend))
-                                val toparser = Main.htmlParser.parse(Jsoup.parse(html))
-                                Bukkit.getServer().broadcast(toparser)
+                                val toparser = Main.htmlParser.parse(Jsoup.parse(Main.htmlRenderer.render(Main.markdownParser.parse(textToSend))))
 
                                 if (textToSend.isNotBlank()) {
                                     finalComponent
@@ -82,8 +80,8 @@ class DscMessageEvent: MessageCreateListener {
                                             Component.text("${msg.author.displayName}: ")
                                                 .style(Style.style(msg.author.roleColor.orElse(Color.DARK_GRAY).toTextColor())))
                                         .append(
-                                            Component.text(EmojiParser.parseToAliases(msg.readableContent))
-                                                .style(Style.style(NamedTextColor.DARK_GRAY))
+                                            toparser
+                                                .color(NamedTextColor.WHITE)
                                         )
                                 }
 

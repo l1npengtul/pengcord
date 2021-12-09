@@ -1,22 +1,22 @@
-package net.pengtul.pengcord.mdparse;
+package net.pengtul.pengcord.mdparse.underline;
 
 import com.vladsch.flexmark.util.ast.DelimitedNode;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.sequence.BasedSequence;
 import org.jetbrains.annotations.NotNull;
 
-public class Spoiler extends Node implements DelimitedNode {
+public class Underline extends Node implements DelimitedNode {
     protected BasedSequence openingMarker = BasedSequence.NULL;
     protected BasedSequence text = BasedSequence.NULL;
     protected BasedSequence closingMarker = BasedSequence.NULL;
 
-    public Spoiler() {}
+    public Underline() {}
 
-    public Spoiler(BasedSequence chars) {
+    public Underline(BasedSequence chars) {
         super(chars);
     }
 
-    public Spoiler(BasedSequence openingMarker, BasedSequence text, BasedSequence closingMarker) {
+    public Underline(BasedSequence openingMarker, BasedSequence text, BasedSequence closingMarker) {
         super(openingMarker.baseSubSequence(openingMarker.getStartOffset(), closingMarker.getEndOffset()));
         this.openingMarker = openingMarker;
         this.text = text;

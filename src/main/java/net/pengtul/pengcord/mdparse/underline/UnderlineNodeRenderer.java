@@ -1,4 +1,4 @@
-package net.pengtul.pengcord.mdparse;
+package net.pengtul.pengcord.mdparse.underline;
 
 import com.vladsch.flexmark.html.HtmlWriter;
 import com.vladsch.flexmark.html.renderer.NodeRenderer;
@@ -12,26 +12,28 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class SpoilerNodeRenderer implements NodeRenderer {
+public class UnderlineNodeRenderer implements NodeRenderer {
 
-    public SpoilerNodeRenderer(DataHolder options) {}
+    public UnderlineNodeRenderer(DataHolder options) {}
 
     @Override
     public @Nullable Set<NodeRenderingHandler<?>> getNodeRenderingHandlers() {
         HashSet<NodeRenderingHandler<?>> set = new HashSet<>();
-        set.add(new NodeRenderingHandler<>(Spoiler.class, this::render));
+        set.add(new NodeRenderingHandler<>(Underline.class, this::render));
         return set;
     }
 
-    private void render(Spoiler node, NodeRendererContext context, HtmlWriter html) {
-        html.withAttr().tagIndent("details", ()-> context.renderChildren(node));
+    private void render(Underline node, NodeRendererContext context, HtmlWriter html) {
+        html.withAttr().tag("u");
+        context.renderChildren(node);
+        html.tag("/u");
     }
 
     public static class Factory implements NodeRendererFactory {
         @NotNull
         @Override
         public NodeRenderer apply(@NotNull DataHolder options) {
-            return new SpoilerNodeRenderer(options);
+            return new UnderlineNodeRenderer(options);
         }
     }
 }

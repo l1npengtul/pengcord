@@ -1,4 +1,4 @@
-package net.pengtul.pengcord.mdparse;
+package net.pengtul.pengcord.mdparse.spoiler;
 
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;

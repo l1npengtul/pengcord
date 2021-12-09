@@ -7,7 +7,7 @@ import org.javacord.api.DiscordApi
 import org.javacord.api.entity.channel.TextChannel
 import org.javacord.api.entity.message.MessageBuilder
 
-class JCDiscordCommandHandler(api: DiscordApi, prefix: String, autoHelp: Boolean, boundChannels: List<String>) {
+class JCDiscordCommandHandler(api: DiscordApi, prefix: String, boundChannels: List<String>) {
     private var allowedCommandChannels: MutableList<TextChannel> = ArrayList()
     private var commandPrefix = prefix
     private val discordApi: DiscordApi = api

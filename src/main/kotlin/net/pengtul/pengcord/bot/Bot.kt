@@ -107,7 +107,7 @@ class Bot {
         val bc : MutableList<String> = ArrayList()
         bc.add(Main.serverConfig.botChatSyncChannel.toString())
         bc.add(Main.serverConfig.botLoggingChannel.toString())
-        commandHandler = JCDiscordCommandHandler(discordApi, Main.serverConfig.botPrefix, true, bc.toList())
+        commandHandler = JCDiscordCommandHandler(discordApi, Main.serverConfig.botPrefix, bc.toList())
         // General Commands
         commandHandler.addCommand(Info())
         commandHandler.addCommand(StopServer())
@@ -255,7 +255,8 @@ class Bot {
         }
     }
 
-    fun log(type: LogType, message: String){
+    fun log(type: LogType, msg: String){
+        val message = msg.replace("@", "@#")
         Main.serverConfig.botLoggingChannel?.let {
             when (type) {
                 LogType.Announcement -> {

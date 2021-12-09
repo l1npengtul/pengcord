@@ -1,4 +1,4 @@
-package net.pengtul.pengcord.mdparse;
+package net.pengtul.pengcord.mdparse.spoiler;
 
 import com.vladsch.flexmark.util.ast.VisitHandler;
 

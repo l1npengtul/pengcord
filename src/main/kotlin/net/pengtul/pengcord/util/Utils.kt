@@ -20,6 +20,8 @@ import net.pengtul.pengcord.data.schema.Player
 import net.pengtul.pengcord.main.Main
 import org.bukkit.*
 import org.javacord.api.entity.message.embed.EmbedBuilder
+import org.javacord.api.entity.permission.PermissionType
+import org.javacord.api.entity.permission.Role
 import org.javacord.api.entity.user.User
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -183,6 +185,27 @@ class Utils {
                 return null
             }
         }
+
+//        fun queryRoleFromString(roleId: String): Role? {
+//            val possibleRole = roleId.toLongOrNull() ?: return null
+//
+//            Main.discordBot.discordServer.getRoleById(possibleRole)?.let { role ->
+//                if (role.isPresent) {
+//                    return role.get()
+//                }
+//            }
+//            return null
+//        }
+//
+//        fun canPlayerPingEverything(player: UUID): Boolean {
+//            Main.database.playerGetByUUID(player)?.let { dbPlayer ->
+//                val user = Main.discordBot.discordServer.getMemberById(dbPlayer.discordUUID)
+//                if (user.isPresent) {
+//                    return Main.discordBot.discordServer.hasAnyPermission(user.get(), PermissionType.MENTION_EVERYONE)
+//                }
+//            }
+//            return false
+//        }
 
         fun timeToOrSinceDateTime(dateTime: DateTime): String {
             val now = DateTime.now()
@@ -689,18 +712,20 @@ class Utils {
         }
 
         fun pingFormatMessage(message: String): String {
-            var formattedMessage = message.split(" ").map {
+            val formattedMessage = message.split(" ").map {
                 if (it.startsWith("@")) {
                     val substr = it.substring(1, it.length)
                     val player = queryPlayerFromString(substr)
                     if (player != null) {
                         return "<@${player.discordUUID}>"
+                    } else if (substr == "everyone") {
+                        return "[@ Everyone]"
+                    } else if (substr == "here") {
+                        return "[@ Here]"
                     }
                 }
                 return it
             }.joinToString(separator = " ")
-            formattedMessage = formattedMessage.replace("@everyone", "[@ everyone]")
-            formattedMessage = formattedMessage.replace("@here", "[@ here]")
             return formattedMessage
         }
     }

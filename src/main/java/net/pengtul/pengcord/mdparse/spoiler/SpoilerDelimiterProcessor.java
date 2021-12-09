@@ -1,4 +1,4 @@
-package net.pengtul.pengcord.mdparse;
+package net.pengtul.pengcord.mdparse.spoiler;
 
 import com.vladsch.flexmark.parser.InlineParser;
 import com.vladsch.flexmark.parser.core.delimiter.Delimiter;
@@ -34,7 +34,7 @@ public class SpoilerDelimiterProcessor implements DelimiterProcessor {
 
     @Override
     public void process(Delimiter opener, Delimiter closer, int delimitersUsed) {
-        Spoiler spoiler = new Spoiler(opener.getTailChars(delimitersUsed), BasedSequence.NULL, closer.getTailChars(delimitersUsed));
+        Spoiler spoiler = new Spoiler(opener.getTailChars(delimitersUsed), BasedSequence.NULL, closer.getLeadChars(delimitersUsed));
         opener.moveNodesBetweenDelimitersTo(spoiler, closer);
     }
 
