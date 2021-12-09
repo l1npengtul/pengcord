@@ -23,7 +23,7 @@ class DscServerMemberBannedEvent: ServerMemberBanListener {
                                     banPlayer(player, TypeOfUniqueID.Unknown("Discord Ban, Check Server Audit Log"), ExpiryDateTime.Permanent, banReason)
                                 }
                                 Main.discordBot.log(LogType.PlayerBanned, "Synced Discord ban for player ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}/${ban.user.discriminatedName})")
-                                Main.serverLogger.info("[pengcord]: Synced Discord ban for player ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}/${ban.user.discriminatedName})")
+                                Main.serverLogger.info("Synced Discord ban for player ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}/${ban.user.discriminatedName})")
                             }
                         })
                     }

@@ -39,6 +39,7 @@ import net.pengtul.pengcord.data.UserSQL
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.mdparse.SpoilerExtension
+import net.pengtul.pengcord.util.PengMDHTMLParser
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandExecutor
 import org.bukkit.configuration.file.FileConfiguration
@@ -57,6 +58,7 @@ import java.io.File
 import java.net.URL
 import java.util.*
 import java.util.logging.Level
+import java.util.logging.Logger
 import javax.imageio.ImageIO
 
 
@@ -64,7 +66,6 @@ typealias MinecraftId = UUID
 
 class Main : JavaPlugin(), Listener, CommandExecutor{
     companion object {
-        val serverLogger =  Bukkit.getLogger()
         lateinit var database: UserSQL
         lateinit var serverRawConfig: FileConfiguration
         lateinit var serverConfig: ServerConfig
@@ -72,6 +73,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         lateinit var discordBot: Bot
         var mojangAPI: Mojang = Mojang().connect()
         lateinit var pengcord: Plugin
+        lateinit var serverLogger: Logger
         val scheduler: BukkitScheduler = Bukkit.getScheduler()
         val neverHappenedDateTime: DateTime = DateTime(0)
         var playersAwaitingVerification: HashMap<Int, MinecraftId> = HashMap()
@@ -100,6 +102,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
             .toImmutable()
         val markdownParser = Parser.builder(PARSER_OPTIONS).build()
         val htmlRenderer = HtmlRenderer.builder(PARSER_OPTIONS).build()
+        val htmlParser = PengMDHTMLParser()
 
         fun downloadSkin(usr: Player){
             val usrUUID: String = usr.uniqueId.toString()
@@ -239,6 +242,8 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         val pl = Bukkit.getServer().pluginManager.getPlugin("pengcord")
         pengcord = pl!!
 
+        serverLogger = pengcord.logger
+
         vaultApi = Bukkit.getServer().pluginManager.getPlugin("Vault")!!
         val rsp = Bukkit.getServer().servicesManager.getRegistration(Chat::class.java)
         vaultChatApi = rsp!!.provider
@@ -302,7 +307,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
 
         discordBot.log(LogType.ServerStartup, "Server Startup and Plugin Initialization successful.")
         serverLogger.info {
-            "[Pengcord] Sucessfully Started!"
+            "Sucessfully Started!"
         }
 
         if (serverConfig.minecraftServerIp.isNullOrEmpty()) {

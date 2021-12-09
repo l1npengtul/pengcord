@@ -158,7 +158,7 @@ class QueryRecord: CommandExecutor {
                             }
 
                             Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran ${this.javaClass.name}.")
-                            Main.serverLogger.info("[pengcord]: User ${sender.name} ran ${this.javaClass.name}.")
+                            Main.serverLogger.info("User ${sender.name} ran ${this.javaClass.name}.")
 
                         }
                     }
@@ -182,7 +182,7 @@ class QueryRecord: CommandExecutor {
                                 sender.sendMessage("§aNo filter alerts for player ${playerToQuery.currentUsername}")
                             }
                             Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran ${this.javaClass.name}.")
-                            Main.serverLogger.info("[pengcord]: User ${sender.name} ran ${this.javaClass.name}.")
+                            Main.serverLogger.info("User ${sender.name} ran ${this.javaClass.name}.")
                         }
                     }
                     "warn", "warns", "w" -> {
@@ -205,7 +205,7 @@ class QueryRecord: CommandExecutor {
                                 sender.sendMessage("§aNo warns for player ${playerToQuery.currentUsername}")
                             }
                             Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                         }
                     }
                     "mute", "mutes", "m" -> {
@@ -255,7 +255,7 @@ class QueryRecord: CommandExecutor {
                                 sender.sendMessage("§aNo mutes for player ${playerToQuery.currentUsername}")
                             }
                             Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                         }
                     }
                     "ban", "bans", "b" -> {
@@ -307,7 +307,7 @@ class QueryRecord: CommandExecutor {
                             }
 
                             Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                         }
                     }
                     else -> {
@@ -318,7 +318,7 @@ class QueryRecord: CommandExecutor {
             return true
         } else {
             Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `queryrecord`. Failed due to insufficient permissions.")
-            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `queryrecord`. Failed due to insufficient permissions.")
+            Main.serverLogger.info("User ${sender.name} ran `queryrecord`. Failed due to insufficient permissions.")
             return false
         }
     }

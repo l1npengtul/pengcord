@@ -39,22 +39,22 @@ class StopServer: CommandExecutor {
             shutdown(shutdownTimer)
             if (sender is Player){
                 Main.discordBot.log(LogType.MCComamndRan, "User ${sender.uniqueId} (${sender.name}) ran `stopserver`.")
-                Main.serverLogger.info("[pengcord]: User ${sender.uniqueId} (${sender.name}) ran `stopserver`.")
+                Main.serverLogger.info("User ${sender.uniqueId} (${sender.name}) ran `stopserver`.")
             }
             else {
                 Main.discordBot.log(LogType.MCComamndRan, "Console ran command `stopserver`.")
-                Main.serverLogger.info("[pengcord]: Console ran command `stopserver`.")
+                Main.serverLogger.info("Console ran command `stopserver`.")
             }
             ret = true
         }
         else {
             if (sender is Player){
                 Main.discordBot.log(LogType.MCComamndError, "User ${sender.uniqueId} (${sender.name}) ran `stopserver`. Failed due to invalid permission.")
-                Main.serverLogger.info("[pengcord]: User ${sender.uniqueId} (${sender.name}) ran `stopserver`. Failed due to invalid permission.")
+                Main.serverLogger.info("User ${sender.uniqueId} (${sender.name}) ran `stopserver`. Failed due to invalid permission.")
             }
             else {
                 Main.discordBot.log(LogType.MCComamndError, "Console ran command `stopserver`. Failed due to invalid permission.")
-                Main.serverLogger.info("[pengcord]: Console ran command `stopserver`. Failed due to invalid permission.")
+                Main.serverLogger.info("Console ran command `stopserver`. Failed due to invalid permission.")
             }
         }
         return ret

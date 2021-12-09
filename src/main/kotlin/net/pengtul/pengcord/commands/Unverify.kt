@@ -38,7 +38,7 @@ class Unverify: CommandExecutor {
                 unverifyPlayer(TypeOfUniqueID.MinecraftTypeOfUniqueID(player.playerUUID))
                 Main.removePlayerFromVerifiedCache(player.playerUUID)
                 Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
             })
             return true
         } else if (sender.hasPermission("pengcord.verify.undo") && args.isNotEmpty()) {
@@ -48,7 +48,7 @@ class Unverify: CommandExecutor {
                 unverifyPlayer(TypeOfUniqueID.MinecraftTypeOfUniqueID(player.playerUUID))
                 Main.removePlayerFromVerifiedCache(player.playerUUID)
                 Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
             })
             return true
         } else {

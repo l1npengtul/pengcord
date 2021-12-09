@@ -111,7 +111,7 @@ class WhoIs: CommandExecutor {
                         ))
 
                         Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `whois` with ${args[0]}.")
-                        Main.serverLogger.info("[pengcord]: User ${sender.name} ran `whois` with ${args[0]}.")
+                        Main.serverLogger.info("User ${sender.name} ran `whois` with ${args[0]}.")
                         return@Runnable
                     }
                 }

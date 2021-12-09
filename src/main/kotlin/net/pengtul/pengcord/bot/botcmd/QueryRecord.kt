@@ -22,7 +22,7 @@ class QueryRecord: JCDiscordCommandExecutor {
         if (!doesUserHavePermission(sender, "pengcord.punishments.query")) {
             message.addReaction("\uD83D\uDEAB").thenAccept {
                 Main.discordBot.log(LogType.DSCComamndError, "User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
-                Main.serverLogger.info("[pengcord]: User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
+                Main.serverLogger.info("User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
                 CommandHelper.deleteAfterSend("\uD83D\uDEAB: You are not a moderator!", 5, message)
             }
             return

@@ -35,14 +35,14 @@ class PBan: CommandExecutor {
                     // else
                     Utils.mutePlayer(player, TypeOfUniqueID.Unknown(sender.name), until, reason)
                     Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                    Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                    Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                 }
             })
 
             return true
         } else {
             Main.discordBot.log(LogType.DSCComamndError, "User ${sender.name} ran `pban`. Failed due to insufficient permissions.")
-            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `pban`. Failed due to insufficient permissions.")
+            Main.serverLogger.info("User ${sender.name} ran `pban`. Failed due to insufficient permissions.")
             return false
         }
     }

@@ -500,7 +500,7 @@ class QueryPunishment: CommandExecutor {
             return true
         } else {
             Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `querypunishment`. Failed due to insufficient permissions.")
-            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `querypunishment`. Failed due to insufficient permissions.")
+            Main.serverLogger.info("User ${sender.name} ran `querypunishment`. Failed due to insufficient permissions.")
             return false
         }
     }

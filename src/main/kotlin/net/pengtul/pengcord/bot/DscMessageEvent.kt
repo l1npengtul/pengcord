@@ -33,24 +33,25 @@ import org.bukkit.Bukkit
 import org.javacord.api.entity.message.Message
 import org.javacord.api.event.message.MessageCreateEvent
 import org.javacord.api.listener.message.MessageCreateListener
+import org.jsoup.Jsoup
 import java.awt.Color
 
 class DscMessageEvent: MessageCreateListener {
     override fun onMessageCreate(event: MessageCreateEvent?) {
         val message: Message? = event?.message
         message?.let { msg ->
-            if (!(msg.author.isWebhook || msg.author.isBotUser || msg.author.isYourself) && Main.serverConfig.enableSync && !msg.content.startsWith("mc!")){
-                if (msg.channel.idAsString == Main.serverConfig.botChatSyncChannel.toString()){
+            if (!(msg.author.isWebhook || msg.author.isBotUser || msg.author.isYourself) && Main.serverConfig.enableSync && !msg.content.startsWith(Main.serverConfig.botPrefix) /* && Bukkit.getOnlinePlayers().isNotEmpty() */){
+                if (msg.channel.id == Main.serverConfig.botChatSyncChannel){
                     try{
                         if ((Main.discordBot.chatFilterRegex.containsMatchIn(msg.readableContent) || Main.discordBot.chatFilterRegex.containsMatchIn(
                                 msg.attachments.joinToString { "${it.fileName}(${it.url}" }))
-                                && Main.serverConfig.enableLiterallyNineteenEightyFour) {
+                            && Main.serverConfig.enableLiterallyNineteenEightyFour
+                            && Main.serverConfig.bannedWords.isNotEmpty()) {
                             msg.delete().thenAccept {
-                                Main.serverLogger.info("Removed Message: ${msg.content} / ${msg.readableContent}")
-                                Main.serverLogger.info("from user ${msg.author.idAsString} / ${msg.author.discriminatedName}")
+                                Main.serverLogger.info("Removed Message: ${msg.content} / ${msg.readableContent} from user ${msg.author.idAsString} / ${msg.author.discriminatedName}")
                                 Main.discordBot.log(LogType.ChatFilter, "User ${msg.author.idAsString} (${msg.author.discriminatedName}) tripped the word filter with message `${msg.content}` / `${msg.readableContent}`.")
                                 msg.userAuthor.ifPresent { user ->
-                                    user.sendMessage("You cannot say that.")
+                                    user.sendMessage(Main.serverConfig.filteredMessage.replace(Main.discordBot.regex, ""))
                                     Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                                         Main.database.playerGetByDiscordUUID(user.id)?.let { player ->
                                             val matchedWords = Main.discordBot.chatFilterRegex.findAll(msg.content).map {
@@ -66,8 +67,13 @@ class DscMessageEvent: MessageCreateListener {
                         else {
                             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                                 // TODO: Parse Markdown
+
                                 val finalComponent = Component.text()
                                 val textToSend = EmojiParser.parseToAliases(msg.readableContent)
+                                val html = Main.htmlRenderer.render(Main.markdownParser.parse(textToSend))
+                                val toparser = Main.htmlParser.parse(Jsoup.parse(html))
+                                Bukkit.getServer().broadcast(toparser)
+
                                 if (textToSend.isNotBlank()) {
                                     finalComponent
                                         .content("[DSC] ")

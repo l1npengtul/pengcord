@@ -71,7 +71,7 @@ class WhoIs: JCDiscordCommandExecutor {
                     message.reply(userInfoEmbed).thenAccept {
                         Main.discordBot.log(LogType.DSCComamndRan,"User ${sender.discriminatedName} ran command `me`.")
                         Main.discordBot.logEmbed(userInfoEmbed)
-                        Main.serverLogger.info("[pengcord]: User ${sender.discriminatedName} ran command `me`.")
+                        Main.serverLogger.info("User ${sender.discriminatedName} ran command `me`.")
                     }
                 }
             }

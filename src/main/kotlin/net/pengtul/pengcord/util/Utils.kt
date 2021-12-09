@@ -247,6 +247,7 @@ class Utils {
                     Bukkit.getPlayer(player.playerUUID)?.kick(Component.text("Unverify"))
                     Main.serverLogger.info("Sucessfully unverified player ${player.currentUsername} (${player.playerUUID})")
                     Main.discordBot.log(LogType.Verification, "Sucessfully unverified player ${player.currentUsername} (${player.playerUUID})")
+                    Main.removePlayerFromVerifiedCache(player.playerUUID)
                 }
             })
         }
@@ -258,6 +259,7 @@ class Utils {
                     Bukkit.getPlayer(player.playerUUID)?.kick(Component.text("Unverify"))
                     Main.serverLogger.info("Sucessfully unverified player ${player.currentUsername} (${player.playerUUID})")
                     Main.discordBot.log(LogType.Verification, "Sucessfully unverified player ${player.currentUsername} (${player.playerUUID})")
+                    Main.removePlayerFromVerifiedCache(player.playerUUID)
                 }
             })
         }
@@ -525,6 +527,7 @@ class Utils {
             if (Main.serverConfig.enableCrossMinecraftDiscordModeration) {
                 banPlayerDiscord(player, reason)
             }
+            Main.removePlayerFromVerifiedCache(player.playerUUID)
         }
 
         private fun banPlayerInMinecraft(player: UUID, issuer: UUID, until: ExpiryDateTime, reason: String) {
@@ -683,6 +686,22 @@ class Utils {
 
         fun getUptime(): String {
             return Main.periodFormatter.print(Duration(ManagementFactory.getRuntimeMXBean().uptime).toPeriod())
+        }
+
+        fun pingFormatMessage(message: String): String {
+            var formattedMessage = message.split(" ").map {
+                if (it.startsWith("@")) {
+                    val substr = it.substring(1, it.length)
+                    val player = queryPlayerFromString(substr)
+                    if (player != null) {
+                        return "<@${player.discordUUID}>"
+                    }
+                }
+                return it
+            }.joinToString(separator = " ")
+            formattedMessage = formattedMessage.replace("@everyone", "[@ everyone]")
+            formattedMessage = formattedMessage.replace("@here", "[@ here]")
+            return formattedMessage
         }
     }
 }

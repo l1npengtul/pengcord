@@ -24,7 +24,7 @@ class UnMute: CommandExecutor {
                         sender.sendMessage("§cInvalid player!")
 
                         Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid args.")
-                        Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid args.")
+                        Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid args.")
                         return@Runnable
                     }
                     player.let {
@@ -32,7 +32,7 @@ class UnMute: CommandExecutor {
                             Utils.pardonMute(mute, pardoned = true)
                             sender.sendMessage("§aLifted mute ${mute.muteId} for player ${it.currentUsername}(UUID: ${it.playerUUID}/Discord: ${it.discordUUID})!")
                             Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                         }
                     }
                 })
@@ -43,14 +43,14 @@ class UnMute: CommandExecutor {
                         Utils.pardonMute(mute, pardoned = true)
                         sender.sendMessage("§aLifted mute ${mute.muteId} for player UUID: ${mute.playerUUID}/Discord: ${mute.discordUUID}!")
                         Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                        Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                        Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                     }
                 })
             }
             return true
         } else {
             Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `unmute`. Failed due to insufficient permissions.")
-            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `unmute`. Failed due to insufficient permissions.")
+            Main.serverLogger.info("User ${sender.name} ran `unmute`. Failed due to insufficient permissions.")
             return false
         }
     }

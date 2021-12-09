@@ -84,7 +84,7 @@ class Verify: CommandExecutor {
             return true
          } else {
             Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `verify` with arguments. Failed due to error.")
-            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `verify` with arguments. Failed due to error.")
+            Main.serverLogger.info("User ${sender.name} ran `verify` with arguments. Failed due to error.")
             return false
         }
     }

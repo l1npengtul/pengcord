@@ -40,7 +40,7 @@ class UserSQL() {
             // Check if player exists, if they do return early
             val checkExistanceQuery = Players.select { Players.playerUUID eq uuid }
             if (checkExistanceQuery.empty()) {
-                Main.serverLogger.info("[pengcord]: Attempt add $username (${uuid}) to table. Creating user.")
+                Main.serverLogger.info("Attempt add $username (${uuid}) to table. Creating user.")
                 Players.insert {
                     it[playerUUID] = uuid
                     it[discordUUID] = 0
@@ -48,7 +48,7 @@ class UserSQL() {
                     it[firstJoinDateTime] = DateTime.now()
                 }
             } else {
-                Main.serverLogger.info("[pengcord]: Attempt add $username (${uuid}) to table. Already exists.")
+                Main.serverLogger.info("Attempt add $username (${uuid}) to table. Already exists.")
                 Players.update ({Players.playerUUID eq uuid}) {
                     it[currentUsername] = username
                 }

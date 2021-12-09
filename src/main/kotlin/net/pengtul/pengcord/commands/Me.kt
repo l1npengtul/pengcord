@@ -18,7 +18,7 @@ class Me: CommandExecutor {
         if (!sender.hasPermission("pengcord.command.me")) {
             sender.sendMessage("§c§nInvalid Permissions!")
             Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `me`. Failed due to insufficient permissions.")
-            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `me`. Failed due to insufficient permissions.")
+            Main.serverLogger.info("User ${sender.name} ran `me`. Failed due to insufficient permissions.")
         }
 
         if (sender !is Player) {
@@ -80,7 +80,7 @@ class Me: CommandExecutor {
                         ))
 
                         Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${sender.name}\".")
-                        Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${sender.name}\".")
+                        Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${sender.name}\".")
                         return@Runnable
                     }
                 }

@@ -30,13 +30,13 @@ class Mute: CommandExecutor {
                             if (bukkitPlayer.hasPermission("pengcord.punishments.mute") || bukkitPlayer.isOp) {
                                 sender.sendMessage("§cCannot ban another moderator!")
                                 Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `pban`. Failed due to attempt mute other moderator.")
-                                Main.serverLogger.info("[pengcord]: User ${sender.name} ran `pban`. Failed due to attempt mute other moderator.")
+                                Main.serverLogger.info("User ${sender.name} ran `pban`. Failed due to attempt mute other moderator.")
                                 return@Runnable
                             }
                             mutePlayer(player, TypeOfUniqueID.MinecraftTypeOfUniqueID(senderPlayer.playerUUID), until, reason)
 
                             Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                         }
                         return@Runnable
                     }
@@ -44,14 +44,14 @@ class Mute: CommandExecutor {
                     mutePlayer(player, TypeOfUniqueID.Unknown(sender.name), until, reason)
 
                     Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                    Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                    Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                 }
             })
 
             return true
         } else {
             Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `mute`. Failed due to insufficient permissions.")
-            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `mute`. Failed due to insufficient permissions.")
+            Main.serverLogger.info("User ${sender.name} ran `mute`. Failed due to insufficient permissions.")
             return false
         }
     }

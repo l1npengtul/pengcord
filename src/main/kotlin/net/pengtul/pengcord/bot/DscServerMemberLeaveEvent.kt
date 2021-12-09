@@ -14,7 +14,7 @@ class DscServerMemberLeaveEvent: ServerMemberLeaveListener {
                     Main.database.playerGetByDiscordUUID(userId)?.let { player ->
                         Main.database.playerUpdateVerify(player.playerUUID, UpdateVerify.Unverify)
                         Main.discordBot.log(LogType.Verification, "Synced Discord Leave for player ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}/${event.user.discriminatedName})")
-                        Main.serverLogger.info("[pengcord]: Synced Discord Leave for player ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}/${event.user.discriminatedName})")
+                        Main.serverLogger.info("Synced Discord Leave for player ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}/${event.user.discriminatedName})")
                     }
                 })
             }

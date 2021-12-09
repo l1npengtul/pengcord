@@ -22,7 +22,7 @@ class Ban: JCDiscordCommandExecutor {
         if (!doesUserHavePermission(sender, "pengcord.punishment.ban")) {
             message.addReaction("\uD83D\uDEAB").thenAccept {
                 Main.discordBot.log(LogType.DSCComamndError, "User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
-                Main.serverLogger.info("[pengcord]: User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
+                Main.serverLogger.info("User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
                 CommandHelper.deleteAfterSend("\uD83D\uDEAB: You are not a moderator!", 5, message)
             }
             return
@@ -46,13 +46,13 @@ class Ban: JCDiscordCommandExecutor {
                 if (!doesUserHavePermission(it, "pengcord.punishment.ban")) {
                     banPlayer(player, TypeOfUniqueID.DiscordTypeOfUniqueID(sender.id), time, reason)
                     message.addReaction("✅").thenAccept {
-                        Main.serverLogger.info("[pengcord]: ${sender.discriminatedName}(${sender.id}) sucessfully banned ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}) from discord.")
+                        Main.serverLogger.info("${sender.discriminatedName}(${sender.id}) sucessfully banned ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}) from discord.")
                         Main.discordBot.log(LogType.DSCComamndRan, "${sender.discriminatedName}(${sender.id}) sucessfully banned ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}) from discord.")
                     }
                 } else {
                     message.addReaction("❌").thenAccept {
                         CommandHelper.deleteAfterSend("❌: Cannot ban another moderator!", 5, message)
-                        Main.serverLogger.info("[pengcord]: Attempt by ${sender.discriminatedName}(${sender.id}) to ban ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}) but failed due to target being another moderator.")
+                        Main.serverLogger.info("Attempt by ${sender.discriminatedName}(${sender.id}) to ban ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}) but failed due to target being another moderator.")
                         Main.discordBot.log(LogType.DSCComamndError,"Attempt by ${sender.discriminatedName}(${sender.id}) to ban ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}) but failed due to target being another moderator.")
                     }
                 }

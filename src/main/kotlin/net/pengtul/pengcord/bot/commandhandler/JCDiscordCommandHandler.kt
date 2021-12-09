@@ -46,7 +46,7 @@ class JCDiscordCommandHandler(api: DiscordApi, prefix: String, autoHelp: Boolean
                 commandChannels.forEach {
                     it.addMessageCreateListener(commandListener)
                 }
-                Main.serverLogger.info("[pengcord]: Added Command ${command.commandName}")
+                Main.serverLogger.info("Added Command ${command.commandName}")
             }
         }
     }

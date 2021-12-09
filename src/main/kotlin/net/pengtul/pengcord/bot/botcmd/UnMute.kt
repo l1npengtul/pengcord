@@ -21,7 +21,7 @@ class UnMute: JCDiscordCommandExecutor {
         if (!Utils.doesUserHavePermission(sender, "pengcord.punishment.mute")) {
             message.addReaction("\uD83D\uDEAB").thenAccept {
                 Main.discordBot.log(LogType.DSCComamndError, "User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
-                Main.serverLogger.info("[pengcord]: User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
+                Main.serverLogger.info("User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
                 CommandHelper.deleteAfterSend("\uD83D\uDEAB: You are not a moderator!", 5, message)
             }
             return
@@ -41,7 +41,7 @@ class UnMute: JCDiscordCommandExecutor {
                         message.addReaction("✅").thenAccept {
                             CommandHelper.deleteAfterSend("§aLifted mute ${mutes.muteId} for player UUID: ${mutes.playerUUID}/Discord: ${mutes.discordUUID}!", 5, message)
                             Main.discordBot.log(LogType.DSCComamndRan, "User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                            Main.serverLogger.info("[pengcord]: User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            Main.serverLogger.info("User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                         }
                     }
                 }
@@ -54,7 +54,7 @@ class UnMute: JCDiscordCommandExecutor {
                     message.addReaction("✅").thenAccept {
                         CommandHelper.deleteAfterSend("§aLifted mute ${mute.muteId} for player UUID: ${mute.playerUUID}/Discord: ${mute.discordUUID}!", 5, message)
                         Main.discordBot.log(LogType.DSCComamndRan, "User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\".")
-                        Main.serverLogger.info("[pengcord]: User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                        Main.serverLogger.info("User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                     }
                     return@Runnable
                 }

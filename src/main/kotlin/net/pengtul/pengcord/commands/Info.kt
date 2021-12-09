@@ -48,7 +48,7 @@ class Info: CommandExecutor {
             sender.sendMessage(serverInfoText)
             
             Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args}\".")
-            Main.serverLogger.info("[pengcord]: User ${sender.name} ran `${this.javaClass.name}` with args \"${args}\".")
+            Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args}\".")
             return true
         }
         else {

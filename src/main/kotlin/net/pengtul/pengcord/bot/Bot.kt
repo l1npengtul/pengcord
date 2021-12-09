@@ -25,6 +25,7 @@ import net.pengtul.pengcord.bot.botcmd.*
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandHandler
 import net.pengtul.pengcord.error.DiscordLoginFailException
 import net.pengtul.pengcord.main.Main
+import net.pengtul.pengcord.util.Utils.Companion.pingFormatMessage
 import org.bukkit.entity.Player
 import org.javacord.api.DiscordApi
 import org.javacord.api.DiscordApiBuilder
@@ -52,7 +53,7 @@ class Bot {
     private lateinit var webhook: JavacordWebhookClient
     var commandHandler: JCDiscordCommandHandler
     var chatFilterRegex: Regex
-    private val regex: Regex = """(§.)""".toRegex()
+    val regex: Regex = """(§.)""".toRegex()
     lateinit var discordServer: Server
 
     init {
@@ -148,7 +149,7 @@ class Bot {
                 permissions.setAllowed(PermissionType.MANAGE_MESSAGES)
             }
 
-            Main.serverLogger.info("[pengcord]: Invite to server using:")
+            Main.serverLogger.info("Invite to server using:")
             Main.serverLogger.info(discordApi.createBotInvite(permissions.build()))
             throw DiscordLoginFailException("Failed to get discord server")
         }
@@ -156,7 +157,7 @@ class Bot {
             this.discordApi.getServerById(it).ifPresentOrElse (
                 {
                     server ->
-                    Main.serverLogger.info("[pengcord]: Connected to discord server ${server.name}")
+                    Main.serverLogger.info("Connected to discord server ${server.name}")
                     discordServer = server
                 },
                 {
@@ -179,7 +180,7 @@ class Bot {
                         permissions.setAllowed(PermissionType.MANAGE_MESSAGES)
                     }
 
-                    Main.serverLogger.info("[pengcord]: Invite to server using:")
+                    Main.serverLogger.info("Invite to server using:")
                     Main.serverLogger.info(discordApi.createBotInvite(permissions.build()))
                     throw DiscordLoginFailException("Failed to get discord server")
                 }
@@ -313,14 +314,14 @@ class Bot {
     }
 
     fun sendMessagetoWebhook(message: String, usrname: String, player: Player){
-        Main.serverLogger.info(message)
-        if (this::webhook.isInitialized && message.isNotBlank() && usrname.isNotBlank()) {
+        val fmt = pingFormatMessage(message)
+        if (this::webhook.isInitialized && fmt.isNotBlank() && usrname.isNotBlank()) {
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                 val senderUsername = if (usrname.lowercase() != "clyde") usrname else "BlydE"
                 val webhookMessage = WebhookMessageBuilder()
                     .setUsername(senderUsername)
                     .setAvatarUrl(Main.getDownloadSkinURL(player.uniqueId))
-                    .setContent(message)
+                    .setContent(fmt)
                     .build()
                 webhook.send(webhookMessage)
             })

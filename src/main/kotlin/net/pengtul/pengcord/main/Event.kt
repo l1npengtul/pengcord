@@ -48,7 +48,7 @@ class Event : Listener{
         Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
             Main.insertIntoVerifiedCache(event.uniqueId)
             if (Main.checkIfPlayerVerifiedCache(event.uniqueId)) {
-                Main.serverLogger.info("[pengcord]: User ${event.name} (${event.uniqueId}) connected, is verified. Adding to cache.")
+                Main.serverLogger.info("User ${event.name} (${event.uniqueId}) connected, is verified. Adding to cache.")
             }
         })
     }
@@ -107,7 +107,7 @@ class Event : Listener{
     @EventHandler
     fun onPlayerChatEvent(event: AsyncChatEvent) {
         if (event.isAsynchronous) {
-            val message = event.message().toStr().replace("@", "@_")
+            val message = event.message().toStr()
             if (!Main.database.playerIsVerified(TypeOfUniqueID.MinecraftTypeOfUniqueID(event.player.uniqueId))) {
                 Main.discordBot.log(LogType.Verification, "<${event.player.name}> Attempted to say \" $message \"" +
                         "\nbut user is not verified!")
