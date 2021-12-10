@@ -5,6 +5,8 @@ author: l1npengtul <l1npengtul@protonmail.com>
 depend:
   - LuckPerms
   - Vault
+softdepend:
+  - ProtocolLib
 api-version: 1.18
 description: Discord <-> Minecraft Verification and Sync Plugin
 load: STARTUP
@@ -33,6 +35,18 @@ commands:
     description: Gets Server RAM usage and uptime
     usage: /info
     permission: pengcord.command.info
+  pignore:
+    description: Ignore a user (You won't see their Discord -> Minecraft sync anymore)
+    usage: /pignore <user>
+    permission: pengcord.command.ignore
+  pignorelist:
+    description: See a user's ignore list (empty for your own)
+    usage: /pignore <user>
+    permission: pengcord.command.ignore
+  puignore:
+    description: Unignore a user (You will see their Discord -> Minecraft sync again)
+    usage: /puignore <user>
+    permission: pengcord.command.ignore
   git:
     description: Gets link to development github
     usage: /git
@@ -118,6 +132,12 @@ permissions:
         default: false
       pengcord.punishments.query:
         description: Query the punishments of other players
+        default: false
+  pengcord.ignore:
+    description: Commands related to /pignore
+    children:
+      pengcord.ignore.listothers:
+        description: Query the ignorelist of other players
         default: false
 
 

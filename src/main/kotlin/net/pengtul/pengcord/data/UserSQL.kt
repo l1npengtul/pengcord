@@ -14,12 +14,11 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.io.File
-import java.lang.Exception
 import java.lang.IllegalArgumentException
 import java.util.*
 
 // WARNING: Every one of these must be done **inside** of a AsyncRun in bukkit!
-class UserSQL() {
+class UserSQL {
     private val database: Database = Database.connect(url = "jdbc:h2:./plugins/pengcord/pengcordstore;DB_CLOSE_DELAY=-1;", driver = "org.h2.Driver")
 
     init {
@@ -745,6 +744,63 @@ class UserSQL() {
                 Bans.update ({Bans.banId eq ban}) {
                     it[Bans.expiryState] = expiry
                 }
+            }
+        }
+    }
+
+    fun queryIgnoresBySourcePlayerUUID(uuid: UUID): List<Ignore> {
+        return transaction(this.database) {
+            val ignores = mutableListOf<Ignore>()
+            Ignores.select {Ignores.sourcePlayerUUID eq uuid}.forEach {
+                ignores.add(ignoreFromResultRow(it))
+            }
+            return@transaction ignores
+        }
+    }
+
+    fun ignoreById(ignoreId: Long): Ignore? {
+        return transaction(this.database) {
+            try {
+                Ignores.select {Ignores.ignoreId eq ignoreId}.singleOrNull()?.let {
+                    return@transaction ignoreFromResultRow(it)
+                }
+                return@transaction null
+            } catch (_: Exception) {
+                return@transaction null
+            }
+        }
+    }
+
+    fun addIgnore(source: UUID, destination: UUID) {
+        transaction(this.database) {
+            val sourceIgnores = this@UserSQL.queryIgnoresBySourcePlayerUUID(source).filter {
+                it.target == destination
+            }
+            if (sourceIgnores.isEmpty()) {
+                Ignores.insert {
+                    it[sourcePlayerUUID] = source
+                    it[targetPlayerUUID] = destination
+                }
+            }
+        }
+    }
+
+    fun removeIgnore(ignoreId: Long) {
+        val ignore = this.ignoreById(ignoreId)
+        ignore?.let {
+            transaction(this.database) {
+                Ignores.deleteWhere { Ignores.ignoreId eq ignoreId }
+            }
+        }
+    }
+
+    fun removeIgnoreOfPlayers(source: UUID, target: UUID) {
+        val ignoresOfPlayer = this.queryIgnoresBySourcePlayerUUID(source).filter {
+            it.target == target
+        }
+        transaction(this.database) {
+            ignoresOfPlayer.forEach { ig ->
+                Ignores.deleteWhere { Ignores.ignoreId eq ig.ignoreId }
             }
         }
     }

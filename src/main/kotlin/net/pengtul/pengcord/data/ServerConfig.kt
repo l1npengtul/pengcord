@@ -39,6 +39,8 @@ class ServerConfig(rawConfig: FileConfiguration) {
     val discordMutedRole: Long
     val discordBanDeleteMessageDays: Int
 
+    val enableLog4JMitigations: Boolean
+
     init {
         enableVerify = rawConfig.getBoolean("enable-verify")
         discordServerLink = rawConfig.getString("discord-server-link")
@@ -84,6 +86,7 @@ class ServerConfig(rawConfig: FileConfiguration) {
         }
         discordBanDeleteMessageDays = days
 
+        enableLog4JMitigations = rawConfig.getBoolean("enable-log4j-mitigations")
     }
 
     companion object {

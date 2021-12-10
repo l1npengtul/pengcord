@@ -35,6 +35,10 @@ bot-command-channels:
 bot-logging-channel: 0
 bot-server: 0
 
+# Messages that will bypass the `!isBot` requirement for these with following roles
+sync-ignore-notbot-roles:
+  - 0
+
 # Webhook ID to manage. Do not edit, managed by bot
 webhook-url: 0
 
@@ -71,3 +75,6 @@ discord-onban-delete-message-days: 0
 # first time booting (does DB exist?)
 # Do not edit
 first-time: true
+
+# Enables the Log4J mitigations. Recommended to keep on to protect dated clients.
+enable-log4j-mitigations: true

@@ -54,8 +54,8 @@ class Info: CommandExecutor {
         else {
             Main.discordBot.log(LogType.MCComamndError,"User ${sender.name} ran `info`. Failed due to invalid permissions.")
             Main.serverLogger.info("User ${sender.name} ran `info`. Failed due to invalid permissions.")
-
-            return true
+            sender.sendMessage("§cYou do not have permission to run this command!")
+            return false
         }
     }
 }

@@ -21,18 +21,14 @@ package net.pengtul.pengcord.main
 // If you're reviewing this, or have to read this
 // I'm sorry.
 
+import com.comphenix.protocol.ProtocolLibrary
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
-import com.vladsch.flexmark.ext.tables.TablesExtension
 import com.vladsch.flexmark.html.HtmlRenderer
 import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.util.data.DataHolder
 import com.vladsch.flexmark.util.data.MutableDataSet
 import com.vladsch.flexmark.util.misc.Extension
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.TextDecoration
 import net.milkbowl.vault.chat.Chat
-import net.pengtul.pengcord.util.Utils.Companion.banPardon
-import net.pengtul.pengcord.util.Utils.Companion.pardonMute
 import net.pengtul.pengcord.bot.Bot
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.commands.*
@@ -43,6 +39,8 @@ import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.mdparse.spoiler.SpoilerExtension
 import net.pengtul.pengcord.mdparse.underline.UnderlineExtension
 import net.pengtul.pengcord.util.PengMDHTMLParser
+import net.pengtul.pengcord.util.Utils.Companion.banPardon
+import net.pengtul.pengcord.util.Utils.Companion.pardonMute
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandExecutor
 import org.bukkit.configuration.file.FileConfiguration
@@ -312,6 +310,18 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         discordBot.log(LogType.ServerStartup, "Server Startup and Plugin Initialization successful.")
         serverLogger.info {
             "Sucessfully Started!"
+        }
+
+        if (serverConfig.enableLog4JMitigations) {
+            if (Bukkit.getServer().pluginManager.getPlugin("ProtocolLib") != null) {
+                // enable protocol lib
+                val manager = ProtocolLibrary.getProtocolManager()
+                manager.addPacketListener(PacketEvent())
+                serverLogger.info("Log4J Mitigations enabled!")
+            }
+            else {
+                serverLogger.warning("Log4J Mitigations enabled but ProtocolLib was not found! Install protocollib and restart to enable mitigations!")
+            }
         }
 
         if (serverConfig.minecraftServerIp.isNullOrEmpty()) {

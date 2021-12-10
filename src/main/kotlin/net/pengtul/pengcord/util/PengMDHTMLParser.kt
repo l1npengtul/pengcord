@@ -1,20 +1,17 @@
 package net.pengtul.pengcord.util
 
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
-import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.pengtul.pengcord.main.Main
 import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
 import org.jsoup.nodes.Node
 import org.jsoup.nodes.TextNode
 import org.jsoup.select.NodeVisitor
 
-class PengMDHTMLParser() {
+class PengMDHTMLParser {
     private val validNodes = mutableListOf<String>()
 
     enum class TokenType(val decoration: TextDecoration) {
@@ -85,10 +82,16 @@ class PengMDHTMLParser() {
                     if (node is TextNode && node.wholeText.isNotBlank()) {
                         Main.serverLogger.info("Processing node ${node.wholeText}")
                         val compToAdd = Component.text()
-                            .content(node.wholeText)
-                        if (insideQuote) {
-                              compToAdd.color(NamedTextColor.GREEN)
-                        } else if (insideCodeBlock) {
+
+                        node.wholeText.lines().forEach {
+                            val lineComponent = Component.text(it)
+                            if (it.startsWith(">")) {
+                                lineComponent.color(NamedTextColor.GREEN)
+                            }
+                            compToAdd.append(lineComponent)
+                        }
+
+                        if (insideCodeBlock) {
                             compToAdd.style(Style.style(TextDecoration.ITALIC))
                             compToAdd.color(NamedTextColor.DARK_GRAY)
                         } else if (insideSpoiler) {
