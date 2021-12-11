@@ -28,6 +28,13 @@ class Ban: JCDiscordCommandExecutor {
             return
         }
 
+        if (args.size != 3) {
+            message.addReaction("\uD83D\uDEAB").thenAccept {
+                CommandHelper.deleteAfterSend("\uD83D\uDEAB: Improper arguments!", 5, message)
+            }
+            return
+        }
+
         val toQuery = if (message.mentionedUsers.size == 1) {
             message.mentionedUsers[0].id.toString()
         } else {

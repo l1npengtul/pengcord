@@ -11,7 +11,7 @@ import org.bukkit.command.CommandSender
 
 class PUnban: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (args.size <= 2) {
+        if (args.size != 2) {
             sender.sendMessage("§cExpected 2 or 1 arguments. Usage: /punban <ban Id/add> <player?>")
             return false
         }

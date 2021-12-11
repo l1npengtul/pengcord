@@ -21,6 +21,8 @@ class Me: JCDiscordCommandExecutor {
         Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
             Main.database.playerGetByDiscordUUID(sender.id)?.let { dbPlayer ->
                 Main.database.playerGetCurrentTimePlayed(player = dbPlayer.playerUUID).onSuccess { time ->
+
+
                     val userInfoEmbed = EmbedBuilder()
                         .setAuthor("Player Information for Discord User ${sender.discriminatedName}")
                         .setTitle("Player Info:")

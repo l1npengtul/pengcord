@@ -26,6 +26,7 @@ class UnMute: JCDiscordCommandExecutor {
             }
             return
         }
+
         if (args[0].lowercase() == "all") {
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                 val player = Utils.queryPlayerFromString(args[1])

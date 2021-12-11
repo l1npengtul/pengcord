@@ -10,7 +10,7 @@ import java.util.*
 object Players: Table() {
     val playerUUID = uuid("playerUUID").uniqueIndex()
     val currentUsername = varchar("currentUsername", 17).default("")
-    val discordUUID = long("discordUUID")
+    val discordUUID = long("discordUUID").default(8)
     val firstJoinDateTime = datetime("firstJoinDateTime").default(Main.neverHappenedDateTime)
     val verifiedDateTime = datetime("verifiedDateTime").default(Main.neverHappenedDateTime)
     val secondsPlayed = long("hoursPlayed").default(0)
@@ -18,7 +18,7 @@ object Players: Table() {
     val isMuted = bool("isMuted").default(false)
     val deaths = long("deaths").default(0)
 
-    override val primaryKey = PrimaryKey(playerUUID, name = "PlayerUUID")
+    override val primaryKey = PrimaryKey(playerUUID)
 }
 
 data class Player(

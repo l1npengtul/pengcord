@@ -227,9 +227,9 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
 
         fun checkIfPlayerPendingVerification(uuid: UUID): Boolean {
             if (playersAwaitingVerification.containsValue(uuid)) {
-                return false
+                return true
             }
-            return true
+            return false
         }
     }
 
@@ -324,15 +324,14 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
             }
         }
 
-        if (serverConfig.minecraftServerIp.isNullOrEmpty()) {
+        if (serverConfig.minecraftServerIp.isNullOrBlank()) {
             discordBot.sendMessageToDiscord("Server Started!")
         } else {
-            discordBot.sendMessageToDiscord("Server Started, get on at ${server.minecraftVersion}")
+            discordBot.sendMessageToDiscord("Server Started, get on at ${serverConfig.minecraftServerIp}!")
         }
     }
 
     override fun onDisable() {
-        scheduler.cancelTasks(pengcord)
         // Save player playtimes
         playersCurrentJoinTime.forEach {
             database.playerUpdateTimePlayed(it.key)
@@ -341,6 +340,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         serverConfig.saveToConfigFile(this.config)
         this.saveConfig()
         database.close()
+        scheduler.cancelTasks(pengcord)
         try {
             discordBot.sendMessageToDiscord("Server Shutting Down! See you soon!")
             discordBot.log(LogType.ServerShutdown, "Server Shutdown initiated.")

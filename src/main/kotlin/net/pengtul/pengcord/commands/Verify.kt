@@ -48,7 +48,8 @@ class Verify: CommandExecutor {
                                 val secretKey = Main.generateUniqueKey()
                                 Main.playersAwaitingVerification[secretKey] = sender.uniqueId
 
-                                val message = Component.text("§aPlease type `${Main.serverConfig.botPrefix}verify ${sender.name} $secretKey` in `${Main.discordBot.discordServer.name}/#${commandChannel.name}` to finish your verification! Note that if you made a mistake, log out and log back in.\n§r§c§lDO NOT SHARE THIS.")
+                                val message = Component.text()
+                                    .content("§aPlease type `${Main.serverConfig.botPrefix}verify ${sender.name} $secretKey` in `${Main.discordBot.discordServer.name}/#${commandChannel.name}` to finish your verification! Note that if you made a mistake, log out and log back in.\n§r§c§lDO NOT SHARE THIS.")
                                     .hoverEvent(
                                         HoverEvent.hoverEvent(
                                             HoverEvent.Action.SHOW_TEXT,
@@ -61,13 +62,15 @@ class Verify: CommandExecutor {
                                             "${Main.serverConfig.botPrefix}verify ${sender.name} $secretKey"
                                         )
                                     )
+                                    .build()
 
                                 sender.sendMessage(message)
 
                                 Main.discordBot.log(
                                     LogType.MCComamndRan,
-                                    "User ${sender.name} ran `verify` with arguments ${serverMember.idAsString} (${serverMember.discriminatedName}). Successful, awaiting verification."
+                                    "User ${sender.name} ran `verify` with arguments ${serverMember.idAsString} (${serverMember.discriminatedName}) and secret key ${secretKey}. Successful, awaiting verification."
                                 )
+                                return@Runnable
                             } else {
                                 Main.discordBot.log(
                                     LogType.MCComamndError,

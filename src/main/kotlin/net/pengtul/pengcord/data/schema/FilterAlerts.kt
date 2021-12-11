@@ -11,7 +11,7 @@ import java.util.*
 object FilterAlerts: IdTable<Long>() {
     val filterAlertId = long("filterAlertId").autoIncrement().uniqueIndex()
     val playerUUID = (uuid("playerUUID") references Players.playerUUID)
-    val discordUUID = (long("discordUUID") references Players.discordUUID)
+    val discordUUID = long("discordUUID")
     val issuedOn = datetime("issuedOn")
     val context = varchar("context", 256)
     val word = varchar("word", 50)

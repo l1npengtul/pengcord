@@ -14,7 +14,7 @@ import java.util.*
 object Warns: IdTable<Long>() {
     val warnId = long("warnId").autoIncrement().uniqueIndex()
     val playerUUID = (uuid("playerUUID") references Players.playerUUID)
-    val discordUUID = (long("discordUUID") references Players.discordUUID)
+    val discordUUID = long("discordUUID")
     // Format
     // Minecraft Issuer: M [username-16] [uuid-32]
     // Discord Issuer: D [username-32]#[discriminator-4] [long-20]

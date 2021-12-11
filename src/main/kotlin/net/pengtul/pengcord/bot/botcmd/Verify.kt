@@ -9,7 +9,6 @@ import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.data.interact.UpdateVerify
 import net.pengtul.pengcord.main.Main
 import net.pengtul.pengcord.util.toComponent
-import net.pengtul.pengcord.util.toComponentNewline
 import org.bukkit.Bukkit
 import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.user.User

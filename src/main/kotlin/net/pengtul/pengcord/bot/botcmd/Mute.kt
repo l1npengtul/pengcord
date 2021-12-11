@@ -29,11 +29,20 @@ class Mute: JCDiscordCommandExecutor {
             return
         }
 
+        if (args.size != 3) {
+            message.addReaction("\uD83D\uDEAB").thenAccept {
+                CommandHelper.deleteAfterSend("\uD83D\uDEAB: Improper arguments!", 5, message)
+            }
+            return
+        }
+
         val toQuery = if (message.mentionedUsers.size == 1) {
             message.mentionedUsers[0].id.toString()
         } else {
             args[0]
         }
+
+
         val reason = args[1]
         val time = parseTimeFromString(args[2])
         if (time == null) {

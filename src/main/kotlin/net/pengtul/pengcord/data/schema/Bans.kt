@@ -14,7 +14,7 @@ import java.util.*
 object Bans: IdTable<Long>() {
     val banId = long("id").autoIncrement().uniqueIndex()
     val playerUUID = (uuid("playerUUID") references Players.playerUUID)
-    val discordUUID = (long("discordUUID") references Players.discordUUID)
+    val discordUUID = long("discordUUID")
     // Format
     // Minecraft Issuer: M [username-16] [uuid-32]
     // Discord Issuer: D [username-32]#[discriminator-4] [long-20]
@@ -42,14 +42,14 @@ data class Ban(
 
 fun banFromResultRow(resRow: ResultRow): Ban {
     return Ban(
-        resRow[Mutes.muteId],
-        resRow[Mutes.playerUUID],
-        resRow[Mutes.discordUUID],
-        resRow[Mutes.issuedBy],
-        resRow[Mutes.isPermanent],
-        resRow[Mutes.issuedOn],
-        resRow[Mutes.expiresOn],
-        resRow[Mutes.reason],
-        resRow[Mutes.expiryState],
+        resRow[Bans.banId],
+        resRow[Bans.playerUUID],
+        resRow[Bans.discordUUID],
+        resRow[Bans.issuedBy],
+        resRow[Bans.isPermanent],
+        resRow[Bans.issuedOn],
+        resRow[Bans.expiresOn],
+        resRow[Bans.reason],
+        resRow[Bans.expiryState],
     )
 }

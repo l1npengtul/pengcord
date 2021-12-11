@@ -34,13 +34,13 @@ class QueryRecord: CommandExecutor {
                             val alerts = Main.database.queryPlayerFilterAlertsByPlayerMinecraft(it).map { filterAlert ->
                                 "§r§5${filterAlert.filterAlertId}§r§a(${filterAlert.word})".toComponent(
                                     HoverEvent.showText("Click to query!".toComponent()),
-                                    ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/pengcord:querypunishment $whatToQuery ${filterAlert.filterAlertId}")
+                                    ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/pengcord:querypunishment f ${filterAlert.filterAlertId}")
                                 )
                             }
                             if (alerts.isNotEmpty()) {
                                 sender.sendMessage(
                                     Component.text()
-                                        .content("=====Filter Alert Query for player ${playerToQuery.currentUsername}=====")
+                                        .content("=====Filter Alert Query for player ${playerToQuery.currentUsername}=====\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .append(*alerts.toTypedArray())
                                         .build()
@@ -52,13 +52,13 @@ class QueryRecord: CommandExecutor {
                             val warns = Main.database.queryPlayerWarnsByPlayerMinecraft(it).map { warn ->
                                 "§r§5${warn.warnId}§r§a(${warn.issuedBy})".toComponent(
                                     HoverEvent.showText("Click to query!".toComponent()),
-                                    ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/pengcord:querypunishment $whatToQuery ${warn.warnId}")
+                                    ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/pengcord:querypunishment w ${warn.warnId}")
                                 )
                             }
                             if (warns.isNotEmpty()) {
                                 sender.sendMessage(
                                     Component.text()
-                                        .content("=====Warns Query for player ${playerToQuery.currentUsername}=====")
+                                        .content("=====Warns Query for player ${playerToQuery.currentUsername}=====\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .append(*warns.toTypedArray())
                                         .build()
@@ -71,38 +71,38 @@ class QueryRecord: CommandExecutor {
                             val expiredMutes = mutes.filter { mute -> mute.expiryState == ExpiryState.Expired }.map { mute ->
                                 "§r§5${mute.muteId}§r§a(${mute.issuedBy})".toComponent(
                                     HoverEvent.showText("Click to query!".toComponent()),
-                                    ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/pengcord:querypunishment $whatToQuery ${mute.muteId}")
+                                    ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/pengcord:querypunishment m ${mute.muteId}")
                                 )
                             }
                             val pardonedMutes = mutes.filter { mute -> mute.expiryState == ExpiryState.Pardoned }.map { mute ->
                                 "§r§5${mute.muteId}§r§a(${mute.issuedBy})".toComponent(
                                     HoverEvent.showText("Click to query!".toComponent()),
-                                    ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/pengcord:querypunishment $whatToQuery ${mute.muteId}")
+                                    ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/pengcord:querypunishment m ${mute.muteId}")
                                 )
                             }
                             val ongoingMutes = mutes.filter { mute -> mute.expiryState == ExpiryState.OnGoing }.map { mute ->
                                 "§r§5${mute.muteId}§r§a(${mute.issuedBy})".toComponent(
                                     HoverEvent.showText("Click to query!".toComponent()),
-                                    ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/pengcord:querypunishment $whatToQuery ${mute.muteId}")
+                                    ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/pengcord:querypunishment m ${mute.muteId}")
                                 )
                             }
 
                             if (mutes.isNotEmpty()) {
                                 val muteComponent = Component.text()
-                                    .content("=====Mutes Query for player ${playerToQuery.currentUsername}=====")
+                                    .content("=====Mutes Query for player ${playerToQuery.currentUsername}=====\n")
                                     .style(Style.style(NamedTextColor.GREEN))
                                     .append(
-                                        Component.text("====EXPIRED====")
+                                        Component.text("====EXPIRED====\n")
                                             .style(Style.style(NamedTextColor.GREEN))
                                     )
                                     .append(*expiredMutes.toTypedArray())
                                     .append(
-                                        Component.text("====PARDONED====")
+                                        Component.text("====PARDONED====\n")
                                             .style(Style.style(NamedTextColor.GREEN))
                                     )
                                     .append(*pardonedMutes.toTypedArray())
                                     .append(
-                                        Component.text("====ONGOING====")
+                                        Component.text("====ONGOING====\n")
                                             .style(Style.style(NamedTextColor.GREEN))
                                     )
                                     .append(*ongoingMutes.toTypedArray())
@@ -116,38 +116,38 @@ class QueryRecord: CommandExecutor {
                             val expiredBans = bans.filter { mute -> mute.expiryState == ExpiryState.Expired }.map { ban ->
                                 "§r§5${ban.banId}§r§a(${ban.issuedBy})".toComponent(
                                     HoverEvent.showText("Click to query!".toComponent()),
-                                    ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/pengcord:querypunishment $whatToQuery ${ban.banId}")
+                                    ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/pengcord:querypunishment b ${ban.banId}")
                                 )
                             }
                             val pardonedBans = bans.filter { mute -> mute.expiryState == ExpiryState.Pardoned }.map { ban ->
                                 "§r§5${ban.banId}§r§a(${ban.issuedBy})".toComponent(
                                     HoverEvent.showText("Click to query!".toComponent()),
-                                    ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/pengcord:querypunishment $whatToQuery ${ban.banId}")
+                                    ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/pengcord:querypunishment b ${ban.banId}")
                                 )
                             }
                             val ongoingBans = bans.filter { mute -> mute.expiryState == ExpiryState.OnGoing }.map { ban ->
                                 "§r§5${ban.banId}§r§a(${ban.issuedBy})".toComponent(
                                     HoverEvent.showText("Click to query!".toComponent()),
-                                    ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/pengcord:querypunishment $whatToQuery ${ban.banId}")
+                                    ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, "/pengcord:querypunishment b ${ban.banId}")
                                 )
                             }
 
                             if (bans.isNotEmpty()) {
                                 val bansComponent = Component.text()
-                                    .content("=====Bans Query for player ${playerToQuery.currentUsername}=====")
+                                    .content("=====Bans Query for player ${playerToQuery.currentUsername}=====\n")
                                     .style(Style.style(NamedTextColor.GREEN))
                                     .append(
-                                        Component.text("====EXPIRED====")
+                                        Component.text("====EXPIRED====\n")
                                             .style(Style.style(NamedTextColor.GREEN))
                                     )
                                     .append(*expiredBans.toTypedArray())
                                     .append(
-                                        Component.text("====PARDONED====")
+                                        Component.text("====PARDONED====\n")
                                             .style(Style.style(NamedTextColor.GREEN))
                                     )
                                     .append(*pardonedBans.toTypedArray())
                                     .append(
-                                        Component.text("====ONGOING====")
+                                        Component.text("====ONGOING====\n")
                                             .style(Style.style(NamedTextColor.GREEN))
                                     )
                                     .append(*ongoingBans.toTypedArray())
@@ -173,7 +173,7 @@ class QueryRecord: CommandExecutor {
                             if (alerts.isNotEmpty()) {
                                 sender.sendMessage(
                                     Component.text()
-                                        .content("=====Filter Alert Query for player ${playerToQuery.currentUsername}=====")
+                                        .content("=====Filter Alert Query for player ${playerToQuery.currentUsername}=====\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .append(*alerts.toTypedArray())
                                         .build()
@@ -196,7 +196,7 @@ class QueryRecord: CommandExecutor {
                             if (warns.isNotEmpty()) {
                                 sender.sendMessage(
                                     Component.text()
-                                        .content("=====Warns Query for player ${playerToQuery.currentUsername}=====")
+                                        .content("=====Warns Query for player ${playerToQuery.currentUsername}=====\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .append(*warns.toTypedArray())
                                         .build()
@@ -232,20 +232,20 @@ class QueryRecord: CommandExecutor {
 
                             if (mutes.isNotEmpty()) {
                                 val muteComponent = Component.text()
-                                    .content("=====Mutes Query for player ${playerToQuery.currentUsername}=====")
+                                    .content("=====Mutes Query for player ${playerToQuery.currentUsername}=====\n")
                                     .style(Style.style(NamedTextColor.GREEN))
                                     .append(
-                                        Component.text("====EXPIRED====")
+                                        Component.text("====EXPIRED====\n")
                                             .style(Style.style(NamedTextColor.GREEN))
                                     )
                                     .append(*expiredMutes.toTypedArray())
                                     .append(
-                                        Component.text("====PARDONED====")
+                                        Component.text("====PARDONED====\n")
                                             .style(Style.style(NamedTextColor.GREEN))
                                     )
                                     .append(*pardonedMutes.toTypedArray())
                                     .append(
-                                        Component.text("====ONGOING====")
+                                        Component.text("====ONGOING====\n")
                                             .style(Style.style(NamedTextColor.GREEN))
                                     )
                                     .append(*ongoingMutes.toTypedArray())
@@ -283,20 +283,20 @@ class QueryRecord: CommandExecutor {
 
                             if (bans.isNotEmpty()) {
                                 val bansComponent = Component.text()
-                                    .content("=====Bans Query for player ${playerToQuery.currentUsername}=====")
+                                    .content("=====Bans Query for player ${playerToQuery.currentUsername}=====\n")
                                     .style(Style.style(NamedTextColor.GREEN))
                                     .append(
-                                        Component.text("====EXPIRED====")
+                                        Component.text("====EXPIRED====\n")
                                             .style(Style.style(NamedTextColor.GREEN))
                                     )
                                     .append(*expiredBans.toTypedArray())
                                     .append(
-                                        Component.text("====PARDONED====")
+                                        Component.text("====PARDONED====\n")
                                             .style(Style.style(NamedTextColor.GREEN))
                                     )
                                     .append(*pardonedBans.toTypedArray())
                                     .append(
-                                        Component.text("====ONGOING====")
+                                        Component.text("====ONGOING====\n")
                                             .style(Style.style(NamedTextColor.GREEN))
                                     )
                                     .append(*ongoingBans.toTypedArray())

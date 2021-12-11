@@ -1,5 +1,6 @@
 package net.pengtul.pengcord.commands
 
+import net.kyori.adventure.text.format.NamedTextColor
 import net.pengtul.pengcord.util.Utils.Companion.mutePlayer
 import net.pengtul.pengcord.util.Utils.Companion.parseTimeFromString
 import net.pengtul.pengcord.util.Utils.Companion.queryPlayerFromString
@@ -7,6 +8,7 @@ import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.ExpiryDateTime
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.main.Main
+import net.pengtul.pengcord.util.toComponent
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -27,14 +29,14 @@ class Mute: CommandExecutor {
                 queryPlayerFromString(playerToBan)?.let { player ->
                     Main.database.playerGetByCurrentName(sender.name)?.let { senderPlayer ->
                         Bukkit.getPlayer(senderPlayer.playerUUID)?.let { bukkitPlayer ->
-                            if (bukkitPlayer.hasPermission("pengcord.punishments.mute") || bukkitPlayer.isOp) {
-                                sender.sendMessage("§cCannot ban another moderator!")
-                                Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `pban`. Failed due to attempt mute other moderator.")
-                                Main.serverLogger.info("User ${sender.name} ran `pban`. Failed due to attempt mute other moderator.")
-                                return@Runnable
-                            }
+//                            if (bukkitPlayer.hasPermission("pengcord.punishments.mute") || bukkitPlayer.isOp) {
+//                                sender.sendMessage("§cCannot ban another moderator!")
+//                                Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `pban`. Failed due to attempt mute other moderator.")
+//                                Main.serverLogger.info("User ${sender.name} ran `pban`. Failed due to attempt mute other moderator.")
+//                                return@Runnable
+//                            }
                             mutePlayer(player, TypeOfUniqueID.MinecraftTypeOfUniqueID(senderPlayer.playerUUID), until, reason)
-
+                            sender.sendMessage("Muted Player!".toComponent().color(NamedTextColor.GREEN))
                             Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                             Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                         }
@@ -42,7 +44,7 @@ class Mute: CommandExecutor {
                     }
                     // else
                     mutePlayer(player, TypeOfUniqueID.Unknown(sender.name), until, reason)
-
+                    sender.sendMessage("Muted Player!".toComponent().color(NamedTextColor.GREEN))
                     Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                     Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                 }

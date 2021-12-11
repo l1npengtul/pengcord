@@ -5,8 +5,8 @@ author: l1npengtul <l1npengtul@protonmail.com>
 depend:
   - LuckPerms
   - Vault
-softdepend:
   - ProtocolLib
+softdepend: [ProtocolLib]
 api-version: 1.18
 description: Discord <-> Minecraft Verification and Sync Plugin
 load: STARTUP

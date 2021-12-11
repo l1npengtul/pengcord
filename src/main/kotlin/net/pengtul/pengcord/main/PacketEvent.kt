@@ -9,18 +9,30 @@ class PacketEvent: PacketListener {
     private val mitigationRegex = Regex("\\$\\{jndi:*.*}")
     override fun onPacketSending(event: PacketEvent?) {
         event?.let { packetEvent ->
-            if (packetEvent.packet.strings.read(0).matches(mitigationRegex)) {
-                packetEvent.isCancelled = true
-                Main.serverLogger.warning("Mitigated chat packet from ${packetEvent.source}!")
+            if (packetEvent.packetType == PacketType.Play.Client.CHAT || packetEvent.packetType == PacketType.Play.Server.CHAT) {
+                try {
+                    if (packetEvent.packet.strings.read(0).matches(mitigationRegex)) {
+                        packetEvent.isCancelled = true
+                        Main.serverLogger.warning("Mitigated chat packet from ${packetEvent.source}!")
+                    }
+                } catch (_: Exception) {
+
+                }
             }
         }
     }
 
     override fun onPacketReceiving(event: PacketEvent?) {
         event?.let { packetEvent ->
-            if (packetEvent.packet.strings.read(0).matches(mitigationRegex)) {
-                packetEvent.isCancelled = true
-                Main.serverLogger.warning("Mitigated chat packet from ${packetEvent.source}!")
+            if (packetEvent.packetType == PacketType.Play.Client.CHAT || packetEvent.packetType == PacketType.Play.Server.CHAT) {
+                try {
+                    if (packetEvent.packet.strings.read(0).matches(mitigationRegex)) {
+                        packetEvent.isCancelled = true
+                        Main.serverLogger.warning("Mitigated chat packet from ${packetEvent.source}!")
+                    }
+                } catch (_: Exception) {
+
+                }
             }
         }
     }
@@ -28,14 +40,14 @@ class PacketEvent: PacketListener {
     override fun getSendingWhitelist(): ListeningWhitelist {
         return ListeningWhitelist.newBuilder()
             .priority(ListenerPriority.HIGHEST)
-            .types(PacketType.Play.Client.CHAT, PacketType.Play.Client.CLIENT_COMMAND, PacketType.Play.Server.CHAT)
+            .types(PacketType.Play.Client.CHAT, PacketType.Play.Server.CHAT)
             .build()
     }
 
     override fun getReceivingWhitelist(): ListeningWhitelist {
         return ListeningWhitelist.newBuilder()
             .priority(ListenerPriority.HIGHEST)
-            .types(PacketType.Play.Client.CHAT, PacketType.Play.Client.CLIENT_COMMAND, PacketType.Play.Server.CHAT)
+            .types(PacketType.Play.Client.CHAT, PacketType.Play.Server.CHAT)
             .build()
     }
 

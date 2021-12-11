@@ -29,25 +29,18 @@ class QueryPunishment: CommandExecutor {
                 when (whatToQuery.lowercase()) {
                     "filter", "filteralerts", "f" -> {
                         Main.database.queryPlayerFilterAlertById(punishmentToQuery)?.let { filterAlert ->
-//                            sender.sendMessage("§a=========Filter Alert Query for ID ${filterAlert.filterAlertId}=========")
-//                            sender.sendMessage("§aFilterAlert ID: ${filterAlert.filterAlertId}")
-//                            sender.sendMessage("§aTarget UUID ${filterAlert.playerUUID}")
-//                            sender.sendMessage("§aTarget Discord UUID: ${filterAlert.discordUUID}")
-//                            sender.sendMessage("§aIssued On: ${filterAlert.issuedOn}")
-//                            sender.sendMessage("§aMessage Context: ${filterAlert.context}")
-//                            sender.sendMessage("§aTriggered Words: ${filterAlert.word}")
                             val alertComponent = Component.text()
-                                .content("=========Filter Alert Query for ID ${filterAlert.filterAlertId}=========")
+                                .content("=========Filter Alert Query for ID ${filterAlert.filterAlertId}=========\n")
                                 .style(Style.style(NamedTextColor.GREEN))
                                 .append(
                                     Component.text()
-                                        .content("FilterAlert ID: ${filterAlert.filterAlertId}")
+                                        .content("FilterAlert ID: ${filterAlert.filterAlertId}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .build()
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Target UUID ${filterAlert.playerUUID}")
+                                        .content("Target UUID ${filterAlert.playerUUID}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .hoverEvent(
                                             HoverEvent.showText(
@@ -64,7 +57,7 @@ class QueryPunishment: CommandExecutor {
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Target Discord UUID: ${filterAlert.discordUUID}")
+                                        .content("Target Discord UUID: ${filterAlert.discordUUID}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .hoverEvent(
                                             HoverEvent.showText(
@@ -81,7 +74,7 @@ class QueryPunishment: CommandExecutor {
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Issued On: ${filterAlert.issuedOn}")
+                                        .content("Issued On: ${filterAlert.issuedOn}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .hoverEvent(
                                             HoverEvent.showText(
@@ -92,13 +85,13 @@ class QueryPunishment: CommandExecutor {
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Message Context: ${filterAlert.context}")
+                                        .content("Message Context: ${filterAlert.context}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .build()
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Triggered Words: ${filterAlert.word}")
+                                        .content("Triggered Words: ${filterAlert.word}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .build()
                                 )
@@ -111,25 +104,18 @@ class QueryPunishment: CommandExecutor {
                     }
                     "warn", "warns", "w" -> {
                         Main.database.queryPlayerWarnById(punishmentToQuery)?.let { warn ->
-//                            sender.sendMessage("§a=========Warns Query for ID ${warn.warnId}=========")
-//                            sender.sendMessage("§aWarn ID: ${warn.warnId}")
-//                            sender.sendMessage("§aTarget UUID ${warn.playerUUID}")
-//                            sender.sendMessage("§aTarget Discord UUID: ${warn.discordUUID}")
-//                            sender.sendMessage("§aIssued By: ${warn.issuedBy}")
-//                            sender.sendMessage("§aIssued On: ${warn.issuedOn}")
-//                            sender.sendMessage("§aReason: ${warn.reason}")
                             val warnComponent = Component.text()
-                                .content("=========Warn Query for ID ${warn.warnId}=========")
+                                .content("=========Warn Query for ID ${warn.warnId}=========\n")
                                 .style(Style.style(NamedTextColor.GREEN))
                                 .append(
                                     Component.text()
-                                        .content("Warn ID: ${warn.warnId}")
+                                        .content("Warn ID: ${warn.warnId}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .build()
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Target UUID ${warn.playerUUID}")
+                                        .content("Target UUID ${warn.playerUUID}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .hoverEvent(
                                             HoverEvent.showText(
@@ -146,7 +132,7 @@ class QueryPunishment: CommandExecutor {
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Target Discord UUID: ${warn.discordUUID}")
+                                        .content("Target Discord UUID: ${warn.discordUUID}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .hoverEvent(
                                             HoverEvent.showText(
@@ -163,7 +149,7 @@ class QueryPunishment: CommandExecutor {
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Issued By: ${warn.issuedBy}")
+                                        .content("Issued By: ${warn.issuedBy}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .hoverEvent(
                                             HoverEvent.showText(
@@ -180,7 +166,7 @@ class QueryPunishment: CommandExecutor {
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Issued On: ${warn.issuedOn}")
+                                        .content("Issued On: ${warn.issuedOn}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .hoverEvent(
                                             HoverEvent.showText(
@@ -191,7 +177,7 @@ class QueryPunishment: CommandExecutor {
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Reason: ${warn.reason}")
+                                        .content("Reason: ${warn.reason}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .build()
                                 )
@@ -204,35 +190,18 @@ class QueryPunishment: CommandExecutor {
                     }
                     "mute", "mutes", "m" -> {
                         Main.database.queryPlayerMuteById(punishmentToQuery)?.let { mute ->
-//                            sender.sendMessage("§a=========Mutes Query for ID ${mute.muteId}=========")
-//                            sender.sendMessage("§aMute ID: ${mute.muteId}")
-//                            sender.sendMessage("§aTarget UUID ${mute.playerUUID}")
-//                            sender.sendMessage("§aTarget Discord UUID: ${mute.discordUUID}")
-//                            sender.sendMessage("§aIssued By: ${mute.issuedBy}")
-//                            sender.sendMessage("§aIssued On: ${mute.issuedOn}")
-//                            if (mute.isPermanent) {
-//                                sender.sendMessage("§aExpires: §c§lNever, Permanent Mute")
-//                            } else {
-//                                sender.sendMessage("§aExpires: ${mute.expiresOn}")
-//                            }
-//                            sender.sendMessage("§aReason: ${mute.reason}")
-//                            if (mute.expiryState != ExpiryState.OnGoing) {
-//                                sender.sendMessage("§aMute Status: §2§l${mute.expiryState}")
-//                            } else {
-//                                sender.sendMessage("§aMute Status: §c§l${mute.expiryState}")
-//                            }
                             val muteComponent = Component.text()
-                                .content("=========Mute Query for ID ${mute.muteId}=========")
+                                .content("=========Mute Query for ID ${mute.muteId}=========\n")
                                 .style(Style.style(NamedTextColor.GREEN))
                                 .append(
                                     Component.text()
-                                        .content("Mute ID: ${mute.muteId}")
+                                        .content("Mute ID: ${mute.muteId}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .build()
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Target UUID ${mute.playerUUID}")
+                                        .content("Target UUID ${mute.playerUUID}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .hoverEvent(
                                             HoverEvent.showText(
@@ -249,7 +218,7 @@ class QueryPunishment: CommandExecutor {
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Target Discord UUID: ${mute.discordUUID}")
+                                        .content("Target Discord UUID: ${mute.discordUUID}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .hoverEvent(
                                             HoverEvent.showText(
@@ -266,7 +235,7 @@ class QueryPunishment: CommandExecutor {
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Issued By: ${mute.issuedBy}")
+                                        .content("Issued By: ${mute.issuedBy}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .hoverEvent(
                                             HoverEvent.showText(
@@ -283,7 +252,7 @@ class QueryPunishment: CommandExecutor {
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Issued On: ${mute.issuedOn}")
+                                        .content("Issued On: ${mute.issuedOn}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .hoverEvent(
                                             HoverEvent.showText(
@@ -294,16 +263,16 @@ class QueryPunishment: CommandExecutor {
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Reason: ${mute.reason}")
+                                        .content("Reason: ${mute.reason}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .build()
                                 )
                             if (mute.isPermanent) {
-                                sender.sendMessage("§aExpires: §c§lNever, Permanent Mute")
+                                sender.sendMessage("§aExpires: §c§lNever, Permanent Mute\n")
                                 muteComponent
                                     .append(
                                         Component.text()
-                                            .content("Expires: Never, Permanent Mute")
+                                            .content("Expires: Never, Permanent Mute\n")
                                             .style(Style.style()
                                                 .decorate(TextDecoration.BOLD)
                                                 .decorate(TextDecoration.ITALIC)
@@ -316,7 +285,7 @@ class QueryPunishment: CommandExecutor {
                                 muteComponent
                                     .append(
                                         Component.text()
-                                            .content("Expires: ${mute.expiresOn}")
+                                            .content("Expires: ${mute.expiresOn}\n")
                                             .style(Style.style()
                                                 .decorate(TextDecoration.BOLD)
                                                 .decorate(TextDecoration.ITALIC)
@@ -334,7 +303,7 @@ class QueryPunishment: CommandExecutor {
                             muteComponent
                                 .append(
                                     Component.text()
-                                        .content("Mute Status: ${mute.expiryState}")
+                                        .content("Mute Status: ${mute.expiryState}\n")
                                         .style(Style.style()
                                             .color(NamedTextColor.GREEN)
                                             .build()
@@ -349,35 +318,18 @@ class QueryPunishment: CommandExecutor {
                     }
                     "ban", "bans", "b" -> {
                         Main.database.queryPlayerBanById(punishmentToQuery)?.let { ban ->
-//                            sender.sendMessage("§a=========Bans Query for ID ${ban.banId}=========")
-//                            sender.sendMessage("§aBan ID: ${ban.banId}")
-//                            sender.sendMessage("§aTarget UUID ${ban.playerUUID}")
-//                            sender.sendMessage("§aTarget Discord UUID: ${ban.discordUUID}")
-//                            sender.sendMessage("§aIssued By: ${ban.issuedBy}")
-//                            sender.sendMessage("§aIssued On: ${ban.issuedOn}")
-//                            if (ban.isPermanent) {
-//                                sender.sendMessage("§aExpires: §c§lNever, Permanent Ban")
-//                            } else {
-//                                sender.sendMessage("§aExpires: ${ban.expiresOn}")
-//                            }
-//                            sender.sendMessage("§aReason: ${ban.reason}")
-//                            if (ban.expiryState != ExpiryState.OnGoing) {
-//                                sender.sendMessage("§aBan Status: §2§l${ban.expiryState}")
-//                            } else {
-//                                sender.sendMessage("§aBan Status: §c§l${ban.expiryState}")
-//                            }
                             val banComponent = Component.text()
-                                .content("=========Ban Query for ID ${ban.banId}=========")
+                                .content("=========Ban Query for ID ${ban.banId}=========\n")
                                 .style(Style.style(NamedTextColor.GREEN))
                                 .append(
                                     Component.text()
-                                        .content("Ban ID: ${ban.banId}")
+                                        .content("Ban ID: ${ban.banId}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .build()
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Target UUID ${ban.playerUUID}")
+                                        .content("Target UUID ${ban.playerUUID}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .hoverEvent(
                                             HoverEvent.showText(
@@ -394,7 +346,7 @@ class QueryPunishment: CommandExecutor {
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Target Discord UUID: ${ban.discordUUID}")
+                                        .content("Target Discord UUID: ${ban.discordUUID}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .hoverEvent(
                                             HoverEvent.showText(
@@ -411,7 +363,7 @@ class QueryPunishment: CommandExecutor {
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Issued By: ${ban.issuedBy}")
+                                        .content("Issued By: ${ban.issuedBy}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .hoverEvent(
                                             HoverEvent.showText(
@@ -428,7 +380,7 @@ class QueryPunishment: CommandExecutor {
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Issued On: ${ban.issuedOn}")
+                                        .content("Issued On: ${ban.issuedOn}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .hoverEvent(
                                             HoverEvent.showText(
@@ -439,16 +391,16 @@ class QueryPunishment: CommandExecutor {
                                 )
                                 .append(
                                     Component.text()
-                                        .content("Reason: ${ban.reason}")
+                                        .content("Reason: ${ban.reason}\n")
                                         .style(Style.style(NamedTextColor.GREEN))
                                         .build()
                                 )
                             if (ban.isPermanent) {
-                                sender.sendMessage("§aExpires: §c§lNever, Permanent Ban")
+                                sender.sendMessage("§aExpires: §c§lNever, Permanent Ban\n")
                                 banComponent
                                     .append(
                                         Component.text()
-                                            .content("Expires: Never, Permanent Ban")
+                                            .content("Expires: Never, Permanent Ban\n")
                                             .style(Style.style()
                                                 .decorate(TextDecoration.BOLD)
                                                 .decorate(TextDecoration.ITALIC)
@@ -461,7 +413,7 @@ class QueryPunishment: CommandExecutor {
                                 banComponent
                                     .append(
                                         Component.text()
-                                            .content("Expires: ${ban.expiresOn}")
+                                            .content("Expires: ${ban.expiresOn}\n")
                                             .style(Style.style()
                                                 .decorate(TextDecoration.BOLD)
                                                 .decorate(TextDecoration.ITALIC)
@@ -479,7 +431,7 @@ class QueryPunishment: CommandExecutor {
                             banComponent
                                 .append(
                                     Component.text()
-                                        .content("Ban Status: ${ban.expiryState}")
+                                        .content("Ban Status: ${ban.expiryState}\n")
                                         .style(Style.style()
                                             .color(NamedTextColor.GREEN)
                                             .build()

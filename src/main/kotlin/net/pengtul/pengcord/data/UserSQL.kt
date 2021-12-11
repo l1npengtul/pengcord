@@ -1,5 +1,6 @@
 package net.pengtul.pengcord.data
 
+import com.comphenix.protocol.PacketType
 import net.pengtul.pengcord.data.interact.ExpiryDateTime
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
@@ -42,7 +43,6 @@ class UserSQL {
                 Main.serverLogger.info("Attempt add $username (${uuid}) to table. Creating user.")
                 Players.insert {
                     it[playerUUID] = uuid
-                    it[discordUUID] = 0
                     it[currentUsername] = username
                     it[firstJoinDateTime] = DateTime.now()
                 }
@@ -475,6 +475,11 @@ class UserSQL {
                     it[reason] = rsn
                     it[expiryState] = ExpiryState.OnGoing
                 }
+
+                Players.update ({Players.playerUUID eq player.playerUUID}) {
+                    it[isMuted] = true
+                }
+
                 return@transaction Result.success(id.value)
             }
             return@transaction Result.failure(IllegalArgumentException("Player not found (perhaps not verified?)!"))
@@ -508,6 +513,11 @@ class UserSQL {
                     it[reason] = rsn
                     it[expiryState] = ExpiryState.OnGoing
                 }
+
+                Players.update ({Players.playerUUID eq player.playerUUID}) {
+                    it[isMuted] = true
+                }
+
                 return@transaction Result.success(id.value)
             }
 
@@ -542,6 +552,11 @@ class UserSQL {
                     it[reason] = rsn
                     it[expiryState] = ExpiryState.OnGoing
                 }
+
+                Players.update ({Players.playerUUID eq player.playerUUID}) {
+                    it[isMuted] = true
+                }
+
                 return@transaction Result.success(id.value)
             }
             return@transaction Result.failure(IllegalArgumentException("Player not found (perhaps not verified?)!"))
@@ -558,6 +573,13 @@ class UserSQL {
             if (thisMute.expiryState == ExpiryState.OnGoing) {
                 Mutes.update ({Mutes.muteId eq mute}) {
                     it[expiryState] = expiry
+                }
+            }
+            // update muted status
+            val mutes = Mutes.select { Mutes.playerUUID eq thisMute.playerUUID }.count()
+            if (mutes == 0L) {
+                Players.update ({ Players.playerUUID eq thisMute.playerUUID }) {
+                    it[isMuted] = false
                 }
             }
         }
@@ -659,6 +681,11 @@ class UserSQL {
                     it[reason] = rsn
                     it[expiryState] = ExpiryState.OnGoing
                 }
+
+                Players.update ({Players.playerUUID eq player.playerUUID}) {
+                    it[isBanned] = true
+                }
+
                 return@transaction Result.success(id.value)
             }
             return@transaction Result.failure(IllegalArgumentException("Player not found (perhaps not verified?)!"))
@@ -692,6 +719,11 @@ class UserSQL {
                     it[reason] = rsn
                     it[expiryState] = ExpiryState.OnGoing
                 }
+
+                Players.update ({Players.playerUUID eq player.playerUUID}) {
+                    it[isBanned] = true
+                }
+
                 return@transaction Result.success(id.value)
             }
 
@@ -726,6 +758,11 @@ class UserSQL {
                     it[reason] = rsn
                     it[expiryState] = ExpiryState.OnGoing
                 }
+
+                Players.update ({Players.playerUUID eq player.playerUUID}) {
+                    it[isBanned] = true
+                }
+
                 return@transaction Result.success(id.value)
             }
 
@@ -743,6 +780,14 @@ class UserSQL {
             if (thisBan.expiryState == ExpiryState.OnGoing) {
                 Bans.update ({Bans.banId eq ban}) {
                     it[Bans.expiryState] = expiry
+                }
+            }
+
+            // update muted status
+            val bans = Mutes.select { Mutes.playerUUID eq thisBan.playerUUID }.count()
+            if (bans == 0L) {
+                Players.update ({ Players.playerUUID eq thisBan.playerUUID }) {
+                    it[isBanned] = false
                 }
             }
         }

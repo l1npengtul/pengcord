@@ -367,7 +367,7 @@ class Utils {
         private fun warnEmbedGenerator(player: Player, issuer: String, reason: String): EmbedBuilder {
             val syncedToDiscord = Main.serverConfig.enableCrossMinecraftDiscordModeration
             Main.downloadSkinUUID(player.playerUUID)
-            return EmbedBuilder().setAuthor("User Unverified from Server")
+            return EmbedBuilder().setAuthor("User Warned from Server")
                 .setTitle("User Warned")
                 .addInlineField("Report","Warned player ${player.currentUsername} (UUID: ${player.playerUUID}, Discord ${player.discordUUID}}")
                 .addInlineField("Warned By", issuer)
@@ -402,20 +402,20 @@ class Utils {
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                 Main.database.playerUpdateCurrentUsername(player)
                 Main.database.playerGetByUUID(player)?.let { dbPlayer ->
-                    when (until) {
-                        is ExpiryDateTime.DateAndTime -> {
-                            Main.serverLogger.info("User $issuer banned player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
-                            Main.discordBot.log(LogType.PlayerMuted, "User $issuer muted player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
-                            Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${Main.mojangAPI.getPlayerProfile(Main.insertDashUUID(issuer.toString()))}/${issuer}", until, reason))
-                        }
-                        is ExpiryDateTime.Permanent -> {
-                            Main.serverLogger.info("User $issuer banned player ${dbPlayer.currentUsername} ($player) permanently for $reason")
-                            Main.discordBot.log(LogType.PlayerMuted, "User $issuer muted player ${dbPlayer.currentUsername} ($player) permanently for $reason")
-                            Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${Main.mojangAPI.getPlayerProfile(Main.insertDashUUID(issuer.toString()))}/${issuer}", until, reason))
-                        }
-                    }
                     Main.database.addMuteToPlayerMinecraft(player, issuer, until, reason).onSuccess { id ->
                         Main.startUnmuteTask(id)
+                        when (until) {
+                            is ExpiryDateTime.DateAndTime -> {
+                                Main.serverLogger.info("User $issuer muted player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
+                                Main.discordBot.log(LogType.PlayerMuted, "User $issuer muted player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
+                                Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${Main.mojangAPI.getPlayerProfile(Main.insertDashUUID(issuer.toString())).username}/${issuer}", until, reason))
+                            }
+                            is ExpiryDateTime.Permanent -> {
+                                Main.serverLogger.info("User $issuer muted player ${dbPlayer.currentUsername} ($player) permanently for $reason")
+                                Main.discordBot.log(LogType.PlayerMuted, "User $issuer muted player ${dbPlayer.currentUsername} ($player) permanently for $reason")
+                                Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${Main.mojangAPI.getPlayerProfile(Main.insertDashUUID(issuer.toString())).username}/${issuer}", until, reason))
+                            }
+                        }
                     }
                 }
             })
@@ -425,20 +425,20 @@ class Utils {
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                 Main.database.playerUpdateCurrentUsername(player)
                 Main.database.playerGetByUUID(player)?.let { dbPlayer ->
-                    when (until) {
-                        is ExpiryDateTime.DateAndTime -> {
-                            Main.serverLogger.info("User ${issuer.discriminatedName} (${issuer.id}) muted player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
-                            Main.discordBot.log(LogType.PlayerMuted, "User ${issuer.discriminatedName} (${issuer.id}) muted player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
-                            Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${issuer.discriminatedName}/${issuer.id}", until, reason))
-                        }
-                        is ExpiryDateTime.Permanent -> {
-                            Main.serverLogger.info("User ${issuer.discriminatedName} (${issuer.id}) muted player ${dbPlayer.currentUsername} ($player) permanently for $reason")
-                            Main.discordBot.log(LogType.PlayerMuted, "User ${issuer.discriminatedName} (${issuer.id}) muted player ${dbPlayer.currentUsername} ($player) permanently for $reason")
-                            Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${issuer.discriminatedName}/${issuer.id}", until, reason))
-                        }
-                    }
                     Main.database.addMutePlayerDiscord(player, issuer, until, reason).onSuccess { id ->
                         Main.startUnmuteTask(id)
+                        when (until) {
+                            is ExpiryDateTime.DateAndTime -> {
+                                Main.serverLogger.info("User ${issuer.discriminatedName} (${issuer.id}) muted player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
+                                Main.discordBot.log(LogType.PlayerMuted, "User ${issuer.discriminatedName} (${issuer.id}) muted player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
+                                Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${issuer.discriminatedName}/${issuer.id}", until, reason))
+                            }
+                            is ExpiryDateTime.Permanent -> {
+                                Main.serverLogger.info("User ${issuer.discriminatedName} (${issuer.id}) muted player ${dbPlayer.currentUsername} ($player) permanently for $reason")
+                                Main.discordBot.log(LogType.PlayerMuted, "User ${issuer.discriminatedName} (${issuer.id}) muted player ${dbPlayer.currentUsername} ($player) permanently for $reason")
+                                Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${issuer.discriminatedName}/${issuer.id}", until, reason))
+                            }
+                        }
                     }
                 }
             })
@@ -448,24 +448,24 @@ class Utils {
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                 Main.database.playerUpdateCurrentUsername(player)
                 Main.database.playerGetByUUID(player)?.let { dbPlayer ->
-                    when (until) {
-                        is ExpiryDateTime.DateAndTime -> {
-                            Main.serverLogger.info("User $issuer muted player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
-                            Main.discordBot.log(LogType.PlayerMuted, "User $issuer muted player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
-                            Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${Main.mojangAPI.getPlayerProfile(Main.insertDashUUID(
-                                issuer
-                            ))}/${issuer}", until, reason))
-                        }
-                        is ExpiryDateTime.Permanent -> {
-                            Main.serverLogger.info("User $issuer muted player ${dbPlayer.currentUsername} ($player) permanently for $reason")
-                            Main.discordBot.log(LogType.PlayerMuted, "User $issuer muted player ${dbPlayer.currentUsername} ($player) permanently for $reason")
-                            Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${Main.mojangAPI.getPlayerProfile(Main.insertDashUUID(
-                                issuer
-                            ))}/${issuer}", until, reason))
-                        }
-                    }
                     Main.database.addMuteToPlayerUnknown(player, issuer, until, reason).onSuccess { id ->
                         Main.startUnmuteTask(id)
+                        when (until) {
+                            is ExpiryDateTime.DateAndTime -> {
+                                Main.serverLogger.info("User $issuer muted player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
+                                Main.discordBot.log(LogType.PlayerMuted, "User $issuer muted player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
+                                Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${Main.mojangAPI.getPlayerProfile(Main.insertDashUUID(
+                                    issuer
+                                ))}/${issuer}", until, reason))
+                            }
+                            is ExpiryDateTime.Permanent -> {
+                                Main.serverLogger.info("User $issuer muted player ${dbPlayer.currentUsername} ($player) permanently for $reason")
+                                Main.discordBot.log(LogType.PlayerMuted, "User $issuer muted player ${dbPlayer.currentUsername} ($player) permanently for $reason")
+                                Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${Main.mojangAPI.getPlayerProfile(Main.insertDashUUID(
+                                    issuer
+                                ))}/${issuer}", until, reason))
+                            }
+                        }
                     }
                 }
             })

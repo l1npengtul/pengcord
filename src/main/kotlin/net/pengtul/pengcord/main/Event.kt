@@ -4,6 +4,8 @@ import io.papermc.paper.event.player.AsyncChatEvent
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.Style
 import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.util.toComponent
@@ -65,7 +67,6 @@ class Event : Listener{
 
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                 Main.database.playerNew(event.player.uniqueId)
-                Main.database.playerUpdateCurrentUsername(event.player.uniqueId)
                 Main.playersCurrentJoinTime[event.player.uniqueId] = DateTime.now()
             })
         }
@@ -73,6 +74,15 @@ class Event : Listener{
 
     @EventHandler
     fun onPlayerLeave(event: PlayerQuitEvent){
+        if (Main.playersAwaitingVerification.containsValue(event.player.uniqueId)) {
+            val keys = Main.playersAwaitingVerification.filter {
+                it.value == event.player.uniqueId
+            }
+            keys.keys.forEach {
+                Main.playersAwaitingVerification.remove(it)
+            }
+        }
+        Main.removePlayerFromVerifiedCache(event.player.uniqueId)
         event.quitMessage()?.let {
             if(Main.serverConfig.enableSync) {
                 Main.discordBot.sendMessageToDiscordJoinLeave(it.toStr().replace("§e", ""))
@@ -117,18 +127,14 @@ class Event : Listener{
                 )
                 event.isCancelled = true
                 return
-            }
-
-            if (Main.database.checkIfPlayerMuted(event.player.uniqueId)) {
+            } else if (Main.database.checkIfPlayerMuted(event.player.uniqueId)) {
                 Main.discordBot.log(LogType.PlayerMuted, "<${event.player.name}> Attempted to say \" $message \"" +
                         "\nbut user is muted!")
                 Main.serverLogger.info("[MC-EVENT-PLAYERCHAT]: <${event.player.name}> Attempted to say \" $message \"" +
                         "\nbut user is muted!" )
                 event.isCancelled = true
                 return
-            }
-
-            if (Main.serverConfig.enableSync) {
+            } else if (Main.serverConfig.enableSync) {
                 if (Main.serverConfig.enableLiterallyNineteenEightyFour) {
                     if (!Main.discordBot.chatFilterRegex.containsMatchIn(message.lowercase())){
                         var prefix = Main.vaultChatApi.getPlayerPrefix(event.player)
@@ -144,8 +150,7 @@ class Event : Listener{
                             event.player
                         )
                         Main.discordBot.log(LogType.PlayerChat, "<${event.player.name}> $message")
-                    }
-                    else if (Main.serverConfig.bannedWords.isNotEmpty()){
+                    } else if (Main.serverConfig.bannedWords.isNotEmpty()){
                         event.player.sendMessage(Main.serverConfig.filteredMessage)
                         Main.discordBot.log(LogType.ChatFilter, "User ${event.player.name} (${event.player.uniqueId }) tripped chat filter with message $message")
                         val matchedWords = Main.discordBot.chatFilterRegex.findAll(message.lowercase()).map {
@@ -172,6 +177,8 @@ class Event : Listener{
                     Main.discordBot.log(LogType.PlayerChat, "<${event.player.name}> $message")
                 }
             }
+        } else {
+            Main.serverLogger.info("Chat event not async")
         }
     }
 
@@ -213,19 +220,22 @@ class Event : Listener{
     @EventHandler
     fun onPlayerMoveEvent(event: PlayerMoveEvent){
         if (Main.serverConfig.enableVerify){
-            if (!Main.checkIfPlayerVerifiedCache(event.player.uniqueId) && !Main.checkIfPlayerPendingVerification(event.player.uniqueId)) {
-                val unverifiedComponent = Component.text()
-                    .content("You are not verified! Do `/verify <discord tag>` to start!")
-                    .append(Component.newline())
-                    .append("/verify clyde#0000 (replace clyde#0000 with your own discord username and tag)".toComponent())
-                    .hoverEvent(
-                        HoverEvent.showText("Click for command".toComponent())
-                    )
-                    .clickEvent(
-                        ClickEvent.suggestCommand("/pengcord:verify ")
-                    )
-                    .build()
-                event.player.sendMessage(unverifiedComponent)
+            if (!Main.checkIfPlayerVerifiedCache(event.player.uniqueId)) {
+                if (!Main.checkIfPlayerPendingVerification(event.player.uniqueId)) {
+                    val unverifiedComponent = Component.text()
+                        .content("You are not verified! Do `/verify <discord tag>` to start!")
+                        .style(Style.style(NamedTextColor.RED))
+                        .append(Component.newline())
+                        .append("/verify clyde#0000 (replace clyde#0000 with your own discord username and tag)".toComponent())
+                        .hoverEvent(
+                            HoverEvent.showText("Click for command".toComponent())
+                        )
+                        .clickEvent(
+                            ClickEvent.suggestCommand("/pengcord:verify ")
+                        )
+                        .build()
+                    event.player.sendMessage(unverifiedComponent)
+                }
                 if (!event.player.isInvulnerable) {
                     event.player.isInvulnerable = true
                 }
@@ -248,19 +258,23 @@ class Event : Listener{
     @EventHandler
     fun onPlayerInteractEvent(event: PlayerInteractEvent){
         if (Main.serverConfig.enableVerify){
-            if (!Main.checkIfPlayerVerifiedCache(event.player.uniqueId) && !Main.checkIfPlayerPendingVerification(event.player.uniqueId)) {
-                val unverifiedComponent = Component.text()
-                    .content("You are not verified! Do `/verify <discord tag>` to start!")
-                    .append(Component.newline())
-                    .append("/verify clyde#0000 (replace clyde#0000 with your own discord username and tag)".toComponent())
-                    .hoverEvent(
-                        HoverEvent.showText("Click for command".toComponent())
-                    )
-                    .clickEvent(
-                        ClickEvent.suggestCommand("/pengcord:verify ")
-                    )
-                    .build()
-                event.player.sendMessage(unverifiedComponent)
+            if (!Main.checkIfPlayerVerifiedCache(event.player.uniqueId)) {
+                if (!Main.checkIfPlayerPendingVerification(event.player.uniqueId)) {
+                    val unverifiedComponent = Component.text()
+                        .content("You are not verified! Do `/verify <discord tag>` to start!")
+                        .style(Style.style(NamedTextColor.RED))
+                        .append(Component.newline())
+                        .append("/verify clyde#0000 (replace clyde#0000 with your own discord username and tag)".toComponent())
+                        .hoverEvent(
+                            HoverEvent.showText("Click for command".toComponent())
+                        )
+                        .clickEvent(
+                            ClickEvent.suggestCommand("/pengcord:verify ")
+                        )
+                        .build()
+                    event.player.sendMessage(unverifiedComponent)
+                }
+
                 if (!event.player.isInvulnerable) {
                     event.player.isInvulnerable = true
                 }
