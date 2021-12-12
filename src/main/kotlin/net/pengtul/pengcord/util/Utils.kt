@@ -716,12 +716,14 @@ class Utils {
                 if (it.startsWith("@")) {
                     val substr = it.substring(1, it.length)
                     val player = queryPlayerFromString(substr)
-                    if (player != null) {
-                        return "<@${player.discordUUID}>"
+                    return if (player != null) {
+                        "<@${player.discordUUID}>"
                     } else if (substr == "everyone") {
-                        return "[@ Everyone]"
+                        "[@ Everyone]"
                     } else if (substr == "here") {
-                        return "[@ Here]"
+                        "[@ Here]"
+                    } else {
+                        it
                     }
                 }
                 return it
