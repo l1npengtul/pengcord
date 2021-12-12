@@ -129,7 +129,7 @@ class Bot {
 
         commandHandler.generateHelp()
 
-        Main.discordBot.discordApi.getRoleById(Main.serverConfig.discordMutedRole).ifPresentOrElse(
+        this.discordApi.getRoleById(Main.serverConfig.discordMutedRole).ifPresentOrElse(
             {
                 mutedRole = it
             },
@@ -137,8 +137,6 @@ class Bot {
                 mutedRole = null
             }
         )
-
-
     }
 
     private fun onSucessfulConnect() {
