@@ -62,7 +62,6 @@ class Verify: CommandExecutor {
                                             "${Main.serverConfig.botPrefix}verify ${sender.name} $secretKey"
                                         )
                                     )
-                                    .build()
 
                                 sender.sendMessage(message)
 
