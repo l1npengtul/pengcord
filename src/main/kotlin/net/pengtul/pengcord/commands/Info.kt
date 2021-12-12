@@ -37,12 +37,11 @@ class Info: CommandExecutor {
             val maxRAM : Long = Runtime.getRuntime().totalMemory() /  1048576L
 
             val serverInfoText = Component.text()
-                .content("§9=======§r§6[Server Info]§r§9=======§r")
-                .append(Component.newline())
-                .append("§aServer RAM usage: $currentUsedRAM MiB/$maxRAM MiB (${((currentUsedRAM.toDouble() / maxRAM.toDouble()) * 100).roundToLong() / 100.0}%)".toComponent())
-                .append("§aServer Uptime (HH:MM:SS): ${getUptime()}".toComponent())
-                .append("§aServer TPS [1M, 5M, 15M]: ${Bukkit.getTPS().map { (it * 100).roundToInt() / 100.0 }.joinToString()}".toComponent())
-                .append("§aOnline: ${Bukkit.getOnlinePlayers().joinToString { it.name }}\nout of ${Bukkit.getServer().maxPlayers}".toComponent())
+                .content("§9=======§r§6[Server Info]§r§9=======§r\n")
+                .append("§aServer RAM usage: $currentUsedRAM MiB/$maxRAM MiB (${((currentUsedRAM.toDouble() / maxRAM.toDouble()) * 100).roundToLong()}%)\n".toComponent())
+                .append("§aServer Uptime (HH:MM:SS): ${getUptime()}\n".toComponent())
+                .append("§aServer TPS [1M, 5M, 15M]: ${Bukkit.getTPS().map { (it * 100).roundToInt() / 100.0 }.joinToString()}\n".toComponent())
+                .append("§aOnline: ${Bukkit.getOnlinePlayers().joinToString { it.name }}\nout of ${Bukkit.getServer().maxPlayers}\n".toComponent())
                 .append("§9==========================§r".toComponent())
                 .build()
             sender.sendMessage(serverInfoText)

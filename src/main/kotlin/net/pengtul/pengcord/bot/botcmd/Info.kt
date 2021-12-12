@@ -44,7 +44,7 @@ class Info: JCDiscordCommandExecutor {
                 .setAuthor("Server Info")
                 .setTitle("Server TPS, Server Playerlist, Server RAM usage, Server Uptime")
                 .addInlineField("Server TPS 1M, 5M, 15M:", Bukkit.getTPS().map { (it * 100).roundToInt() / 100.0 }.joinToString())
-                .addInlineField("Server RAM Usage:", "$currentUsedRAM MiB / $maxRAM MiB (${((currentUsedRAM.toDouble() / maxRAM.toDouble()) * 100).roundToLong() / 100.0}%)")
+                .addInlineField("Server RAM Usage:", "$currentUsedRAM MiB / $maxRAM MiB (${((currentUsedRAM.toDouble() / maxRAM.toDouble()) * 100).roundToLong()}%)")
                 .addInlineField("Server Uptime (HH:MM:SS): ", getUptime())
                 .addField("Users Online (${playerList.size}/${Bukkit.getMaxPlayers()}):",
                     playerList.joinToString { it.name })

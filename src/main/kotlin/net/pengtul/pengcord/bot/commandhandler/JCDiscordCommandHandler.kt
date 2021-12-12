@@ -28,6 +28,7 @@ class JCDiscordCommandHandler(api: DiscordApi, prefix: String, boundChannels: Li
         helpMessage.append("```diff")
         helpMessage.appendNewLine()
         addCommand(Git())
+        addCommand(Help(helpMessage))
     }
 
     fun addCommand(vararg commands: JCDiscordCommandExecutor){

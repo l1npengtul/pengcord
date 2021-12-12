@@ -6,7 +6,6 @@ import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.TranslatableComponent
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
-import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.title.Title
 import net.pengtul.pengcord.bot.LogType
@@ -20,13 +19,9 @@ import net.pengtul.pengcord.data.schema.Player
 import net.pengtul.pengcord.main.Main
 import org.bukkit.*
 import org.javacord.api.entity.message.embed.EmbedBuilder
-import org.javacord.api.entity.permission.PermissionType
-import org.javacord.api.entity.permission.Role
 import org.javacord.api.entity.user.User
 import org.joda.time.DateTime
 import org.joda.time.Duration
-import org.jsoup.nodes.Document
-import org.jsoup.select.Elements
 import java.awt.Color
 import java.lang.management.ManagementFactory
 import java.util.*
@@ -711,24 +706,29 @@ class Utils {
             return Main.periodFormatter.print(Duration(ManagementFactory.getRuntimeMXBean().uptime).toPeriod())
         }
 
-        fun pingFormatMessage(message: String): String {
-            val formattedMessage = message.split(" ").map {
-                if (it.startsWith("@")) {
-                    val substr = it.substring(1, it.length)
-                    val player = queryPlayerFromString(substr)
-                    return if (player != null) {
-                        "<@${player.discordUUID}>"
-                    } else if (substr == "everyone") {
-                        "[@ Everyone]"
-                    } else if (substr == "here") {
-                        "[@ Here]"
-                    } else {
-                        it
-                    }
+        fun formatMessage(message: String): String {
+            // Format Pings
+            Main.discordBot.everyoneMentionRegex.replace(message, "[@ Everyone]")
+            Main.discordBot.hereMentionRegex.replace(message, "[@ Here]")
+            val pings = Main.discordBot.mentionPlayerRegex.findAll(message).toMutableList()
+            pings.forEach {
+                Main.discordBot.discordServer.getMemberByDiscriminatedNameIgnoreCase(
+                    it.value.substring(
+                        1,
+                        it.value.length
+                    )
+                ).ifPresent { user ->
+                    message.replace(it.value, "<@${user.id}>")
                 }
-                return it
-            }.joinToString(separator = " ")
-            return formattedMessage
+            }
+            // format emotes
+            if (Main.discordBot.checkIfServerEmojiUsed.containsMatchIn(message) && Main.serverConfig.enableDiscordCustomEmojiSync) {
+                Main.discordBot.serverEmoteRegexMap.forEach {
+                    it.key.replace(message, it.value)
+                }
+            }
+
+            return message
         }
     }
 }

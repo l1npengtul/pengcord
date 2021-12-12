@@ -26,6 +26,8 @@ class ServerConfig(rawConfig: FileConfiguration) {
     var botLoggingChannel: Long?
     var botServer: Long?
 
+    val enableDiscordCustomEmojiSync: Boolean
+
     // Bot-Managed Discord Settings
     var webhookURL: String?
 
@@ -87,6 +89,8 @@ class ServerConfig(rawConfig: FileConfiguration) {
         discordBanDeleteMessageDays = days
 
         enableLog4JMitigations = rawConfig.getBoolean("enable-log4j-mitigations")
+
+        enableDiscordCustomEmojiSync = rawConfig.getBoolean("enable-emoji-sync")
     }
 
     companion object {

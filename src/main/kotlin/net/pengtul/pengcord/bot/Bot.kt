@@ -23,9 +23,12 @@ import club.minnced.discord.webhook.external.JavacordWebhookClient
 import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import net.pengtul.pengcord.bot.botcmd.*
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandHandler
+import net.pengtul.pengcord.bot.emoji.DscEmojiEditedEvent
+import net.pengtul.pengcord.bot.emoji.DscEmojiRemovedEvent
+import net.pengtul.pengcord.bot.emoji.DscEmojiWhitelistChangedEvent
 import net.pengtul.pengcord.error.DiscordLoginFailException
 import net.pengtul.pengcord.main.Main
-import net.pengtul.pengcord.util.Utils.Companion.pingFormatMessage
+import net.pengtul.pengcord.util.Utils.Companion.formatMessage
 import org.bukkit.entity.Player
 import org.javacord.api.DiscordApi
 import org.javacord.api.DiscordApiBuilder
@@ -38,8 +41,9 @@ import org.javacord.api.entity.server.Server
 import org.javacord.api.entity.user.UserStatus
 import org.javacord.api.entity.webhook.WebhookBuilder
 import org.joda.time.DateTime
-import java.lang.StringBuilder
 import kotlin.collections.ArrayList
+import kotlin.net.pengtul.pengcord.bot.emoji.DscEmojiAddedEvent
+import kotlin.text.StringBuilder
 
 
 class Bot {
@@ -57,6 +61,15 @@ class Bot {
     val regex: Regex = """(§.)""".toRegex()
     lateinit var discordServer: Server
     var mutedRole: Role? = null
+    val mentionPlayerRegex = Regex("(@(.+)#\\d{4})")
+    val everyoneMentionRegex = Regex("@everyone")
+    val hereMentionRegex = Regex("@here")
+    var checkIfServerEmojiUsed = Regex("")
+    var serverEmoteRegexMap: HashMap<Regex, String> = HashMap()
+    private var lastMessageSentBroadcast = ""
+    private var lastMessageSentJoinLeave = ""
+    private var lastMessageSentInGame = ""
+    private var lastMessageSentAnnouncement = ""
 
     init {
         this.onSucessfulConnect()
@@ -137,6 +150,29 @@ class Bot {
                 mutedRole = null
             }
         )
+
+        if (Main.serverConfig.enableDiscordCustomEmojiSync) {
+            updateDiscordEmojis()
+            discordApi.addListener(DscEmojiAddedEvent())
+            discordApi.addListener(DscEmojiEditedEvent())
+            discordApi.addListener(DscEmojiRemovedEvent())
+            discordApi.addListener(DscEmojiWhitelistChangedEvent())
+        }
+    }
+
+    fun updateDiscordEmojis() {
+        val emojiRegexString = StringBuilder()
+
+        this.discordServer.customEmojis.forEach {emoji ->
+            if (emojiRegexString.isBlank()) {
+                emojiRegexString.append("(:${emoji.name}:)")
+            } else {
+                emojiRegexString.append("|(:${emoji.name}:)")
+            }
+            this.serverEmoteRegexMap[Regex("(:${emoji.name}:)")] = "<:${emoji.name}:${emoji.id}>"
+        }
+
+        this.checkIfServerEmojiUsed = Regex(emojiRegexString.toString())
     }
 
     private fun onSucessfulConnect() {
@@ -200,13 +236,14 @@ class Bot {
     }
 
     fun sendMessageToDiscord(message: String){
-        if (message == "") {
+        if (message == "" || lastMessageSentBroadcast.startsWith(message)) {
             return
         }
 
         Main.serverConfig.botChatSyncChannel?.let {
             discordApi.getTextChannelById(it).ifPresent { channel ->
                 if (!regex.replace(message,"").startsWith("[DSC]")){
+                    lastMessageSentBroadcast = message
                     channel.sendMessage(regex.replace(message,""))
                 }
             }
@@ -214,13 +251,14 @@ class Bot {
     }
 
     fun sendMessageToDiscordJoinLeave(message: String){
-        if (message == "" || Main.serverConfig.filterJoinLeaveMessage) {
+        if (message == "" || Main.serverConfig.filterJoinLeaveMessage || lastMessageSentJoinLeave.startsWith(message)) {
             return
         }
 
         Main.serverConfig.botChatSyncChannel?.let {
             discordApi.getTextChannelById(it).ifPresent { channel ->
                 if (!regex.replace(message,"").startsWith("[DSC]")){
+                    lastMessageSentJoinLeave = message
                     channel.sendMessage("[GAME]: ${regex.replace(message,"")}")
                 }
             }
@@ -228,13 +266,14 @@ class Bot {
     }
 
     fun sendMessageToDiscordInGame(message: String){
-        if (message == "" || Main.serverConfig.filterInGameMessage) {
+        if (message == "" || Main.serverConfig.filterInGameMessage || lastMessageSentInGame.startsWith(message)) {
             return
         }
 
         Main.serverConfig.botChatSyncChannel?.let {
             discordApi.getTextChannelById(it).ifPresent { channel ->
                 if (!regex.replace(message,"").startsWith("[DSC]")){
+                    lastMessageSentInGame = message
                     channel.sendMessage("[GAME]: ${regex.replace(message,"")}")
                 }
             }
@@ -242,13 +281,14 @@ class Bot {
     }
 
     fun sendMessageToDiscordAnnouncement(message: String){
-        if (message == "" || Main.serverConfig.filterAnnouncements) {
+        if (message == "" || Main.serverConfig.filterAnnouncements || lastMessageSentAnnouncement.startsWith(message)) {
             return
         }
 
         Main.serverConfig.botChatSyncChannel?.let {
             discordApi.getTextChannelById(it).ifPresent { channel ->
                 if (!regex.replace(message,"").startsWith("[DSC]")){
+                    lastMessageSentAnnouncement = message
                     channel.sendMessage("[BROADCAST]: ${regex.replace(message,"")}")
                 }
             }
@@ -326,7 +366,7 @@ class Bot {
     }
 
     fun sendMessagetoWebhook(message: String, usrname: String, player: Player){
-        val fmt = pingFormatMessage(message)
+        val fmt = formatMessage(message)
         if (this::webhook.isInitialized && fmt.isNotBlank() && usrname.isNotBlank()) {
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                 val senderUsername = if (usrname.lowercase() != "clyde") usrname else "BlydE"

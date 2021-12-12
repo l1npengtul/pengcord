@@ -17,6 +17,9 @@ bot-bio-text: "A link between worlds..."
 # Playing... status of bot
 bot-playing-status: "Vanguard of the Minecraft Server"
 
+# Enable sync discord custom emojis
+enable-emoji-sync: true
+
 # Filter Player Join/Leave messages
 filter-join-leave: false
 # Filter In Game Notification (E.g. someone dies)

@@ -29,12 +29,12 @@ class Mute: CommandExecutor {
                 queryPlayerFromString(playerToBan)?.let { player ->
                     Main.database.playerGetByCurrentName(sender.name)?.let { senderPlayer ->
                         Bukkit.getPlayer(senderPlayer.playerUUID)?.let { bukkitPlayer ->
-//                            if (bukkitPlayer.hasPermission("pengcord.punishments.mute") || bukkitPlayer.isOp) {
-//                                sender.sendMessage("§cCannot ban another moderator!")
-//                                Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `pban`. Failed due to attempt mute other moderator.")
-//                                Main.serverLogger.info("User ${sender.name} ran `pban`. Failed due to attempt mute other moderator.")
-//                                return@Runnable
-//                            }
+                            if (bukkitPlayer.hasPermission("pengcord.punishments.mute") || bukkitPlayer.isOp) {
+                                sender.sendMessage("§cCannot ban another moderator!")
+                                Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `pban`. Failed due to attempt mute other moderator.")
+                                Main.serverLogger.info("User ${sender.name} ran `pban`. Failed due to attempt mute other moderator.")
+                                return@Runnable
+                            }
                             mutePlayer(player, TypeOfUniqueID.MinecraftTypeOfUniqueID(senderPlayer.playerUUID), until, reason)
                             sender.sendMessage("Muted Player!".toComponent().color(NamedTextColor.GREEN))
                             Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
