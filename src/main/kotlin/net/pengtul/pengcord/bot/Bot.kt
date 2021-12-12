@@ -33,6 +33,7 @@ import org.javacord.api.entity.activity.ActivityType
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.entity.permission.PermissionType
 import org.javacord.api.entity.permission.PermissionsBuilder
+import org.javacord.api.entity.permission.Role
 import org.javacord.api.entity.server.Server
 import org.javacord.api.entity.user.UserStatus
 import org.javacord.api.entity.webhook.WebhookBuilder
@@ -55,6 +56,7 @@ class Bot {
     var chatFilterRegex: Regex
     val regex: Regex = """(§.)""".toRegex()
     lateinit var discordServer: Server
+    var mutedRole: Role? = null
 
     init {
         this.onSucessfulConnect()
@@ -126,6 +128,17 @@ class Bot {
         commandHandler.addCommand(QueryRecord())
 
         commandHandler.generateHelp()
+
+        Main.discordBot.discordApi.getRoleById(Main.serverConfig.discordMutedRole).ifPresentOrElse(
+            {
+                mutedRole = it
+            },
+            {
+                mutedRole = null
+            }
+        )
+
+
     }
 
     private fun onSucessfulConnect() {
