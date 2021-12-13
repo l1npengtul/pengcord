@@ -1,3 +1,6 @@
+# Enables bStats. Turning this off won't affect any functionality.
+enable-bstats: true
+
 # Enables the "Verify" feature, tying a discord account to an in game account
 enable-verify: false
 
@@ -38,20 +41,15 @@ bot-command-channels:
 bot-logging-channel: 0
 bot-server: 0
 
-# Messages that will bypass the `!isBot` requirement for these with following roles
-sync-ignore-notbot-roles:
-  - 0
-
 # Webhook ID to manage. Do not edit, managed by bot
 webhook-url: 0
 
-# A list of admin roles on the Discord Server. They can run history and moderation commands
-# This should be a long number, such as 741365968336322711
+# A list of admin roles on the Discord Server. They can run history and moderation commands. By-ID
 discord-admin-roles:
     - 0
 
 # Enable chat filter
-enable-literally-nineteen-eighty-four: true
+enable-literally-nineteen-eighty-four: false
 
 # A chat filter. Case-insensitive, but won't work if you use capital letters.
 # Does not sync to discord (will ignore uses of these words in discrd. get yourself a proper moderation bot)
@@ -72,7 +70,7 @@ enable-bot-moderation-features: true
 discord-muted-role: 0
 
 # Delete number of days of messages
-# Must be between 0-7
+# Must be between 0-7. Defaults to zero.
 discord-onban-delete-message-days: 0
 
 # first time booting (does DB exist?)
@@ -81,3 +79,9 @@ first-time: true
 
 # Enables the Log4J mitigations. Recommended to keep on to protect dated clients.
 enable-log4j-mitigations: true
+
+# Log Kotlin Exposed SQL Queries
+debug-log-sql: false
+
+# Respect vanish (dont sync vanished players)
+respect-vanish: true

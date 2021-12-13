@@ -3,7 +3,7 @@ package net.pengtul.pengcord.commands
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
 import net.pengtul.pengcord.util.Utils.Companion.timeToOrSinceDateTime
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.main.Main
 import net.pengtul.pengcord.util.toComponent
 import org.bukkit.command.Command
@@ -17,7 +17,7 @@ class Me: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("pengcord.command.me")) {
             sender.sendMessage("§c§nInvalid Permissions!")
-            Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `me`. Failed due to insufficient permissions.")
+            
             Main.serverLogger.info("User ${sender.name} ran `me`. Failed due to insufficient permissions.")
         }
 
@@ -79,7 +79,7 @@ class Me: CommandExecutor {
                             ClickEvent.clickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, dbPlayer.deaths.toString())
                         ))
 
-                        Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${sender.name}\".")
+                        
                         Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${sender.name}\".")
                         return@Runnable
                     }

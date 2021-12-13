@@ -1,10 +1,11 @@
 package net.pengtul.pengcord.commands
 
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.event.ClickEvent
+import net.kyori.adventure.text.event.HoverEvent
 import net.pengtul.pengcord.util.Utils.Companion.getUptime
-import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.main.Main
-import net.pengtul.pengcord.util.toComponentNewline
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.util.toComponent
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
@@ -42,17 +43,22 @@ class Info: CommandExecutor {
                 .append("§aServer Uptime (HH:MM:SS): ${getUptime()}\n".toComponent())
                 .append("§aServer TPS [1M, 5M, 15M]: ${Bukkit.getTPS().map { (it * 100).roundToInt() / 100.0 }.joinToString()}\n".toComponent())
                 .append("§aOnline: ${Bukkit.getOnlinePlayers().joinToString { it.name }}\nout of ${Bukkit.getServer().maxPlayers}\n".toComponent())
-                .append("§9==========================§r".toComponent())
-                .build()
+
+            if (!Main.serverConfig.discordServerLink.isNullOrBlank()) {
+                serverInfoText.append("Discord Server: ${Main.serverConfig.discordServerLink}".toComponent(
+                    HoverEvent.showText("Click to join!".toComponent()),
+                    ClickEvent.openUrl(Main.serverConfig.discordServerLink.toString())
+                ))
+            }
+            serverInfoText.append("§9==========================§r".toComponent())
             sender.sendMessage(serverInfoText)
-            
-            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args}\".")
-            Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args}\".")
+
+            Main.serverLogger.info(LogType.MCComamndRan,"User ${sender.name} ran `${this.javaClass.name}` with args \"${args}\".")
             return true
         }
         else {
-            Main.discordBot.log(LogType.MCComamndError,"User ${sender.name} ran `info`. Failed due to invalid permissions.")
-            Main.serverLogger.info("User ${sender.name} ran `info`. Failed due to invalid permissions.")
+            
+            Main.serverLogger.info(LogType.MCComamndError,"User ${sender.name} ran `info`. Failed due to invalid permissions.")
             sender.sendMessage("§cYou do not have permission to run this command!")
             return false
         }

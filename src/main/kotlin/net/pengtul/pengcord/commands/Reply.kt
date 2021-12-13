@@ -1,6 +1,6 @@
 package net.pengtul.pengcord.commands
 //
-//import net.pengtul.pengcord.bot.LogType
+//import net.pengtul.pengcord.util.LogType
 //import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 //import net.pengtul.pengcord.main.Main
 //import org.bukkit.command.Command

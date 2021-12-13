@@ -30,15 +30,20 @@ import com.vladsch.flexmark.util.data.MutableDataSet
 import com.vladsch.flexmark.util.misc.Extension
 import net.milkbowl.vault.chat.Chat
 import net.pengtul.pengcord.bot.Bot
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.commands.*
 import net.pengtul.pengcord.data.ServerConfig
 import net.pengtul.pengcord.data.UserSQL
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
+import net.pengtul.pengcord.event.Event
+import net.pengtul.pengcord.event.PacketEvent
 import net.pengtul.pengcord.mdparse.spoiler.SpoilerExtension
 import net.pengtul.pengcord.mdparse.underline.UnderlineExtension
+import net.pengtul.pengcord.util.Logger
 import net.pengtul.pengcord.util.PengMDHTMLParser
+import net.pengtul.pengcord.util.Stats
+import net.pengtul.pengcord.util.TranslationProvider
 import net.pengtul.pengcord.util.Utils.Companion.banPardon
 import net.pengtul.pengcord.util.Utils.Companion.pardonMute
 import org.bukkit.Bukkit
@@ -59,7 +64,6 @@ import java.io.File
 import java.net.URL
 import java.util.*
 import java.util.logging.Level
-import java.util.logging.Logger
 import javax.imageio.ImageIO
 
 
@@ -70,11 +74,11 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         lateinit var database: UserSQL
         lateinit var serverRawConfig: FileConfiguration
         lateinit var serverConfig: ServerConfig
+        lateinit var serverLogger: Logger
         lateinit var discordFolder: File
         lateinit var discordBot: Bot
         var mojangAPI: Mojang = Mojang().connect()
         lateinit var pengcord: Plugin
-        lateinit var serverLogger: Logger
         val scheduler: BukkitScheduler = Bukkit.getScheduler()
         val neverHappenedDateTime: DateTime = DateTime(0)
         var playersAwaitingVerification: HashMap<Int, MinecraftId> = HashMap()
@@ -105,8 +109,9 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         val markdownParser = Parser.builder(PARSER_OPTIONS).build()
         val htmlRenderer = HtmlRenderer.builder(PARSER_OPTIONS).build()
         val htmlParser = PengMDHTMLParser()
+        private lateinit var stats: Stats
 
-        fun downloadSkin(usr: Player){
+        fun downloadSkin(usr: Player) {
             val usrUUID: String = usr.uniqueId.toString()
             scheduler.runTaskAsynchronously(pengcord, Runnable {
                 try {
@@ -114,22 +119,24 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
                     newPngFile.mkdirs()
                     val image: BufferedImage = ImageIO.read(URL("https://minotar.net/helm/${usrUUID}/100.png"))
                     ImageIO.write(image, "png", newPngFile)
+                    image.flush()
                 } catch (e: Exception) {
-                    println("Exception $e")
+                    serverLogger.warn("Exception $e")
                 }
             })
 
         }
 
-        fun downloadSkinUUID(uuid: UUID){
+        fun downloadSkinUUID(uuid: UUID) {
             scheduler.runTaskAsynchronously(pengcord, Runnable {
                 try {
                     val newPngFile = File("plugins${File.separator}pengcord${File.separator}playerico${File.separator}${uuid}.png")
                     newPngFile.mkdirs()
                     val image: BufferedImage = ImageIO.read(URL("https://minotar.net/helm/${uuid}/100.png"))
                     ImageIO.write(image, "png", newPngFile)
+                    image.flush()
                 } catch (e: Exception) {
-                    println("Exception $e")
+                    serverLogger.warn("Exception $e")
                 }
             })
         }
@@ -244,8 +251,6 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         val pl = Bukkit.getServer().pluginManager.getPlugin("pengcord")
         pengcord = pl!!
 
-        serverLogger = pengcord.logger
-
         vaultApi = Bukkit.getServer().pluginManager.getPlugin("Vault")!!
         val rsp = Bukkit.getServer().servicesManager.getRegistration(Chat::class.java)
         vaultChatApi = rsp!!.provider
@@ -257,14 +262,16 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
 
         val cfg = ServerConfig.new(serverRawConfig)
         cfg.onFailure {
-            this.logger.log(Level.SEVERE, "Failed to load server configuration:")
-            this.logger.log(Level.SEVERE, it.toString())
-            this.logger.log(Level.SEVERE, "Exiting pengcord!!!")
+            pengcord.logger.log(Level.SEVERE, "Failed to load server configuration:")
+            pengcord.logger.log(Level.SEVERE, it.toString())
+            pengcord.logger.log(Level.SEVERE, "Exiting pengcord!!!")
             this.pluginLoader.disablePlugin(this)
         }
         cfg.onSuccess {
             serverConfig = it
         }
+
+        serverLogger = Logger(this, serverConfig)
 
         // Initialize SQL
         database = UserSQL()
@@ -272,6 +279,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         discordFolder = dataFolder
         try{
             discordBot = Bot()
+            serverLogger.initDiscordBot(discordBot)
         }
         catch (e: Exception){
             serverLogger.severe("Exception ${e}. Disabling plugin!")
@@ -308,9 +316,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         }
 
         discordBot.log(LogType.ServerStartup, "Server Startup and Plugin Initialization successful.")
-        serverLogger.info {
-            "Sucessfully Started!"
-        }
+        serverLogger.info ("Sucessfully Started!")
 
         if (serverConfig.enableLog4JMitigations) {
             if (Bukkit.getServer().pluginManager.getPlugin("ProtocolLib") != null) {
@@ -320,7 +326,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
                 serverLogger.info("Log4J Mitigations enabled!")
             }
             else {
-                serverLogger.warning("Log4J Mitigations enabled but ProtocolLib was not found! Install protocollib and restart to enable mitigations!")
+                serverLogger.warn("Log4J Mitigations enabled but ProtocolLib was not found! Install protocollib and restart to enable mitigations!")
             }
         }
 
@@ -329,6 +335,11 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         } else {
             discordBot.sendMessageToDiscord("Server Started, get on at ${serverConfig.minecraftServerIp}!")
         }
+
+        if (serverConfig.enablebStats) {
+            stats = Stats(this, 13572);
+        }
+
     }
 
     override fun onDisable() {

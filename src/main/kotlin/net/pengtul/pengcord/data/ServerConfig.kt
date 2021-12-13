@@ -5,6 +5,9 @@ import org.bukkit.configuration.file.FileConfiguration
 import java.lang.Exception
 
 class ServerConfig(rawConfig: FileConfiguration) {
+    // bStats
+    val enablebStats: Boolean
+
     // Verify related settings
     val enableVerify: Boolean
     val discordServerLink: String?
@@ -43,7 +46,12 @@ class ServerConfig(rawConfig: FileConfiguration) {
 
     val enableLog4JMitigations: Boolean
 
+    val logSql: Boolean
+    val respectVanish: Boolean
+
     init {
+        enablebStats = rawConfig.getBoolean("enable-bstats")
+
         enableVerify = rawConfig.getBoolean("enable-verify")
         discordServerLink = rawConfig.getString("discord-server-link")
         minecraftServerIp = rawConfig.getString("minecraft-server-ip")
@@ -91,6 +99,10 @@ class ServerConfig(rawConfig: FileConfiguration) {
         enableLog4JMitigations = rawConfig.getBoolean("enable-log4j-mitigations")
 
         enableDiscordCustomEmojiSync = rawConfig.getBoolean("enable-emoji-sync")
+
+        logSql = rawConfig.getBoolean("debug-log-sql")
+
+        respectVanish = rawConfig.getBoolean("respect-vanish")
     }
 
     companion object {

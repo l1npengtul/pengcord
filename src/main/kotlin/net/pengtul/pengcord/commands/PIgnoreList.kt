@@ -5,7 +5,6 @@ import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
-import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.main.Main
 import net.pengtul.pengcord.util.Utils
 import net.pengtul.pengcord.util.toComponent
@@ -14,10 +13,9 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
-class IgnoreList: CommandExecutor {
+class PIgnoreList: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("pengcord.command.ignore")) {
-            Main.discordBot.log(LogType.MCComamndError,"User ${sender.name} ran `${this.javaClass.name}`. Failed due to invalid permissions.")
             Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}`. Failed due to invalid permissions.")
             sender.sendMessage("§cYou do not have permission to run this command!")
             return false

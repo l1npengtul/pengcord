@@ -1,7 +1,7 @@
 package net.pengtul.pengcord.bot.botcmd
 
 import net.pengtul.pengcord.util.Utils.Companion.getUptime
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.main.Main
 import org.bukkit.Bukkit
@@ -49,8 +49,12 @@ class Info: JCDiscordCommandExecutor {
                 .addField("Users Online (${playerList.size}/${Bukkit.getMaxPlayers()}):",
                     playerList.joinToString { it.name })
 
+        if (!Main.serverConfig.discordServerLink.isNullOrBlank()) {
+            embed.addField("Server IP:", Main.serverConfig.discordServerLink)
+        }
+
         message.reply(embed).thenAccept {
-            Main.discordBot.log(LogType.DSCComamndRan, "User ${sender.idAsString} (${sender.discriminatedName}) ran command `$commandName`.")
+            
             Main.discordBot.logEmbed(embed)
         }
     }

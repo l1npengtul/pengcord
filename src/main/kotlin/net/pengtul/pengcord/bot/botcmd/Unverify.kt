@@ -1,14 +1,12 @@
 package net.pengtul.pengcord.bot.botcmd
 
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.util.Utils.Companion.doesUserHavePermission
 import net.pengtul.pengcord.util.Utils.Companion.unverifyPlayer
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.main.Main
 import net.pengtul.pengcord.util.Utils.Companion.queryPlayerFromString
-import org.bukkit.Bukkit
-import org.bukkit.entity.Player
 import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.user.User
 
@@ -39,7 +37,7 @@ class Unverify: JCDiscordCommandExecutor {
                 }
             } else {
                 message.addReaction("\uD83D\uDEAB").thenAccept {
-                    Main.discordBot.log(LogType.DSCComamndError, "User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
+                    
                     Main.serverLogger.info("User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
                     CommandHelper.deleteAfterSend("\uD83D\uDEAB: Cannot mute another moderator!", 5, message)
                 }

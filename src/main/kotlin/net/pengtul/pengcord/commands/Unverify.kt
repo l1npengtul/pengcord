@@ -1,7 +1,7 @@
 package net.pengtul.pengcord.commands
 
 import net.pengtul.pengcord.util.Utils.Companion.unverifyPlayer
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.main.Main
 import org.bukkit.command.Command
@@ -37,7 +37,7 @@ class Unverify: CommandExecutor {
 
                 unverifyPlayer(TypeOfUniqueID.MinecraftTypeOfUniqueID(player.playerUUID))
                 Main.removePlayerFromVerifiedCache(player.playerUUID)
-                Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                
                 Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
             })
             return true
@@ -47,7 +47,7 @@ class Unverify: CommandExecutor {
 
                 unverifyPlayer(TypeOfUniqueID.MinecraftTypeOfUniqueID(player.playerUUID))
                 Main.removePlayerFromVerifiedCache(player.playerUUID)
-                Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                
                 Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
             })
             return true

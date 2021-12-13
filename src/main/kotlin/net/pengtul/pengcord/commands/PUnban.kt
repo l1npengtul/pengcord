@@ -2,7 +2,7 @@ package net.pengtul.pengcord.commands
 
 import net.pengtul.pengcord.util.Utils.Companion.banPardon
 import net.pengtul.pengcord.util.Utils.Companion.queryPlayerFromString
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.main.Main
 import org.bukkit.command.Command
@@ -29,7 +29,7 @@ class PUnban: CommandExecutor {
                         Main.database.queryPlayerBansByPlayerMinecraft(player.playerUUID).filter { it.expiryState == ExpiryState.OnGoing }.forEach { ban ->
                             banPardon(ban, pardoned = true)
                             sender.sendMessage("§aLifted ban ${ban.banId} for player ${it.currentUsername}(UUID: ${it.playerUUID}/Discord: ${it.discordUUID})!")
-                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            
                             Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")                        }
                     }
                 })
@@ -39,13 +39,13 @@ class PUnban: CommandExecutor {
                     Main.database.queryPlayerBanById(banId)?.let { ban ->
                         banPardon(ban, pardoned = true)
                         sender.sendMessage("§aLifted ban ${ban.banId} for player UUID: ${ban.playerUUID}/Discord: ${ban.discordUUID}!")
-                        Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                        
                         Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${args[0]}\".")                    }
                 })
             }
             return true
         } else {
-            Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `punban`. Failed due to insufficient permissions.")
+            
             Main.serverLogger.info("User ${sender.name} ran `punban`. Failed due to insufficient permissions.")
             return false
         }

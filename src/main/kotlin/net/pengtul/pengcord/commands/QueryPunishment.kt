@@ -7,7 +7,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextDecoration
 import net.pengtul.pengcord.util.Utils.Companion.timeToOrSinceDateTime
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.main.Main
 import net.pengtul.pengcord.util.toComponent
 import org.bukkit.command.Command
@@ -97,7 +97,7 @@ class QueryPunishment: CommandExecutor {
                                 )
                                 .build()
                             sender.sendMessage(alertComponent)
-                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `querypunishment`.")
+                            
                             return@Runnable
                         }
                         sender.sendMessage("§cQuery failed: Invalid ID!")
@@ -183,7 +183,7 @@ class QueryPunishment: CommandExecutor {
                                 )
                                 .build()
                             sender.sendMessage(warnComponent)
-                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `query`.")
+                            
                             return@Runnable
                         }
                         sender.sendMessage("§cQuery failed: Invalid ID!")
@@ -311,7 +311,7 @@ class QueryPunishment: CommandExecutor {
                                         .build()
                                 )
                             sender.sendMessage(muteComponent.build())
-                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `querypunishment`.")
+                            
                             return@Runnable
                         }
                         sender.sendMessage("§cQuery failed: Invalid ID!")
@@ -439,7 +439,7 @@ class QueryPunishment: CommandExecutor {
                                         .build()
                                 )
                             sender.sendMessage(banComponent.build())
-                            Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `querypunishment`.")
+                            
                             return@Runnable
                         }
                         sender.sendMessage("§cQuery failed: Invalid ID!")
@@ -451,7 +451,7 @@ class QueryPunishment: CommandExecutor {
             })
             return true
         } else {
-            Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `querypunishment`. Failed due to insufficient permissions.")
+            
             Main.serverLogger.info("User ${sender.name} ran `querypunishment`. Failed due to insufficient permissions.")
             return false
         }

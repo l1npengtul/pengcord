@@ -1,4 +1,4 @@
-package net.pengtul.pengcord.bot
+package net.pengtul.pengcord.util
 
 enum class LogType(val log: String) {
     MCComamndError("[MC-COMMAND-ERROR]: "),
@@ -20,7 +20,10 @@ enum class LogType(val log: String) {
     PlayerUnBanned("[PL-UNBANNED]: "),
     PlayerJoin("[PL-JOIN]: "),
     PlayerLeave("[PL-LEAVE]: "),
-    PlayerDie("[PL-DIE]: "),;
+    PlayerDie("[PL-DIE]: "),
+    SQLLog("[SQL]: "),
+    Generic("[INFO]: "),
+    GenericWarning("[WARN]: ");
 
     override fun toString(): String {
         return this.log

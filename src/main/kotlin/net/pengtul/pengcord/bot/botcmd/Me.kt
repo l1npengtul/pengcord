@@ -1,6 +1,6 @@
 package net.pengtul.pengcord.bot.botcmd
 
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.main.Main
 import org.javacord.api.entity.message.Message
@@ -43,21 +43,21 @@ class Me: JCDiscordCommandExecutor {
                     }
                     message.addReaction("✅").thenAccept {
                         message.reply(userInfoEmbed).thenAccept {
-                            Main.discordBot.log(LogType.DSCComamndRan,"User ${sender.discriminatedName} ran command `me`.")
+                            
+                            Main.serverLogger.info(LogType.MCComamndRan,"User ${sender.discriminatedName} ran command `me`.")
                             Main.discordBot.logEmbed(userInfoEmbed)
-                            Main.serverLogger.info("User ${sender.discriminatedName} ran command `me`.")
                         }
                     }
                     return@Runnable
                 }
                 message.addReaction("❌").thenAccept {
-                    Main.discordBot.log(LogType.DSCComamndError,"Could not get user played time.")
+                    
                     CommandHelper.deleteAfterSend("Could not find your played time!", 5, message)
                 }
                 return@Runnable
             }
             message.addReaction("❌").thenAccept {
-                Main.discordBot.log(LogType.DSCComamndError,"Invalid User.")
+                
                 CommandHelper.deleteAfterSend("Could not find you! Are you verified on the server?", 5, message)
             }
             return@Runnable

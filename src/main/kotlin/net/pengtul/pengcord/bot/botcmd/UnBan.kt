@@ -3,7 +3,7 @@ package net.pengtul.pengcord.bot.botcmd
 import net.pengtul.pengcord.util.Utils.Companion.banPardon
 import net.pengtul.pengcord.util.Utils.Companion.doesUserHavePermission
 import net.pengtul.pengcord.util.Utils.Companion.queryPlayerFromString
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.main.Main
@@ -21,7 +21,7 @@ class UnBan: JCDiscordCommandExecutor {
     override fun executeCommand(msg: String, sender: User, message: Message, args: List<String>) {
         if (!doesUserHavePermission(sender, "pengcord.punishment.ban")) {
             message.addReaction("\uD83D\uDEAB").thenAccept {
-                Main.discordBot.log(LogType.DSCComamndError, "User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
+                
                 Main.serverLogger.info("User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
                 CommandHelper.deleteAfterSend("\uD83D\uDEAB: You are not a moderator!", 5, message)
             }
@@ -42,7 +42,7 @@ class UnBan: JCDiscordCommandExecutor {
                         banPardon(ban, pardoned = true)
                         message.addReaction("✅").thenAccept {
                             CommandHelper.deleteAfterSend("§aLifted ban ${ban.banId} for player UUID: ${ban.playerUUID}/Discord: ${ban.discordUUID}!", 5, message)
-                            Main.discordBot.log(LogType.DSCComamndRan, "User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                            
                             Main.serverLogger.info("User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                         }
                     }
@@ -55,7 +55,7 @@ class UnBan: JCDiscordCommandExecutor {
                     banPardon(ban, pardoned = true)
                     message.addReaction("✅").thenAccept {
                         CommandHelper.deleteAfterSend("§aLifted ban ${ban.banId} for player UUID: ${ban.playerUUID}/Discord: ${ban.discordUUID}!", 5, message)
-                        Main.discordBot.log(LogType.DSCComamndRan, "User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+                        
                         Main.serverLogger.info("User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\".")
                     }
                     return@Runnable

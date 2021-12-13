@@ -3,7 +3,7 @@ package net.pengtul.pengcord.commands
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.main.Main
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -29,7 +29,7 @@ class Git: CommandExecutor {
             )
             sender.sendMessage(clickable)
         }
-        Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran command `${this.javaClass.name}`")
+        
         return true
     }
 }

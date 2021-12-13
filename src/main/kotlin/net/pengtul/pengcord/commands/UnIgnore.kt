@@ -1,6 +1,6 @@
 package net.pengtul.pengcord.commands
 
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.main.Main
 import net.pengtul.pengcord.util.Utils
 import org.bukkit.command.Command
@@ -11,7 +11,7 @@ import org.bukkit.entity.Player
 class UnIgnore: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (!sender.hasPermission("pengcord.command.ignore")) {
-            Main.discordBot.log(LogType.MCComamndError,"User ${sender.name} ran `${this.javaClass.name}`. Failed due to invalid permissions.")
+            
             Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}`. Failed due to invalid permissions.")
             sender.sendMessage("§cYou do not have permission to run this command!")
             return false

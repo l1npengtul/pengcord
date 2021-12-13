@@ -2,7 +2,7 @@ package net.pengtul.pengcord.bot.botcmd
 
 import net.pengtul.pengcord.util.Utils
 import net.pengtul.pengcord.util.Utils.Companion.shutdown
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.main.Main
 import org.javacord.api.entity.message.Message
@@ -19,7 +19,7 @@ class StopServer: JCDiscordCommandExecutor {
     override fun executeCommand(msg: String, sender: User, message: Message, args: List<String>) {
         if (!Utils.doesUserHavePermission(sender, "pengcord.command.shutdown")) {
             message.addReaction("\uD83D\uDEAB").thenAccept {
-                Main.discordBot.log(LogType.DSCComamndError, "User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
+                
                 Main.serverLogger.info("User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
                 CommandHelper.deleteAfterSend("\uD83D\uDEAB: You are not a moderator!", 5, message)
             }
@@ -27,7 +27,7 @@ class StopServer: JCDiscordCommandExecutor {
         }
         val shutdownTimer = (args[0].toIntOrNull() ?: 20).toLong()
         shutdown(shutdownTimer)
-        Main.discordBot.log(LogType.DSCComamndRan, "User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\".")
+        
         Main.serverLogger.info("User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\".")
     }
 }

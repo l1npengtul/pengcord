@@ -1,14 +1,15 @@
-package net.pengtul.pengcord.bot
+package net.pengtul.pengcord.bot.listeners
 
 import net.pengtul.pengcord.util.Utils.Companion.banPlayer
 import net.pengtul.pengcord.data.interact.ExpiryDateTime
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.data.interact.UpdateVerify
 import net.pengtul.pengcord.main.Main
+import net.pengtul.pengcord.util.LogType
 import org.javacord.api.event.server.member.ServerMemberBanEvent
 import org.javacord.api.listener.server.member.ServerMemberBanListener
 
-class DscServerMemberBannedEvent: ServerMemberBanListener {
+class DscServerMemberBannedListener: ServerMemberBanListener {
     override fun onServerMemberBan(event: ServerMemberBanEvent?) {
         event?.let { serverMemberBanEvent ->
             if (serverMemberBanEvent.server.equals(Main.discordBot.discordServer)) {
@@ -22,7 +23,7 @@ class DscServerMemberBannedEvent: ServerMemberBanListener {
                                 if (lastPlayerBan.reason == banReason) {
                                     banPlayer(player, TypeOfUniqueID.Unknown("Discord Ban, Check Server Audit Log"), ExpiryDateTime.Permanent, banReason)
                                 }
-                                Main.discordBot.log(LogType.PlayerBanned, "Synced Discord ban for player ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}/${ban.user.discriminatedName})")
+                                
                                 Main.serverLogger.info("Synced Discord ban for player ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}/${ban.user.discriminatedName})")
                             }
                         })

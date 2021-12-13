@@ -2,7 +2,7 @@ package net.pengtul.pengcord.bot.botcmd
 
 import net.pengtul.pengcord.util.Utils.Companion.doesUserHavePermission
 import net.pengtul.pengcord.util.Utils.Companion.queryPlayerFromString
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.main.Main
@@ -69,7 +69,7 @@ class WhoIs: JCDiscordCommandExecutor {
                 }
                 message.addReaction("✅").thenAccept {
                     message.reply(userInfoEmbed).thenAccept {
-                        Main.discordBot.log(LogType.DSCComamndRan,"User ${sender.discriminatedName} ran command `me`.")
+                        
                         Main.discordBot.logEmbed(userInfoEmbed)
                         Main.serverLogger.info("User ${sender.discriminatedName} ran command `me`.")
                     }

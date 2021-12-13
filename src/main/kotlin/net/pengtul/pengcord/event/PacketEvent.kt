@@ -1,8 +1,9 @@
-package net.pengtul.pengcord.main
+package net.pengtul.pengcord.event
 
 import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.events.*
 import com.comphenix.protocol.events.PacketEvent
+import net.pengtul.pengcord.main.Main
 import org.bukkit.plugin.Plugin
 
 class PacketEvent: PacketListener {
@@ -13,7 +14,7 @@ class PacketEvent: PacketListener {
                 try {
                     if (packetEvent.packet.strings.read(0).matches(mitigationRegex)) {
                         packetEvent.isCancelled = true
-                        Main.serverLogger.warning("Mitigated chat packet from ${packetEvent.source}!")
+                        Main.serverLogger.warning("Mitigated chat packet from ${packetEvent.player.name}!")
                     }
                 } catch (_: Exception) {
 
@@ -28,7 +29,7 @@ class PacketEvent: PacketListener {
                 try {
                     if (packetEvent.packet.strings.read(0).matches(mitigationRegex)) {
                         packetEvent.isCancelled = true
-                        Main.serverLogger.warning("Mitigated chat packet from ${packetEvent.source}!")
+                        Main.serverLogger.warning("Mitigated chat packet from ${packetEvent.player.name}!")
                     }
                 } catch (_: Exception) {
 

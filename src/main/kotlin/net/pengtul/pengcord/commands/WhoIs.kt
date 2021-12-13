@@ -4,7 +4,7 @@ import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
 import net.pengtul.pengcord.util.Utils.Companion.queryPlayerFromString
 import net.pengtul.pengcord.util.Utils.Companion.timeToOrSinceDateTime
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.main.Main
 import net.pengtul.pengcord.util.toComponent
@@ -110,7 +110,7 @@ class WhoIs: CommandExecutor {
                             ClickEvent.clickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, dbPlayer.deaths.toString())
                         ))
 
-                        Main.discordBot.log(LogType.MCComamndRan, "User ${sender.name} ran `whois` with ${args[0]}.")
+                        
                         Main.serverLogger.info("User ${sender.name} ran `whois` with ${args[0]}.")
                         return@Runnable
                     }
@@ -119,7 +119,7 @@ class WhoIs: CommandExecutor {
             })
             return true
         } else {
-            Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `whois` with argument ${args[0]}. Failed due to invalid permission.")
+            
             Main.serverLogger.info("User ${sender.name} ran `whois` with argument ${args[0]}. Failed due to invalid permission.")
             sender.sendMessage("§cYou do not have permission to run this command.")
             return false

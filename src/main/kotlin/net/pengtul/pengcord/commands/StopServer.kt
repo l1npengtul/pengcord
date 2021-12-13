@@ -1,9 +1,8 @@
 package net.pengtul.pengcord.commands
 
 import net.pengtul.pengcord.util.Utils.Companion.shutdown
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.main.Main
-import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -38,22 +37,18 @@ class StopServer: CommandExecutor {
         if (sender.hasPermission("pengcord.command.stopserver")) {
             shutdown(shutdownTimer)
             if (sender is Player){
-                Main.discordBot.log(LogType.MCComamndRan, "User ${sender.uniqueId} (${sender.name}) ran `stopserver`.")
                 Main.serverLogger.info("User ${sender.uniqueId} (${sender.name}) ran `stopserver`.")
             }
             else {
-                Main.discordBot.log(LogType.MCComamndRan, "Console ran command `stopserver`.")
                 Main.serverLogger.info("Console ran command `stopserver`.")
             }
             ret = true
         }
         else {
             if (sender is Player){
-                Main.discordBot.log(LogType.MCComamndError, "User ${sender.uniqueId} (${sender.name}) ran `stopserver`. Failed due to invalid permission.")
                 Main.serverLogger.info("User ${sender.uniqueId} (${sender.name}) ran `stopserver`. Failed due to invalid permission.")
             }
             else {
-                Main.discordBot.log(LogType.MCComamndError, "Console ran command `stopserver`. Failed due to invalid permission.")
                 Main.serverLogger.info("Console ran command `stopserver`. Failed due to invalid permission.")
             }
         }

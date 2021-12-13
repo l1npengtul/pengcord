@@ -3,10 +3,9 @@ main: net.pengtul.pengcord.main.Main
 version: 0.3.0
 author: l1npengtul <l1npengtul@protonmail.com>
 depend:
-  - LuckPerms
   - Vault
+softdepend:
   - ProtocolLib
-softdepend: [ProtocolLib]
 api-version: 1.18
 description: Discord <-> Minecraft Verification and Sync Plugin
 load: STARTUP
@@ -139,5 +138,18 @@ permissions:
       pengcord.ignore.listothers:
         description: Query the ignorelist of other players
         default: false
+  pengcord.silent:
+    description: Permissions to silently do stuff
+    children:
+      pengcord.silent.join:
+        description: Silently Join the Server
+        default: false
+      pengcord.silent.leave:
+        description: Silently Leave the Server
+        default: false
+      pengcord.silent.advancement:
+        description: Do not sync advancement gains
+        default: false
+      pengcord.silent.
 
 

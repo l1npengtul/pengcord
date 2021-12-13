@@ -1,4 +1,4 @@
-package net.pengtul.pengcord.main
+package net.pengtul.pengcord.util
 
 import org.json.JSONObject
 

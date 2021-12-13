@@ -1,4 +1,4 @@
-package net.pengtul.pengcord.bot
+package net.pengtul.pengcord.bot.listeners
 
 /*
 *    Event that fires and processes incoming messages from Discord
@@ -27,6 +27,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextDecoration
 import net.pengtul.pengcord.main.Main
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.util.toComponent
 import net.pengtul.pengcord.util.toTextColor
 import org.bukkit.Bukkit
@@ -36,7 +37,7 @@ import org.javacord.api.listener.message.MessageCreateListener
 import org.jsoup.Jsoup
 import java.awt.Color
 
-class DscMessageEvent: MessageCreateListener {
+class DscMessageListener: MessageCreateListener {
     override fun onMessageCreate(event: MessageCreateEvent?) {
         val message: Message? = event?.message
         message?.let { msg ->
@@ -49,7 +50,7 @@ class DscMessageEvent: MessageCreateListener {
                             && Main.serverConfig.bannedWords.isNotEmpty()) {
                             msg.delete().thenAccept {
                                 Main.serverLogger.info("Removed Message: ${msg.content} / ${msg.readableContent} from user ${msg.author.idAsString} / ${msg.author.discriminatedName}")
-                                Main.discordBot.log(LogType.ChatFilter, "User ${msg.author.idAsString} (${msg.author.discriminatedName}) tripped the word filter with message `${msg.content}` / `${msg.readableContent}`.")
+                                
                                 msg.userAuthor.ifPresent { user ->
                                     user.sendMessage(Main.serverConfig.filteredMessage.replace(Main.discordBot.regex, ""))
                                     Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
@@ -92,11 +93,11 @@ class DscMessageEvent: MessageCreateListener {
 
                                     for (attachment in msg.attachments){
                                         val initialContent = if (attachment.isSpoiler){
-                                            Main.discordBot.log(LogType.PlayerChat, "User ${msg.author.idAsString} (${msg.author.discriminatedName}) sync message `SPOILER: ${attachment.url}`.")
+                                            
                                             finalComponent.append(Component.newline())
                                             "[DSC] [SPOILER] "
                                         } else {
-                                            Main.discordBot.log(LogType.PlayerChat, "User ${msg.author.idAsString} (${msg.author.discriminatedName}) sync message `${attachment.url}`.")
+                                            
                                             "[DSC]"
                                         }
                                         val attachmentComponent = Component.text()
@@ -129,7 +130,7 @@ class DscMessageEvent: MessageCreateListener {
                         }
                     }
                     catch (e: Exception){
-                        Main.discordBot.log(LogType.GenericError, "User ${msg.author.idAsString} (${msg.author.discriminatedName}) message sync failed due to exception ${e}.")
+                        
                         Main.serverLogger.severe("Failed to broadcast message! Exception $e")
                         Main.serverLogger.severe(e.stackTrace.toString())
                     }

@@ -31,6 +31,7 @@ dependencies {
     implementation "net.kyori:adventure-api:4.9.3"
     implementation 'com.vladsch.flexmark:flexmark-all:0.62.2'
     implementation 'org.jsoup:jsoup:1.14.3'
+    implementation group: 'org.bstats', name: 'bstats-bukkit', version: '2.2.1'
     compileOnly "io.papermc.paper:paper-api:1.18-R0.1-SNAPSHOT"
     compileOnly "com.github.MilkBowl:VaultAPI:1.7"
     compileOnly group: "com.comphenix.protocol", name: "ProtocolLib", version: "4.7.0";

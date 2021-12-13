@@ -1,6 +1,6 @@
 package net.pengtul.pengcord.bot.commandhandler.default
 
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.main.Main
 import org.bukkit.Bukkit
@@ -20,7 +20,7 @@ class Help(helpmsg: MessageBuilder) : JCDiscordCommandExecutor {
         Bukkit.getPluginManager().getPlugin("pengcord")?.let {
             Bukkit.getScheduler().runTaskAsynchronously(it, Runnable {
                 content.send(sender).join()
-                Main.discordBot.log(LogType.DSCComamndRan, "User ${sender.idAsString} (${sender.discriminatedName}) ran `$commandName`.")
+                
             })
         }
     }

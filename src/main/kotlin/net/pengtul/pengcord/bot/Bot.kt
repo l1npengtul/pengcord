@@ -23,11 +23,15 @@ import club.minnced.discord.webhook.external.JavacordWebhookClient
 import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import net.pengtul.pengcord.bot.botcmd.*
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandHandler
-import net.pengtul.pengcord.bot.emoji.DscEmojiEditedEvent
-import net.pengtul.pengcord.bot.emoji.DscEmojiRemovedEvent
-import net.pengtul.pengcord.bot.emoji.DscEmojiWhitelistChangedEvent
+import net.pengtul.pengcord.bot.listeners.emoji.DscEmojiEditedListener
+import net.pengtul.pengcord.bot.listeners.emoji.DscEmojiRemovedListener
+import net.pengtul.pengcord.bot.listeners.emoji.DscEmojiWhitelistChangedListener
+import net.pengtul.pengcord.bot.listeners.DscMessageListener
+import net.pengtul.pengcord.bot.listeners.DscServerMemberBannedListener
+import net.pengtul.pengcord.bot.listeners.DscServerMemberLeaveListener
 import net.pengtul.pengcord.error.DiscordLoginFailException
 import net.pengtul.pengcord.main.Main
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.util.Utils.Companion.formatMessage
 import org.bukkit.entity.Player
 import org.javacord.api.DiscordApi
@@ -42,7 +46,7 @@ import org.javacord.api.entity.user.UserStatus
 import org.javacord.api.entity.webhook.WebhookBuilder
 import org.joda.time.DateTime
 import kotlin.collections.ArrayList
-import kotlin.net.pengtul.pengcord.bot.emoji.DscEmojiAddedEvent
+import net.pengtul.pengcord.bot.listeners.emoji.DscEmojiAddedListener
 import kotlin.text.StringBuilder
 
 
@@ -93,10 +97,10 @@ class Bot {
 
         Main.serverConfig.webhookURL = webhook.url
 
-        discordApi.addListener(DscMessageEvent())
+        discordApi.addListener(DscMessageListener())
         if (Main.serverConfig.enableCrossMinecraftDiscordModeration) {
-            discordApi.addListener(DscServerMemberLeaveEvent())
-            discordApi.addListener(DscServerMemberBannedEvent())
+            discordApi.addListener(DscServerMemberLeaveListener())
+            discordApi.addListener(DscServerMemberBannedListener())
         }
 
         chatFilterRegex = if (Main.serverConfig.enableLiterallyNineteenEightyFour){
@@ -153,14 +157,18 @@ class Bot {
 
         if (Main.serverConfig.enableDiscordCustomEmojiSync) {
             updateDiscordEmojis()
-            discordApi.addListener(DscEmojiAddedEvent())
-            discordApi.addListener(DscEmojiEditedEvent())
-            discordApi.addListener(DscEmojiRemovedEvent())
-            discordApi.addListener(DscEmojiWhitelistChangedEvent())
+            discordApi.addListener(DscEmojiAddedListener())
+            discordApi.addListener(DscEmojiEditedListener())
+            discordApi.addListener(DscEmojiRemovedListener())
+            discordApi.addListener(DscEmojiWhitelistChangedListener())
         }
     }
 
     fun updateDiscordEmojis() {
+        if (!Main.serverConfig.enableDiscordCustomEmojiSync) {
+            return
+        }
+
         val emojiRegexString = StringBuilder()
 
         this.discordServer.customEmojis.forEach {emoji ->
@@ -295,16 +303,16 @@ class Bot {
         }
     }
 
-    fun sendEmbedToDiscord(message: EmbedBuilder){
-        Main.serverLogger.info("aaaaa")
-        Main.serverConfig.botChatSyncChannel?.let {
-            discordApi.getTextChannelById(
-                it
-            ).ifPresent { channel ->
-                channel.sendMessage(message)
-            }
-        }
-    }
+//    fun sendEmbedToDiscord(message: EmbedBuilder){
+//        Main.serverLogger.info("aaaaa")
+//        Main.serverConfig.botChatSyncChannel?.let {
+//            discordApi.getTextChannelById(
+//                it
+//            ).ifPresent { channel ->
+//                channel.sendMessage(message)
+//            }
+//        }
+//    }
 
     fun log(type: LogType, msg: String){
         val message = msg.replace("@", "@#")

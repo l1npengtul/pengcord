@@ -27,7 +27,7 @@ object CommandHelper {
         msg.reply(message)
             .thenAccept { sent ->
                 sent.api.threadPool.scheduler.schedule(
-                    Runnable {
+                    {
                         sent.delete().exceptionally(ExceptionLogger.get())
                     },
                     duration.toLong(),

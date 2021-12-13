@@ -4,7 +4,7 @@ import net.pengtul.pengcord.util.Utils.Companion.doesUserHavePermission
 import net.pengtul.pengcord.util.Utils.Companion.mutePlayer
 import net.pengtul.pengcord.util.Utils.Companion.parseTimeFromString
 import net.pengtul.pengcord.util.Utils.Companion.queryPlayerFromString
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.main.Main
@@ -22,7 +22,7 @@ class Mute: JCDiscordCommandExecutor {
     override fun executeCommand(msg: String, sender: User, message: Message, args: List<String>) {
         if (!doesUserHavePermission(sender, "pengcord.punishment.mute")) {
             message.addReaction("\uD83D\uDEAB").thenAccept {
-                Main.discordBot.log(LogType.DSCComamndError, "User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
+                
                 Main.serverLogger.info("User ${sender.discriminatedName} ran `${this.javaClass.name}` with args \"${args[0]}\". Failed due to invalid permissions.")
                 CommandHelper.deleteAfterSend("\uD83D\uDEAB: You are not a moderator!", 5, message)
             }
@@ -57,13 +57,13 @@ class Mute: JCDiscordCommandExecutor {
                     mutePlayer(player, TypeOfUniqueID.DiscordTypeOfUniqueID(sender.id), time, reason)
                     message.addReaction("✅").thenAccept {
                         Main.serverLogger.info("${sender.discriminatedName}(${sender.id}) sucessfully muted ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}) from discord.")
-                        Main.discordBot.log(LogType.DSCComamndRan, "${sender.discriminatedName}(${sender.id}) sucessfully muted ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}) from discord.")
+                        
                     }
                 } else {
                     message.addReaction("❌").thenAccept {
                         CommandHelper.deleteAfterSend("❌: Cannot mute another moderator!", 5, message)
                         Main.serverLogger.info("Attempt by ${sender.discriminatedName}(${sender.id}) to mute ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}) but failed due to target being another moderator.")
-                        Main.discordBot.log(LogType.DSCComamndError,"Attempt by ${sender.discriminatedName}(${sender.id}) to mute ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}) but failed due to target being another moderator.")
+                        
                     }
                 }
                 return@ifPresent

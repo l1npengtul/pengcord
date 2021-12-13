@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.NamedTextColor
-import net.pengtul.pengcord.bot.LogType
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.main.Main
 import org.bukkit.command.Command
@@ -85,7 +85,7 @@ class Verify: CommandExecutor {
             })
             return true
          } else {
-            Main.discordBot.log(LogType.MCComamndError, "User ${sender.name} ran `verify` with arguments. Failed due to error.")
+            
             Main.serverLogger.info("User ${sender.name} ran `verify` with arguments. Failed due to error.")
             return false
         }

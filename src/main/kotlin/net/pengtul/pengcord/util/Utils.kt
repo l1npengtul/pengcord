@@ -8,7 +8,6 @@ import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.title.Title
-import net.pengtul.pengcord.bot.LogType
 import net.pengtul.pengcord.data.interact.ExpiryDateTime
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
@@ -264,7 +263,7 @@ class Utils {
                     Main.database.playerUpdateVerify(player.playerUUID, UpdateVerify.Unverify)
                     Bukkit.getPlayer(player.playerUUID)?.kick(Component.text("Unverify"))
                     Main.serverLogger.info("Sucessfully unverified player ${player.currentUsername} (${player.playerUUID})")
-                    Main.discordBot.log(LogType.Verification, "Sucessfully unverified player ${player.currentUsername} (${player.playerUUID})")
+                    
                     Main.removePlayerFromVerifiedCache(player.playerUUID)
                 }
             })
@@ -276,7 +275,7 @@ class Utils {
                     Main.database.playerUpdateVerify(player.playerUUID, UpdateVerify.Unverify)
                     Bukkit.getPlayer(player.playerUUID)?.kick(Component.text("Unverify"))
                     Main.serverLogger.info("Sucessfully unverified player ${player.currentUsername} (${player.playerUUID})")
-                    Main.discordBot.log(LogType.Verification, "Sucessfully unverified player ${player.currentUsername} (${player.playerUUID})")
+                    
                     Main.removePlayerFromVerifiedCache(player.playerUUID)
                 }
             })
@@ -355,7 +354,7 @@ class Utils {
         private fun warnPlayerDiscord(player: Player, issuer: String, reason: String) {
             Main.discordBot.discordApi.getUserById(player.discordUUID).thenAccept { user ->
                 user.sendMessage("You were warned by $issuer because of $reason")
-                Main.discordBot.log(LogType.PlayerWarned, "$issuer warned ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}) for $reason")
+                
             }
         }
 
@@ -402,12 +401,12 @@ class Utils {
                         when (until) {
                             is ExpiryDateTime.DateAndTime -> {
                                 Main.serverLogger.info("User $issuer muted player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
-                                Main.discordBot.log(LogType.PlayerMuted, "User $issuer muted player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
+                                
                                 Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${Main.mojangAPI.getPlayerProfile(Main.insertDashUUID(issuer.toString())).username}/${issuer}", until, reason))
                             }
                             is ExpiryDateTime.Permanent -> {
                                 Main.serverLogger.info("User $issuer muted player ${dbPlayer.currentUsername} ($player) permanently for $reason")
-                                Main.discordBot.log(LogType.PlayerMuted, "User $issuer muted player ${dbPlayer.currentUsername} ($player) permanently for $reason")
+                                
                                 Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${Main.mojangAPI.getPlayerProfile(Main.insertDashUUID(issuer.toString())).username}/${issuer}", until, reason))
                             }
                         }
@@ -425,12 +424,12 @@ class Utils {
                         when (until) {
                             is ExpiryDateTime.DateAndTime -> {
                                 Main.serverLogger.info("User ${issuer.discriminatedName} (${issuer.id}) muted player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
-                                Main.discordBot.log(LogType.PlayerMuted, "User ${issuer.discriminatedName} (${issuer.id}) muted player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
+                                
                                 Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${issuer.discriminatedName}/${issuer.id}", until, reason))
                             }
                             is ExpiryDateTime.Permanent -> {
                                 Main.serverLogger.info("User ${issuer.discriminatedName} (${issuer.id}) muted player ${dbPlayer.currentUsername} ($player) permanently for $reason")
-                                Main.discordBot.log(LogType.PlayerMuted, "User ${issuer.discriminatedName} (${issuer.id}) muted player ${dbPlayer.currentUsername} ($player) permanently for $reason")
+                                
                                 Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${issuer.discriminatedName}/${issuer.id}", until, reason))
                             }
                         }
@@ -448,14 +447,14 @@ class Utils {
                         when (until) {
                             is ExpiryDateTime.DateAndTime -> {
                                 Main.serverLogger.info("User $issuer muted player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
-                                Main.discordBot.log(LogType.PlayerMuted, "User $issuer muted player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
+                                
                                 Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${Main.mojangAPI.getPlayerProfile(Main.insertDashUUID(
                                     issuer
                                 ))}/${issuer}", until, reason))
                             }
                             is ExpiryDateTime.Permanent -> {
                                 Main.serverLogger.info("User $issuer muted player ${dbPlayer.currentUsername} ($player) permanently for $reason")
-                                Main.discordBot.log(LogType.PlayerMuted, "User $issuer muted player ${dbPlayer.currentUsername} ($player) permanently for $reason")
+                                
                                 Main.discordBot.logEmbed(muteEmbedGenerator(dbPlayer, "${Main.mojangAPI.getPlayerProfile(Main.insertDashUUID(
                                     issuer
                                 ))}/${issuer}", until, reason))
@@ -488,7 +487,7 @@ class Utils {
             mServer.getRoleById(Main.serverConfig.discordMutedRole).ifPresent { muteRole ->
                 mServer.getMemberById(player.discordUUID).ifPresent { user ->
                     mServer.addRoleToUser(user, muteRole).thenAccept {
-                        Main.discordBot.log(LogType.PlayerMuted, "User ${player.discordUUID} muted due to $reason")
+                        
                         Main.serverLogger.info("[DISCORD-MUTED]: User ${player.discordUUID} muted due to $reason")
                     }
                 }
@@ -506,7 +505,7 @@ class Utils {
             val otherMutes = Main.database.queryPlayerMutesByPlayerMinecraft(mute.playerUUID).filter { it.expiryState == ExpiryState.OnGoing }
             // There are no other mutes so we can remove player punishments.
             if (otherMutes.isEmpty()) {
-                Main.discordBot.log(LogType.PlayerUnMuted, "User ${currentPlayer.currentUsername} (${mute.playerUUID}) unmuted due to $expiry")
+                
                 Main.serverLogger.info("[MINECRAFT-UNBAN]: User ${currentPlayer.currentUsername} (${mute.playerUUID}) unmuted due to $expiry")
 
 
@@ -518,7 +517,7 @@ class Utils {
                     mServer.getRoleById(Main.serverConfig.discordMutedRole).ifPresent { muteRole ->
                         mServer.getMemberById(mute.discordUUID).ifPresent { user ->
                             mServer.removeRoleFromUser(user, muteRole).thenAccept {
-                                Main.discordBot.log(LogType.PlayerUnMuted, "User ${mute.discordUUID} unmuted due to ban $expiry")
+                                
                                 Main.serverLogger.info("[DISCORD-UNMUTE]: User ${mute.discordUUID} unmuted due to ban $expiry")
                             }
                         }
@@ -559,13 +558,13 @@ class Utils {
                         is ExpiryDateTime.DateAndTime -> {
                             banList.addBan(dbPlayer.currentUsername, reason, until.time.toDate(), issuer.toString())
                             Main.serverLogger.info("User $issuer banned player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
-                            Main.discordBot.log(LogType.PlayerBanned,"User $issuer banned player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
+                            
                             Main.discordBot.logEmbed(banEmbedGenerator(dbPlayer, "${Main.mojangAPI.getPlayerProfile(Main.insertDashUUID(issuer.toString()))}/${issuer}", until, reason))
                         }
                         is ExpiryDateTime.Permanent -> {
                             banList.addBan(dbPlayer.currentUsername, reason, null, issuer.toString())
                             Main.serverLogger.info("User $issuer banned player ${dbPlayer.currentUsername} ($player) permanently for $reason")
-                            Main.discordBot.log(LogType.PlayerBanned,"User $issuer banned player ${dbPlayer.currentUsername} ($player) permanently for $reason")
+                            
                             Main.discordBot.logEmbed(banEmbedGenerator(dbPlayer, "${Main.mojangAPI.getPlayerProfile(Main.insertDashUUID(issuer.toString()))}/${issuer}", until, reason))
                         }
                     }
@@ -590,13 +589,13 @@ class Utils {
                         is ExpiryDateTime.DateAndTime -> {
                             banList.addBan(dbPlayer.currentUsername, reason, until.time.toDate(), issuer.toString())
                             Main.serverLogger.info("User ${issuer.discriminatedName} (${issuer.id}) banned player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
-                            Main.discordBot.log(LogType.PlayerBanned,"User ${issuer.discriminatedName} (${issuer.id}) banned player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
+                            
                             Main.discordBot.logEmbed(banEmbedGenerator(dbPlayer, "${issuer.discriminatedName}/${issuer.id}", until, reason))
                         }
                         is ExpiryDateTime.Permanent -> {
                             banList.addBan(dbPlayer.currentUsername, reason, null, issuer.toString())
                             Main.serverLogger.info("User ${issuer.discriminatedName} (${issuer.id}) banned player ${dbPlayer.currentUsername} ($player) permanently for $reason")
-                            Main.discordBot.log(LogType.PlayerBanned,"User ${issuer.discriminatedName} (${issuer.id}) banned player ${dbPlayer.currentUsername} ($player) permanently for $reason")
+                            
                             Main.discordBot.logEmbed(banEmbedGenerator(dbPlayer, "${issuer.discriminatedName}/${issuer.id}", until, reason))
                         }
                     }
@@ -621,7 +620,7 @@ class Utils {
                         is ExpiryDateTime.DateAndTime -> {
                             banList.addBan(dbPlayer.currentUsername, reason, until.time.toDate(), issuer)
                             Main.serverLogger.info("User $issuer banned player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
-                            Main.discordBot.log(LogType.PlayerBanned,"User $issuer banned player ${dbPlayer.currentUsername} ($player) until ${until.time} for $reason")
+                            
                             Main.discordBot.logEmbed(banEmbedGenerator(dbPlayer, "${Main.mojangAPI.getPlayerProfile(Main.insertDashUUID(
                                 issuer
                             ))}/${issuer}", until, reason))
@@ -629,7 +628,7 @@ class Utils {
                         is ExpiryDateTime.Permanent -> {
                             banList.addBan(dbPlayer.currentUsername, reason, null, issuer)
                             Main.serverLogger.info("User $issuer banned player ${dbPlayer.currentUsername} ($player) permanently for $reason")
-                            Main.discordBot.log(LogType.PlayerBanned,"User $issuer banned player ${dbPlayer.currentUsername} ($player) permanently for $reason")
+                            
                             Main.discordBot.logEmbed(banEmbedGenerator(dbPlayer, "${Main.mojangAPI.getPlayerProfile(Main.insertDashUUID(
                                 issuer
                             ))}/${issuer}", until, reason))
@@ -667,7 +666,7 @@ class Utils {
 
             mServer.banUser(player.discordUUID, Main.serverConfig.discordBanDeleteMessageDays, reason)
             Main.serverLogger.info("Synced ban for user ${player.currentUsername}. (Discord: ${player.discordUUID})")
-            Main.discordBot.log(LogType.PlayerBanned, "Synced ban for user ${player.currentUsername}. (Discord: ${player.discordUUID})")
+            
         }
 
         fun banPardon(ban: Ban, pardoned: Boolean = false) {
@@ -685,7 +684,7 @@ class Utils {
                 if (pardoned) {
                     val banList = Bukkit.getBanList(BanList.Type.NAME)
                     banList.pardon(currentPlayer.currentUsername)
-                    Main.discordBot.log(LogType.PlayerUnBanned, "User ${currentPlayer.currentUsername} (${ban.playerUUID}) unbanned due to ban $expiry")
+                    
                     Main.serverLogger.info("[MINECRAFT-UNBAN]: User ${currentPlayer.currentUsername} (${ban.playerUUID}) unbanned due to ban $expiry")
                 }
 
@@ -695,7 +694,7 @@ class Utils {
                     val server = Main.discordBot.discordApi.getServerById(botServerId) ?: return
                     val mServer = if (server.isPresent) server.orElseThrow() else return
                     mServer.unbanUser(ban.discordUUID).thenAccept {
-                        Main.discordBot.log(LogType.PlayerUnBanned, "User ${ban.discordUUID} unbanned due to $expiry")
+                        
                         Main.serverLogger.info("[DISCORD-UNBAN]: User ${ban.discordUUID} unbanned due to ban $expiry")
                     }
                 }
