@@ -65,7 +65,7 @@ import java.net.URL
 import java.util.*
 import java.util.logging.Level
 import javax.imageio.ImageIO
-
+import kotlin.collections.HashSet
 
 typealias MinecraftId = UUID
 
@@ -110,6 +110,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         val htmlRenderer = HtmlRenderer.builder(PARSER_OPTIONS).build()
         val htmlParser = PengMDHTMLParser()
         private lateinit var stats: Stats
+        var silentSet: HashSet<UUID> = HashSet()
 
         fun downloadSkin(usr: Player) {
             val usrUUID: String = usr.uniqueId.toString()

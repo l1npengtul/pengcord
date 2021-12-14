@@ -14,7 +14,7 @@ class PacketEvent: PacketListener {
                 try {
                     if (packetEvent.packet.strings.read(0).matches(mitigationRegex)) {
                         packetEvent.isCancelled = true
-                        Main.serverLogger.warning("Mitigated chat packet from ${packetEvent.player.name}!")
+                        Main.serverLogger.warn("Mitigated chat packet from ${packetEvent.player.name}!")
                     }
                 } catch (_: Exception) {
 
@@ -29,7 +29,7 @@ class PacketEvent: PacketListener {
                 try {
                     if (packetEvent.packet.strings.read(0).matches(mitigationRegex)) {
                         packetEvent.isCancelled = true
-                        Main.serverLogger.warning("Mitigated chat packet from ${packetEvent.player.name}!")
+                        Main.serverLogger.warn("Mitigated chat packet from ${packetEvent.player.name}!")
                     }
                 } catch (_: Exception) {
 

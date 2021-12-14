@@ -46,6 +46,7 @@ class Event : Listener{
         if (Main.serverConfig.enableLiterallyNineteenEightyFour && Main.serverConfig.bannedWords.isNotEmpty()) {
             if (Main.discordBot.chatFilterRegex.containsMatchIn(event.name.lowercase()) &&  Main.serverConfig.bannedWords.isNotEmpty()) {
                 event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER, "Please change your minecraft username!".toComponent())
+                Main.serverLogger.warn(LogType.ChatFilter, "User ${event.name} (${event.uniqueId}) connected, tripped chat filter. Blocked from joining.")
             } else {
                 event.allow()
             }
@@ -53,7 +54,7 @@ class Event : Listener{
         Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
             Main.insertIntoVerifiedCache(event.uniqueId)
             if (Main.checkIfPlayerVerifiedCache(event.uniqueId)) {
-                Main.serverLogger.info("User ${event.name} (${event.uniqueId}) connected, is verified. Adding to cache.")
+                Main.serverLogger.info(LogType.Verification, "User ${event.name} (${event.uniqueId}) connected, is verified. Adding to cache.")
             }
         })
     }
@@ -62,10 +63,9 @@ class Event : Listener{
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent){
         event.joinMessage()?.let {
-            if (Main.serverConfig.enableSync){
+            if (Main.serverConfig.enableSync && !event.player.hasPermission("pengcord.silent.joinleave")){
                 Main.discordBot.sendMessageToDiscordJoinLeave(it.toStr().replace("§e",""))
                 Main.downloadSkin(event.player)
-                
             }
 
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
@@ -87,9 +87,8 @@ class Event : Listener{
         }
         Main.removePlayerFromVerifiedCache(event.player.uniqueId)
         event.quitMessage()?.let {
-            if(Main.serverConfig.enableSync) {
+            if(Main.serverConfig.enableSync && !event.player.hasPermission("pengcord.silent.joinleave")) {
                 Main.discordBot.sendMessageToDiscordJoinLeave(it.toStr().replace("§e", ""))
-                
             }
 
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
@@ -106,7 +105,6 @@ class Event : Listener{
         } as HashMap<Int, MinecraftId>
         event.leaveMessage().let {
             if(Main.serverConfig.enableSync) {
-                
                 Main.discordBot.sendMessageToDiscordJoinLeave("${it.toStr().replace("§e", "")}. Reason: ${event.reason().toStr().replace("§e", "")}")
             }
 
@@ -139,7 +137,7 @@ class Event : Listener{
                         "\nbut user is muted!" )
                 event.isCancelled = true
                 return
-            } else if (Main.serverConfig.enableSync) {
+            } else if (Main.serverConfig.enableSync && !Main.silentSet.contains(event.player.uniqueId)) {
                 if (Main.serverConfig.enableLiterallyNineteenEightyFour) {
                     if (!Main.discordBot.chatFilterRegex.containsMatchIn(message.lowercase())){
                         var prefix = Main.vaultChatApi.getPlayerPrefix(event.player)
@@ -182,7 +180,7 @@ class Event : Listener{
                 }
             }
         } else {
-            Main.serverLogger.info("Chat event not async")
+            Main.serverLogger.severe("Chat event was not asynchrounous!")
         }
     }
 
@@ -197,11 +195,10 @@ class Event : Listener{
                 }
                 else if (Main.serverConfig.bannedWords.isNotEmpty()) {
                     
-                    Main.serverLogger.info("[ChatFilter]: Message of unknown origin (Message Broadcast) tripped chat filter with message ${event.message().toStr()}.")
+                    Main.serverLogger.info(LogType.ChatFilter, "Message of unknown origin (Message Broadcast) tripped chat filter with message ${event.message().toStr()}.")
                     event.isCancelled = true
                 }
             } else {
-                
                 Main.discordBot.sendMessageToDiscordAnnouncement(event.message().toStr())
             }
         }

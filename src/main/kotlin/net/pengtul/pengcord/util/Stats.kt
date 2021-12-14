@@ -1,6 +1,6 @@
 package net.pengtul.pengcord.util
 
-import org.bstats.bukkit.Metrics
+import net.pengtul.pengcord.metrics.Metrics
 import org.bukkit.plugin.java.JavaPlugin
 
 class Stats(plugin: JavaPlugin, pluginId: Int?) {

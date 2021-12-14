@@ -82,6 +82,10 @@ commands:
     description: Query a specific punishment. b -> Bans, m -> Mutes, w -> Warns, f -> Filter Alerts,
     usage: /querypunishment <b|m|w|f> <punishmentId>
     permission: pengcord.punishments.query
+  quiet:
+    description: Activate/Deactivate silent chat - not sync chat
+    usage: /quiet
+    permission: pengcord.silent.chat
 
 permissions:
   pengcord.verify:
@@ -141,15 +145,15 @@ permissions:
   pengcord.silent:
     description: Permissions to silently do stuff
     children:
-      pengcord.silent.join:
-        description: Silently Join the Server
+      pengcord.silent.joinleave:
+        description: Silently Join/Leave the Server
         default: false
-      pengcord.silent.leave:
-        description: Silently Leave the Server
-        default: false
-      pengcord.silent.advancement:
+      pengcord.silent.ingame:
         description: Do not sync advancement gains
         default: false
-      pengcord.silent.
+      pengcord.silent.chat:
+        description: Allow silent mode of chatting
+        default: false
+
 
 

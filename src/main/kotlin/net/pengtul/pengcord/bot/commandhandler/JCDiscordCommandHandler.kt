@@ -22,7 +22,7 @@ class JCDiscordCommandHandler(api: DiscordApi, prefix: String, boundChannels: Li
                 allowedCommandChannels.add(discordApi.getTextChannelById(channel).get())
             }
             else {
-                Main.serverLogger.warning("Channel $channel does not exist!")
+                Main.serverLogger.warn("Channel $channel does not exist!")
             }
         }
         helpMessage.append("```diff")
