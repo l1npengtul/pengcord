@@ -1,7 +1,10 @@
 package net.pengtul.pengcord.commands
 
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.Style
 import net.pengtul.pengcord.util.Utils.Companion.timeToOrSinceDateTime
 import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.main.Main
@@ -79,6 +82,22 @@ class Me: CommandExecutor {
                             ClickEvent.clickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, dbPlayer.deaths.toString())
                         ))
 
+                        if (sender.hasPermission("pengcord.command.ignorelist")) {
+                            val sendComponent = Component.text()
+                                .content("Ignores: ")
+                                .style(Style.style(NamedTextColor.GREEN))
+                            Main.database.queryIgnoresBySourcePlayerUUID(dbPlayer.playerUUID).forEach { ignore ->
+                                Main.database.playerGetByUUID(ignore.target)?.let {
+                                    sendComponent.append(
+                                        "${it.currentUsername}(${ignore.ignoreId})"
+                                            .toComponent()
+                                            .hoverEvent(HoverEvent.showText("Click to unignore!".toComponent()))
+                                            .clickEvent(ClickEvent.suggestCommand("/pengcord:unignore ${it.playerUUID}"))
+                                    )
+                                }
+                            }
+                            sender.sendMessage(sendComponent.build())
+                        }
                         
                         Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${sender.name}\".")
                         return@Runnable

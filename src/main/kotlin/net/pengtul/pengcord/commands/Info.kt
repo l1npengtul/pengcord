@@ -6,6 +6,7 @@ import net.kyori.adventure.text.event.HoverEvent
 import net.pengtul.pengcord.util.Utils.Companion.getUptime
 import net.pengtul.pengcord.main.Main
 import net.pengtul.pengcord.util.LogType
+import net.pengtul.pengcord.util.Utils
 import net.pengtul.pengcord.util.toComponent
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
@@ -36,13 +37,14 @@ class Info: CommandExecutor {
         if (sender.hasPermission("pengcord.command.info")){
             val currentUsedRAM : Long = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1048576L
             val maxRAM : Long = Runtime.getRuntime().totalMemory() /  1048576L
+            val onlinePlayers = Utils.queryFormattedOnlinePlayers().joinToString()
 
             val serverInfoText = Component.text()
                 .content("§9=======§r§6[Server Info]§r§9=======§r\n")
                 .append("§aServer RAM usage: $currentUsedRAM MiB/$maxRAM MiB (${((currentUsedRAM.toDouble() / maxRAM.toDouble()) * 100).roundToLong()}%)\n".toComponent())
                 .append("§aServer Uptime (HH:MM:SS): ${getUptime()}\n".toComponent())
                 .append("§aServer TPS [1M, 5M, 15M]: ${Bukkit.getTPS().map { (it * 100).roundToInt() / 100.0 }.joinToString()}\n".toComponent())
-                .append("§aOnline: ${Bukkit.getOnlinePlayers().joinToString { it.name }}\nout of ${Bukkit.getServer().maxPlayers}\n".toComponent())
+                .append("§aOnline: $onlinePlayers\nout of ${Bukkit.getServer().maxPlayers}\n".toComponent())
 
             if (!Main.serverConfig.discordServerLink.isNullOrBlank()) {
                 serverInfoText.append("Discord Server: ${Main.serverConfig.discordServerLink}".toComponent(

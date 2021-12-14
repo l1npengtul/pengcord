@@ -3,6 +3,7 @@ package net.pengtul.pengcord.bot.botcmd
 import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.bot.commandhandler.JCDiscordCommandExecutor
 import net.pengtul.pengcord.main.Main
+import net.pengtul.pengcord.util.Utils
 import org.javacord.api.entity.message.Message
 import org.javacord.api.entity.message.embed.EmbedBuilder
 import org.javacord.api.entity.user.User
@@ -41,10 +42,20 @@ class Me: JCDiscordCommandExecutor {
                     if (dbPlayer.verifiedDateTime != Main.neverHappenedDateTime) {
                         userInfoEmbed.addInlineField("Latest Verification Date Time:", "${dbPlayer.verifiedDateTime}")
                     }
+                    if (Utils.doesUserHavePermission(sender, "pengcord.command.ignorelist")) {
+                        val sendComponent = mutableListOf<String>()
+                        Main.database.queryIgnoresBySourcePlayerUUID(dbPlayer.playerUUID).forEach { ignore ->
+                            Main.database.playerGetByUUID(ignore.target)?.let {
+                                sendComponent.add(
+                                    "${it.currentUsername}(${ignore.ignoreId})"
+                                )
+                            }
+                        }
+                        userInfoEmbed.addField("User Ignores:", sendComponent.toString())
+                    }
                     message.addReaction("✅").thenAccept {
                         message.reply(userInfoEmbed).thenAccept {
-                            
-                            Main.serverLogger.info(LogType.MCComamndRan,"User ${sender.discriminatedName} ran command `me`.")
+                            Main.serverLogger.info(LogType.DSCComamndRan,"User ${sender.discriminatedName} ran command `me`.")
                             Main.discordBot.logEmbed(userInfoEmbed)
                         }
                     }

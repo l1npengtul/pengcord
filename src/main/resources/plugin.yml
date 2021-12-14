@@ -41,7 +41,7 @@ commands:
   pignorelist:
     description: See a user's ignore list (empty for your own)
     usage: /pignore <user>
-    permission: pengcord.command.ignore
+    permission: pengcord.command.ignorelist
   puignore:
     description: Unignore a user (You will see their Discord -> Minecraft sync again)
     usage: /puignore <user>
@@ -149,7 +149,7 @@ permissions:
         description: Silently Join/Leave the Server
         default: false
       pengcord.silent.ingame:
-        description: Do not sync advancement gains
+        description: Do not sync in game announcements
         default: false
       pengcord.silent.chat:
         description: Allow silent mode of chatting

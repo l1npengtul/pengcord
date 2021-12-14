@@ -153,7 +153,7 @@ class Utils {
                 return Main.database.playerGetByUUID(UUID.fromString(Main.insertDashUUID(user)))
             }
             // Minecraft Username
-            else if (user.length >= 3 || user.length <= 16){
+            else if (user.length in 3..16){
                 return Main.database.playerGetByCurrentName(user)
             }
             // Minecraft/Discord format issuer string
@@ -728,6 +728,35 @@ class Utils {
             }
 
             return message
+        }
+
+        fun queryIgnoreList(ofPlayer: UUID): List<Player> {
+            val player = mutableListOf<Player>()
+            Main.database.queryIgnoresBySourcePlayerUUID(ofPlayer).forEach { ignore ->
+                Main.database.playerGetByUUID(ignore.target)?.let {
+                    player.add(it)
+                }
+            }
+            return player
+        }
+
+        fun queryFormattedOnlinePlayers(): List<String> {
+            val players = Bukkit.getOnlinePlayers().map {
+                var final = it.name
+                val dbpl = Main.database.playerGetByUUID(it.uniqueId)
+                if (dbpl != null) {
+                    Main.discordBot.discordApi.getUserById(dbpl.discordUUID).thenAccept {
+                        final = "$final(${it.discriminatedName})"
+                    }
+                }
+                return@map final
+            }
+            return players
+        }
+
+        fun isPlayerOnIgnoreList(source: UUID, target: Long): Boolean {
+
+            return false
         }
     }
 }

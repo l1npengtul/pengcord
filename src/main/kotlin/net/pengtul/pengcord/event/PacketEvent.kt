@@ -30,6 +30,12 @@ class PacketEvent: PacketListener {
                     if (packetEvent.packet.strings.read(0).matches(mitigationRegex)) {
                         packetEvent.isCancelled = true
                         Main.serverLogger.warn("Mitigated chat packet from ${packetEvent.player.name}!")
+                        Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
+                            val matched = mitigationRegex.findAll(packetEvent.packet.strings.read(0)).joinToString()
+                            Main.database.addFilterAlertToPlayer(player = event.player.uniqueId, w = matched, packetEvent.packet.strings.read(0)).onFailure { exception ->
+                                Main.serverLogger.warn("[ChatFilter] [SQLError]: Failed to add filter alert to ${event.player.name} (${event.player.uniqueId }) due to error: $exception")
+                            }
+                        })
                     }
                 } catch (_: Exception) {
 

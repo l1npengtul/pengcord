@@ -51,7 +51,7 @@ discord-admin-roles:
 # Enable chat filter
 enable-literally-nineteen-eighty-four: false
 
-# A chat filter. Case-insensitive, but won't work if you use capital letters.
+# A chat filter. Case-insensitive, and regexes work too.
 # Does not sync to discord (will ignore uses of these words in discrd. get yourself a proper moderation bot)
 # Every word **must** be less than 50 characters.
 # NOTE: ***BAD*** THINGS HAPPEN IF FILTER IS ENABLED BUT `banned-words` IS EMPTY!

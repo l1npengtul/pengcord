@@ -64,6 +64,19 @@ class WhoIs: JCDiscordCommandExecutor {
                     userInfoEmbed.addField("Banned Status:", "${player.isBanned}")
                     userInfoEmbed.addField("# Of Bans:", "${activePlayerBans.count()} active, ${playerBans.count()} total")
                 }
+
+                if (doesUserHavePermission(sender, "pengcord.commands.listothers")) {
+                    val sendComponent = mutableListOf<String>()
+                    Main.database.queryIgnoresBySourcePlayerUUID(player.playerUUID).forEach { ignore ->
+                        Main.database.playerGetByUUID(ignore.target)?.let {
+                            sendComponent.add(
+                                "${it.currentUsername}(${ignore.ignoreId})"
+                            )
+                        }
+                    }
+                    userInfoEmbed.addField("User Ignores:", sendComponent.joinToString())
+                }
+
                 Main.getDownloadedSkinAsFile(player.playerUUID)?.let {
                     userInfoEmbed.setImage(it)
                 }
@@ -71,7 +84,7 @@ class WhoIs: JCDiscordCommandExecutor {
                     message.reply(userInfoEmbed).thenAccept {
                         
                         Main.discordBot.logEmbed(userInfoEmbed)
-                        Main.serverLogger.info("User ${sender.discriminatedName} ran command `me`.")
+                        Main.serverLogger.info(LogType.DSCComamndRan, "User ${sender.discriminatedName} ran command `whois`.")
                     }
                 }
             }

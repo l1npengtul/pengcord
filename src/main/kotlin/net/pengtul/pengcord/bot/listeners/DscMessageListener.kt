@@ -28,6 +28,7 @@ import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextDecoration
 import net.pengtul.pengcord.main.Main
 import net.pengtul.pengcord.util.LogType
+import net.pengtul.pengcord.util.Utils
 import net.pengtul.pengcord.util.toComponent
 import net.pengtul.pengcord.util.toTextColor
 import org.bukkit.Bukkit
@@ -93,11 +94,9 @@ class DscMessageListener: MessageCreateListener {
 
                                     for (attachment in msg.attachments){
                                         val initialContent = if (attachment.isSpoiler){
-                                            
                                             finalComponent.append(Component.newline())
                                             "[DSC] [SPOILER] "
                                         } else {
-                                            
                                             "[DSC]"
                                         }
                                         val attachmentComponent = Component.text()
@@ -124,14 +123,36 @@ class DscMessageListener: MessageCreateListener {
                                             )
                                         finalComponent.append(attachmentComponent.build())
                                     }
-                                    Bukkit.broadcast(finalComponent.build())
+                                    Bukkit.getOnlinePlayers().forEach { online ->
+                                        if (!Utils.isPlayerOnIgnoreList(online.uniqueId, msg.author.id)) {
+                                            online.sendMessage(finalComponent.build())
+                                        } else {
+                                            online.sendMessage(
+                                                Component.text("[DSC]: Ignored Message")
+                                                    .style(
+                                                        Style.style()
+                                                            .color(NamedTextColor.DARK_GRAY)
+                                                            .decorate(TextDecoration.ITALIC)
+                                                            .decorate(TextDecoration.UNDERLINED)
+                                                            .build()
+                                                    )
+                                                    .hoverEvent(
+                                                        HoverEvent.showText(finalComponent)
+                                                    )
+                                                    .clickEvent(
+                                                        ClickEvent.suggestCommand(
+                                                            "/pengcord:punignore ${msg.author.id}"
+                                                        )
+                                                    )
+                                            )
+                                        }
+                                    }
                                 }
                             })
                         }
                     }
                     catch (e: Exception){
-                        
-                        Main.serverLogger.severe("Failed to broadcast message! Exception $e")
+                        Main.serverLogger.severe(LogType.GenericError,"Failed to broadcast message! Exception $e")
                         Main.serverLogger.severe(e.stackTrace.toString())
                     }
                 }

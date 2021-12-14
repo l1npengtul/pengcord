@@ -15,7 +15,7 @@ import org.bukkit.entity.Player
 
 class PIgnoreList: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-        if (!sender.hasPermission("pengcord.command.ignore")) {
+        if (!sender.hasPermission("pengcord.command.ignorelist")) {
             Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}`. Failed due to invalid permissions.")
             sender.sendMessage("§cYou do not have permission to run this command!")
             return false

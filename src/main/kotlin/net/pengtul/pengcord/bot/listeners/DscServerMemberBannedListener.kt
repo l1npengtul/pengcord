@@ -20,11 +20,10 @@ class DscServerMemberBannedListener: ServerMemberBanListener {
                                 Main.database.playerUpdateVerify(player.playerUUID, UpdateVerify.Unverify)
                                 val banReason = ban.reason.orElse("")
                                 val lastPlayerBan = Main.database.queryPlayerBansByPlayerDiscord(player.discordUUID).lastOrNull() ?: return@Runnable
-                                if (lastPlayerBan.reason == banReason) {
+                                if (lastPlayerBan.reason != banReason) {
                                     banPlayer(player, TypeOfUniqueID.Unknown("Discord Ban, Check Server Audit Log"), ExpiryDateTime.Permanent, banReason)
                                 }
-                                
-                                Main.serverLogger.info("Synced Discord ban for player ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}/${ban.user.discriminatedName})")
+                                Main.serverLogger.info(LogType.PlayerBanned, "Synced Discord ban for player ${player.currentUsername}(${player.playerUUID}/${player.discordUUID}/${ban.user.discriminatedName})")
                             }
                         })
                     }
