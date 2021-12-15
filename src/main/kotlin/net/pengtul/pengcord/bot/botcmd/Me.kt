@@ -45,10 +45,13 @@ class Me: JCDiscordCommandExecutor {
                     if (Utils.doesUserHavePermission(sender, "pengcord.command.ignorelist")) {
                         val sendComponent = mutableListOf<String>()
                         Main.database.queryIgnoresBySourcePlayerUUID(dbPlayer.playerUUID).forEach { ignore ->
-                            Main.database.playerGetByUUID(ignore.target)?.let {
-                                sendComponent.add(
+                            Main.database.playerGetByDiscordUUID(ignore.target).let {
+                                val comp = if (it == null) {
+                                    "${ignore.target}(${ignore.ignoreId})"
+                                } else {
                                     "${it.currentUsername}(${ignore.ignoreId})"
-                                )
+                                }
+                                sendComponent.add(comp)
                             }
                         }
                         userInfoEmbed.addField("User Ignores:", sendComponent.toString())

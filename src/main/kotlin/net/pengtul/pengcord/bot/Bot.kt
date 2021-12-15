@@ -66,6 +66,7 @@ class Bot {
     lateinit var discordServer: Server
     var mutedRole: Role? = null
     val mentionPlayerRegex = Regex("(@(.+)#\\d{4})")
+    val mentionImproperFormatPlayerRegex = Regex("(@(.+))")
     val everyoneMentionRegex = Regex("@everyone")
     val hereMentionRegex = Regex("@here")
     var checkIfServerEmojiUsed = Regex("")
@@ -165,9 +166,7 @@ class Bot {
     }
 
     fun updateDiscordEmojis() {
-        if (!Main.serverConfig.enableDiscordCustomEmojiSync) {
-            return
-        }
+        Main.serverLogger.info("Syncing emojis...")
 
         val emojiRegexString = StringBuilder()
 
@@ -177,6 +176,7 @@ class Bot {
             } else {
                 emojiRegexString.append("|(:${emoji.name}:)")
             }
+            Main.serverLogger.info("Found emoji ${emoji.name}")
             this.serverEmoteRegexMap[Regex("(:${emoji.name}:)")] = "<:${emoji.name}:${emoji.id}>"
         }
 
@@ -386,10 +386,6 @@ class Bot {
                 webhook.send(webhookMessage)
             })
         }
-    }
-
-    fun cleanUpWebhook() {
-        this.webhook.close()
     }
 }
 

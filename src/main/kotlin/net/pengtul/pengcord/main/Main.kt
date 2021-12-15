@@ -65,6 +65,7 @@ import java.net.URL
 import java.util.*
 import java.util.logging.Level
 import javax.imageio.ImageIO
+import kotlin.collections.HashMap
 import kotlin.collections.HashSet
 
 typealias MinecraftId = UUID
@@ -111,6 +112,7 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         val htmlParser = PengMDHTMLParser()
         private lateinit var stats: Stats
         var silentSet: HashSet<UUID> = HashSet()
+        var ignoreCache: HashMap<UUID, HashSet<Long>> = HashMap()
 
         fun downloadSkin(usr: Player) {
             val usrUUID: String = usr.uniqueId.toString()
@@ -356,7 +358,6 @@ class Main : JavaPlugin(), Listener, CommandExecutor{
         try {
             discordBot.sendMessageToDiscord("Server Shutting Down! See you soon!")
             discordBot.log(LogType.ServerShutdown, "Server Shutdown initiated.")
-            discordBot.cleanUpWebhook()
             discordBot.discordApi.disconnect()
         } catch (_: Exception) {}
     }

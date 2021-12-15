@@ -19,14 +19,14 @@ class PUnignore: CommandExecutor {
             sender.sendMessage("§cYou must be a player to run this command!")
             return false
         }
-        val playerToQuery = Utils.queryPlayerFromString(args.getOrNull(0) ?: "")
+        val playerToQuery = Utils.queryDiscordUserFromString(args.getOrNull(0) ?: "")
         if (playerToQuery == null) {
             sender.sendMessage("§cPlease put a valid player!")
             return false
         }
         Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
-            Main.database.removeIgnoreOfPlayers(sender.uniqueId, playerToQuery.playerUUID)
-            sender.sendMessage("§aYou won't see discord to ingame sync messages from ${playerToQuery.currentUsername}.")
+            Utils.unignoreUser(sender.uniqueId, playerToQuery)
+            sender.sendMessage("§aYou won't see discord to ingame sync messages from ${playerToQuery}.")
         })
         return true
     }

@@ -21,6 +21,11 @@ class WhoIs: JCDiscordCommandExecutor {
         get() = "whois <player>"
 
     override fun executeCommand(msg: String, sender: User, message: Message, args: List<String>) {
+        if (args.size != 1) {
+            message.addReaction("❌").thenAccept {
+                CommandHelper.deleteAfterSend("❌: Improper Argument!", 5, message)
+            }
+        }
         val toQuery = queryPlayerFromString(args[0])
         if (toQuery == null) {
             message.addReaction("❌").thenAccept {
@@ -65,16 +70,34 @@ class WhoIs: JCDiscordCommandExecutor {
                     userInfoEmbed.addField("# Of Bans:", "${activePlayerBans.count()} active, ${playerBans.count()} total")
                 }
 
-                if (doesUserHavePermission(sender, "pengcord.commands.listothers")) {
+//                if (doesUserHavePermission(sender, "pengcord.commands.listothers")) {
+//                    val sendComponent = mutableListOf<String>()
+//                    Main.database.queryIgnoresBySourcePlayerUUID(player.playerUUID).forEach { ignore ->
+//                        Main.database.playerGetByDiscordUUID(ignore.target).let {
+//                            val comp = if (it == null) {
+//                                "${ignore.target}(${ignore.ignoreId})"
+//                            } else {
+//                                "${it.currentUsername}(${ignore.ignoreId})"
+//                            }
+//                            sendComponent.add(comp)
+//                        }
+//                    }
+//                    userInfoEmbed.addField("User Ignores:", sendComponent.joinToString())
+//                }
+
+                if (doesUserHavePermission(sender, "pengcord.ignore.listothers")) {
                     val sendComponent = mutableListOf<String>()
                     Main.database.queryIgnoresBySourcePlayerUUID(player.playerUUID).forEach { ignore ->
-                        Main.database.playerGetByUUID(ignore.target)?.let {
-                            sendComponent.add(
+                        Main.database.playerGetByDiscordUUID(ignore.target).let {
+                            val comp = if (it == null) {
+                                "${ignore.target}(${ignore.ignoreId})"
+                            } else {
                                 "${it.currentUsername}(${ignore.ignoreId})"
-                            )
+                            }
+                            sendComponent.add(comp)
                         }
                     }
-                    userInfoEmbed.addField("User Ignores:", sendComponent.joinToString())
+                    userInfoEmbed.addField("User Ignores:", sendComponent.toString())
                 }
 
                 Main.getDownloadedSkinAsFile(player.playerUUID)?.let {
@@ -82,7 +105,6 @@ class WhoIs: JCDiscordCommandExecutor {
                 }
                 message.addReaction("✅").thenAccept {
                     message.reply(userInfoEmbed).thenAccept {
-                        
                         Main.discordBot.logEmbed(userInfoEmbed)
                         Main.serverLogger.info(LogType.DSCComamndRan, "User ${sender.discriminatedName} ran command `whois`.")
                     }

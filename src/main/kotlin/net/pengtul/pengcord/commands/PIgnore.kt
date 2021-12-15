@@ -2,6 +2,8 @@ package net.pengtul.pengcord.commands
 
 import net.pengtul.pengcord.main.Main
 import net.pengtul.pengcord.util.LogType
+import net.pengtul.pengcord.util.Utils
+import net.pengtul.pengcord.util.Utils.Companion.queryDiscordUserFromString
 import net.pengtul.pengcord.util.Utils.Companion.queryPlayerFromString
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -19,14 +21,14 @@ class PIgnore: CommandExecutor {
             sender.sendMessage("§cYou must be a player to run this command!")
             return false
         }
-        val playerToQuery = queryPlayerFromString(args.getOrNull(0) ?: "")
+        val playerToQuery = queryDiscordUserFromString(args.getOrNull(0) ?: "")
         if (playerToQuery == null) {
             sender.sendMessage("§cPlease put a valid player!")
             return false
         }
         Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
-            Main.database.addIgnore(sender.uniqueId, playerToQuery.playerUUID)
-            sender.sendMessage("§aYou won't see discord to ingame sync messages from ${playerToQuery.currentUsername}.")
+            Utils.ignoreUser(sender.uniqueId, playerToQuery)
+            sender.sendMessage("§aYou won't see discord to ingame sync messages from ${playerToQuery}.")
         })
         return true
     }

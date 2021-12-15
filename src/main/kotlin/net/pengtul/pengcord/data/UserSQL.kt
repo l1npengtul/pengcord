@@ -27,9 +27,9 @@ class UserSQL {
             val databaseDir = File(Main.pengcord.dataFolder.path+File.pathSeparator+"pengcordstore.mv.db")
             Main.serverLogger.info(Main.pengcord.dataFolder.path)
             if (databaseDir.isFile) {
-                SchemaUtils.createMissingTablesAndColumns(Players, Warns, Mutes, Bans, FilterAlerts)
+                SchemaUtils.createMissingTablesAndColumns(Players, Warns, Mutes, Bans, FilterAlerts, Ignores)
             } else {
-                SchemaUtils.create(Players, Warns, Mutes, Bans, FilterAlerts)
+                SchemaUtils.create(Players, Warns, Mutes, Bans, FilterAlerts, Ignores)
             }
         }
     }
@@ -803,6 +803,17 @@ class UserSQL {
         }
     }
 
+    fun queryIgnoresBySourceDiscordUUID(uuid: Long): List<Ignore> {
+        return transaction(this.database) {
+            val ignores = mutableListOf<Ignore>()
+            val player = this@UserSQL.playerGetByDiscordUUID(uuid) ?: return@transaction ignores
+            Ignores.select {Ignores.sourcePlayerUUID eq player.playerUUID}.forEach {
+                ignores.add(ignoreFromResultRow(it))
+            }
+            return@transaction ignores
+        }
+    }
+
     fun ignoreById(ignoreId: Long): Ignore? {
         return transaction(this.database) {
             try {
@@ -816,7 +827,7 @@ class UserSQL {
         }
     }
 
-    fun addIgnore(source: UUID, destination: UUID) {
+    fun addIgnore(source: UUID, destination: Long) {
         transaction(this.database) {
             val sourceIgnores = this@UserSQL.queryIgnoresBySourcePlayerUUID(source).filter {
                 it.target == destination
@@ -839,7 +850,7 @@ class UserSQL {
         }
     }
 
-    fun removeIgnoreOfPlayers(source: UUID, target: UUID) {
+    fun removeIgnoreOfPlayers(source: UUID, target: Long) {
         val ignoresOfPlayer = this.queryIgnoresBySourcePlayerUUID(source).filter {
             it.target == target
         }

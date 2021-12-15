@@ -77,7 +77,11 @@ class DscMessageListener: MessageCreateListener {
                                         }
                                     val finalComponent = Component.text()
                                     val textToSend = EmojiParser.parseToAliases(msg.readableContent)
-                                    val toparser = Main.htmlParser.parse(Jsoup.parse(Main.htmlRenderer.render(Main.markdownParser.parse(textToSend))))
+                                    val toparser = if(textToSend.length > 4) {
+                                        Main.htmlParser.parse(Jsoup.parse(Main.htmlRenderer.render(Main.markdownParser.parse(textToSend))))
+                                    } else {
+                                        textToSend.toComponent()
+                                    }
 
                                     if (textToSend.isNotBlank()) {
                                         finalComponent
@@ -124,28 +128,30 @@ class DscMessageListener: MessageCreateListener {
                                         finalComponent.append(attachmentComponent.build())
                                     }
                                     Bukkit.getOnlinePlayers().forEach { online ->
-                                        if (!Utils.isPlayerOnIgnoreList(online.uniqueId, msg.author.id)) {
-                                            online.sendMessage(finalComponent.build())
-                                        } else {
-                                            online.sendMessage(
-                                                Component.text("[DSC]: Ignored Message")
-                                                    .style(
-                                                        Style.style()
-                                                            .color(NamedTextColor.DARK_GRAY)
-                                                            .decorate(TextDecoration.ITALIC)
-                                                            .decorate(TextDecoration.UNDERLINED)
-                                                            .build()
-                                                    )
-                                                    .hoverEvent(
-                                                        HoverEvent.showText(finalComponent)
-                                                    )
-                                                    .clickEvent(
-                                                        ClickEvent.suggestCommand(
-                                                            "/pengcord:punignore ${msg.author.id}"
+                                        Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
+                                            if (!Utils.isPlayerOnIgnoreList(online.uniqueId, msg.author.id)) {
+                                                online.sendMessage(finalComponent.build())
+                                            } else {
+                                                online.sendMessage(
+                                                    Component.text("[DSC]: Ignored Message")
+                                                        .style(
+                                                            Style.style()
+                                                                .color(NamedTextColor.DARK_GRAY)
+                                                                .decorate(TextDecoration.ITALIC)
+                                                                .decorate(TextDecoration.UNDERLINED)
+                                                                .build()
                                                         )
-                                                    )
-                                            )
-                                        }
+                                                        .hoverEvent(
+                                                            HoverEvent.showText(finalComponent)
+                                                        )
+                                                        .clickEvent(
+                                                            ClickEvent.suggestCommand(
+                                                                "/pengcord:punignore ${msg.author.id}"
+                                                            )
+                                                        )
+                                                )
+                                            }
+                                        })
                                     }
                                 }
                             })

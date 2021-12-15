@@ -24,43 +24,56 @@ class PIgnoreList: CommandExecutor {
             sender.sendMessage("§cYou must be a player to run this command!")
             return false
         }
-        val playerToQuery = Utils.queryPlayerFromString(args.getOrNull(0) ?: "")
+        val playerToQuery = Utils.queryDiscordUserFromString(args.getOrNull(0) ?: "")
         if (playerToQuery == null) {
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                 val sendComponent = Component.text()
                     .content("Ignores: ")
                     .style(Style.style(NamedTextColor.GREEN))
                 Main.database.queryIgnoresBySourcePlayerUUID(sender.uniqueId).forEach { ignore ->
-                    Main.database.playerGetByUUID(ignore.target)?.let {
-                        sendComponent.append(
+                    Main.database.playerGetByDiscordUUID(ignore.target).let {
+                        val comp = if (it == null) {
+                            "${ignore.target}(${ignore.ignoreId})"
+                                .toComponent()
+                                .hoverEvent(HoverEvent.showText("Click to unignore!".toComponent()))
+                                .clickEvent(ClickEvent.suggestCommand("/pengcord:unignore ${ignore.ignoreId}"))
+                        } else {
                             "${it.currentUsername}(${ignore.ignoreId})"
                                 .toComponent()
                                 .hoverEvent(HoverEvent.showText("Click to unignore!".toComponent()))
                                 .clickEvent(ClickEvent.suggestCommand("/pengcord:unignore ${it.playerUUID}"))
-                        )
+                        }
+                        sendComponent.append(comp)
                     }
                 }
                 sender.sendMessage(sendComponent.build())
             })
             return true
-        } else {
+        } else if (sender.hasPermission("pengocord.ignore.listothers")) {
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                 val sendComponent = Component.text()
                     .content("Ignores: ")
                     .style(Style.style(NamedTextColor.GREEN))
-                Main.database.queryIgnoresBySourcePlayerUUID(playerToQuery.playerUUID).forEach { ignore ->
-                    Main.database.playerGetByUUID(ignore.target)?.let {
-                        sendComponent.append(
+                Main.database.queryIgnoresBySourceDiscordUUID(playerToQuery).forEach { ignore ->
+                    Main.database.playerGetByDiscordUUID(ignore.target).let {
+                        val comp = if (it == null) {
+                            "${ignore.target}(${ignore.ignoreId})"
+                                .toComponent()
+                                .hoverEvent(HoverEvent.showText("Click to unignore!".toComponent()))
+                                .clickEvent(ClickEvent.suggestCommand("/pengcord:unignore ${ignore.ignoreId}"))
+                        } else {
                             "${it.currentUsername}(${ignore.ignoreId})"
                                 .toComponent()
                                 .hoverEvent(HoverEvent.showText("Click to unignore!".toComponent()))
                                 .clickEvent(ClickEvent.suggestCommand("/pengcord:unignore ${it.playerUUID}"))
-                        )
+                        }
+                        sendComponent.append(comp)
                     }
                 }
                 sender.sendMessage(sendComponent.build())
             })
             return true
         }
+        return false
     }
 }

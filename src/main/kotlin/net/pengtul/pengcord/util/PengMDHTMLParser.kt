@@ -80,7 +80,6 @@ class PengMDHTMLParser {
                 }
                 "#text" -> {
                     if (node is TextNode && node.wholeText.isNotBlank()) {
-                        Main.serverLogger.info("Processing node ${node.wholeText}")
                         val compToAdd = Component.text()
 
                         node.wholeText.lines().forEach {

@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'net.pengtul.pengcord'
-version '0.3.0-SNAPSHOT'
+version '0.4.0-RC1'
 
 repositories {
     maven {

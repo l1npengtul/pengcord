@@ -9,7 +9,7 @@ import java.util.*
 object Ignores: IdTable<Long>() {
     val ignoreId = long("id").autoIncrement().uniqueIndex()
     val sourcePlayerUUID = (uuid("sourcePlayerUUID") references Players.playerUUID)
-    val targetPlayerUUID = (uuid("targetPlayerUUID") references Players.playerUUID)
+    val targetPlayerUUID = (long("targetPlayerUUID") references Players.discordUUID)
 
     override val id: Column<EntityID<Long>> = ignoreId.entityId()
 }
@@ -17,7 +17,7 @@ object Ignores: IdTable<Long>() {
 data class Ignore(
     val ignoreId: Long,
     val source: UUID,
-    val target: UUID,
+    val target: Long,
 )
 
 fun ignoreFromResultRow(resrow: ResultRow): Ignore {

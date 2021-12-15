@@ -11,6 +11,7 @@ import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.data.interact.TypeOfUniqueID
 import net.pengtul.pengcord.main.Main
 import net.pengtul.pengcord.main.MinecraftId
+import net.pengtul.pengcord.util.Utils
 import net.pengtul.pengcord.util.toComponent
 import net.pengtul.pengcord.util.toStr
 import org.bukkit.event.EventHandler
@@ -71,6 +72,7 @@ class Event : Listener{
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                 Main.database.playerNew(event.player.uniqueId)
                 Main.playersCurrentJoinTime[event.player.uniqueId] = DateTime.now()
+                Utils.updateIgnoredCacheOfUser(event.player.uniqueId)
             })
         }
     }
@@ -94,6 +96,7 @@ class Event : Listener{
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                 Main.database.playerUpdateTimePlayed(event.player.uniqueId)
                 Main.removePlayerFromVerifiedCache(event.player.uniqueId)
+                Utils.removeFromCache(event.player.uniqueId)
             })
         }
     }
@@ -104,7 +107,7 @@ class Event : Listener{
             v != event.player.uniqueId
         } as HashMap<Int, MinecraftId>
         event.leaveMessage().let {
-            if(Main.serverConfig.enableSync) {
+            if(Main.serverConfig.enableSync && !event.player.hasPermission("pengcord.silent.joinleave")) {
                 Main.discordBot.sendMessageToDiscordJoinLeave("${it.toStr().replace("§e", "")}. Reason: ${event.reason().toStr().replace("§e", "")}")
             }
 

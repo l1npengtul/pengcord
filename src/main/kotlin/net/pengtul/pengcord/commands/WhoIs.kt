@@ -7,22 +7,23 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.pengtul.pengcord.util.Utils.Companion.queryPlayerFromString
 import net.pengtul.pengcord.util.Utils.Companion.timeToOrSinceDateTime
-import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.data.interact.ExpiryState
 import net.pengtul.pengcord.main.Main
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.util.toComponent
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.joda.time.Duration
 import org.joda.time.Period
 
 class WhoIs: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
-
-        if (args.size != 1 || args.isEmpty()) {
-            sender.sendMessage("Command usage: /whois [Minecraft Username/Minecraft UUID/Discord Discriminated Username/Discord UUID Long]")
+        if (args.size != 1) {
+            sender.sendMessage("Command usage: /whois <Minecraft Username/Minecraft UUID/Discord Discriminated Username/Discord UUID Long>"
+                .toComponent()
+                .color(NamedTextColor.RED)
+            )
             return false
         }
 
@@ -119,20 +120,26 @@ class WhoIs: CommandExecutor {
                                 .content("Ignores: ")
                                 .style(Style.style(NamedTextColor.GREEN))
                             Main.database.queryIgnoresBySourcePlayerUUID(dbPlayer.playerUUID).forEach { ignore ->
-                                Main.database.playerGetByUUID(ignore.target)?.let {
-                                    sendComponent.append(
+                                Main.database.playerGetByDiscordUUID(ignore.target).let {
+                                    val comp = if (it == null) {
+                                        "${ignore.target}(${ignore.ignoreId})"
+                                            .toComponent()
+                                            .hoverEvent(HoverEvent.showText("Click to unignore!".toComponent()))
+                                            .clickEvent(ClickEvent.suggestCommand("/pengcord:unignore ${ignore.ignoreId}"))
+                                    } else {
                                         "${it.currentUsername}(${ignore.ignoreId})"
                                             .toComponent()
                                             .hoverEvent(HoverEvent.showText("Click to unignore!".toComponent()))
                                             .clickEvent(ClickEvent.suggestCommand("/pengcord:unignore ${it.playerUUID}"))
-                                    )
+                                    }
+                                    sendComponent.append(comp)
                                 }
                             }
                             sender.sendMessage(sendComponent.build())
                         }
 
                         
-                        Main.serverLogger.info("User ${sender.name} ran `whois` with ${args[0]}.")
+                        Main.serverLogger.info(LogType.MCComamndRan, "User ${sender.name} ran `whois` with ${args[0]}.")
                         return@Runnable
                     }
                 }
@@ -141,7 +148,7 @@ class WhoIs: CommandExecutor {
             return true
         } else {
             
-            Main.serverLogger.info("User ${sender.name} ran `whois` with argument ${args[0]}. Failed due to invalid permission.")
+            Main.serverLogger.info(LogType.MCComamndError, "User ${sender.name} ran `whois` with argument ${args[0]}. Failed due to invalid permission.")
             sender.sendMessage("§cYou do not have permission to run this command.")
             return false
         }

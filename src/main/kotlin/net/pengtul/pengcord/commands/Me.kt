@@ -6,8 +6,8 @@ import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.pengtul.pengcord.util.Utils.Companion.timeToOrSinceDateTime
-import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.main.Main
+import net.pengtul.pengcord.util.LogType
 import net.pengtul.pengcord.util.toComponent
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
@@ -87,19 +87,25 @@ class Me: CommandExecutor {
                                 .content("Ignores: ")
                                 .style(Style.style(NamedTextColor.GREEN))
                             Main.database.queryIgnoresBySourcePlayerUUID(dbPlayer.playerUUID).forEach { ignore ->
-                                Main.database.playerGetByUUID(ignore.target)?.let {
-                                    sendComponent.append(
+                                Main.database.playerGetByDiscordUUID(ignore.target).let {
+                                    val comp = if (it == null) {
+                                        "${ignore.target}(${ignore.ignoreId})"
+                                            .toComponent()
+                                            .hoverEvent(HoverEvent.showText("Click to unignore!".toComponent()))
+                                            .clickEvent(ClickEvent.suggestCommand("/pengcord:unignore ${ignore.ignoreId}"))
+                                    } else {
                                         "${it.currentUsername}(${ignore.ignoreId})"
                                             .toComponent()
                                             .hoverEvent(HoverEvent.showText("Click to unignore!".toComponent()))
                                             .clickEvent(ClickEvent.suggestCommand("/pengcord:unignore ${it.playerUUID}"))
-                                    )
+                                    }
+                                    sendComponent.append(comp)
                                 }
                             }
                             sender.sendMessage(sendComponent.build())
                         }
                         
-                        Main.serverLogger.info("User ${sender.name} ran `${this.javaClass.name}` with args \"${sender.name}\".")
+                        Main.serverLogger.info(LogType.MCComamndRan, "User ${sender.name} ran `${this.javaClass.name}` with args \"${sender.name}\".")
                         return@Runnable
                     }
                 }

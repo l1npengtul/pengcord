@@ -180,6 +180,60 @@ class Utils {
             }
         }
 
+        fun queryDiscordUserFromString(user: String): Long? {
+            // Discriminated Name
+            if (user.contains("#")) {
+                val server = Main.discordBot.discordServer
+                var usr: Long? = null
+                server.getMemberByDiscriminatedName(user).ifPresent { u ->
+                    usr = u.id
+                }
+                return usr
+            }
+            // Minecraft UUID with dash
+            else if (user.contains("-")) {
+                return Main.database.playerGetByUUID(UUID.fromString(user))?.discordUUID
+            }
+            // Discord UUID
+            else if (user.toLongOrNull() != null) {
+                val id = Main.discordBot.discordServer.getMemberById(user.toLong())
+                if (id.isPresent) {
+                    return id.get().id
+                }
+                return null
+            }
+            // Minecraft UUID without dash
+            else if (user.length == 32) {
+                return Main.database.playerGetByUUID(UUID.fromString(Main.insertDashUUID(user)))?.discordUUID
+            }
+            // Minecraft Username
+            else if (user.length in 3..16){
+                return Main.database.playerGetByCurrentName(user)?.discordUUID
+            }
+            // Minecraft/Discord format issuer string
+            // Minecraft Issuer: M [username-16] [uuid-32]
+            // Discord Issuer: D [username-32]#[discriminator-4] [long-20]
+            else if (user.startsWith("M ") || user.startsWith("D ")) {
+                val parts = user.split(" ")
+                return if (parts.size == 3) {
+                    queryDiscordUserFromString(parts[2])
+                } else {
+                    null
+                }
+            }
+            else if (user.startsWith("U ")) {
+                val parts = user.split(" ")
+                return if (parts.size >= 2) {
+                    queryDiscordUserFromString(parts[1])
+                } else {
+                    null
+                }
+            }
+            else {
+                return null
+            }
+        }
+
 //        fun queryRoleFromString(roleId: String): Role? {
 //            val possibleRole = roleId.toLongOrNull() ?: return null
 //
@@ -707,43 +761,44 @@ class Utils {
 
         fun formatMessage(message: String): String {
             // Format Pings
-            Main.discordBot.everyoneMentionRegex.replace(message, "[@ Everyone]")
-            Main.discordBot.hereMentionRegex.replace(message, "[@ Here]")
-            val pings = Main.discordBot.mentionPlayerRegex.findAll(message).toMutableList()
-            pings.forEach {
+            var formatted = message
+            formatted = Main.discordBot.everyoneMentionRegex.replace(formatted, "[@ Everyone]")
+            formatted = Main.discordBot.hereMentionRegex.replace(formatted, "[@ Here]")
+            Main.discordBot.mentionPlayerRegex.findAll(formatted).toMutableList().forEach {
                 Main.discordBot.discordServer.getMemberByDiscriminatedNameIgnoreCase(
                     it.value.substring(
                         1,
                         it.value.length
                     )
                 ).ifPresent { user ->
-                    message.replace(it.value, "<@${user.id}>")
+                    formatted = formatted.replace(it.value, "<@${user.id}>")
+                }
+            }
+            Main.discordBot.mentionImproperFormatPlayerRegex.findAll(formatted).toMutableList().forEach { match ->
+                val toQuery = match.value.substring(
+                    1,
+                    match.value.length
+                )
+                queryPlayerFromString(toQuery)?.let { player ->
+                    Main.discordBot.discordServer.getMemberById(player.discordUUID).ifPresent { user ->
+                        formatted = formatted.replace(match.value, "<@${user.id}>")
+                    }
                 }
             }
             // format emotes
             if (Main.discordBot.checkIfServerEmojiUsed.containsMatchIn(message) && Main.serverConfig.enableDiscordCustomEmojiSync) {
                 Main.discordBot.serverEmoteRegexMap.forEach {
-                    it.key.replace(message, it.value)
+                    formatted = it.key.replace(formatted, it.value)
                 }
             }
 
-            return message
-        }
-
-        fun queryIgnoreList(ofPlayer: UUID): List<Player> {
-            val player = mutableListOf<Player>()
-            Main.database.queryIgnoresBySourcePlayerUUID(ofPlayer).forEach { ignore ->
-                Main.database.playerGetByUUID(ignore.target)?.let {
-                    player.add(it)
-                }
-            }
-            return player
+            return formatted
         }
 
         fun queryFormattedOnlinePlayers(): List<String> {
-            val players = Bukkit.getOnlinePlayers().map {
-                var final = it.name
-                val dbpl = Main.database.playerGetByUUID(it.uniqueId)
+            val players = Bukkit.getOnlinePlayers().map { player ->
+                var final = player.name
+                val dbpl = Main.database.playerGetByUUID(player.uniqueId)
                 if (dbpl != null) {
                     Main.discordBot.discordApi.getUserById(dbpl.discordUUID).thenAccept {
                         final = "$final(${it.discriminatedName})"
@@ -754,9 +809,26 @@ class Utils {
             return players
         }
 
-        fun isPlayerOnIgnoreList(source: UUID, target: Long): Boolean {
+        fun ignoreUser(source: UUID, target: Long) {
+            Main.database.addIgnore(source, target)
+            Main.ignoreCache[source]?.add(target)
+        }
 
-            return false
+        fun unignoreUser(source: UUID, target: Long) {
+            Main.database.removeIgnoreOfPlayers(source, target)
+            Main.ignoreCache[source]?.remove(target)}
+
+        fun updateIgnoredCacheOfUser(source: UUID) {
+            val data = Main.database.queryIgnoresBySourcePlayerUUID(source).map { it.ignoreId }.toHashSet()
+            Main.ignoreCache[source] = data
+        }
+
+        fun removeFromCache(source: UUID) {
+            Main.ignoreCache.remove(source)
+        }
+
+        fun isPlayerOnIgnoreList(source: UUID, target: Long): Boolean {
+            return Main.ignoreCache[source]?.contains(target) ?: false
         }
     }
 }
