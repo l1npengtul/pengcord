@@ -11,6 +11,7 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.javacord.api.entity.user.User
 
 /*
 *    The Verify command, prepares the user to be verified on discord
@@ -35,8 +36,19 @@ import org.bukkit.entity.Player
 class Verify: CommandExecutor {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (sender is Player && Main.serverConfig.enableVerify && sender.hasPermission("pengcord.verify.command")){
-            Main.serverLogger.info("Got valid verification request... Attempting verify MC Player ${sender.uniqueId} with discord tag ${args[0]}")
+            var user: User? = null;
+
             Main.discordBot.discordServer.getMemberByDiscriminatedName(args[0]).ifPresentOrElse ({ serverMember ->
+                user = serverMember
+            }, {
+                Main.discordBot.discordServer.getMemberById(args[0]).ifPresent {
+                    user = it
+                }
+            })
+
+            if (user != null) {
+                val serverMember = user!!
+                Main.serverLogger.info("Got valid verification request... Attempting verify MC Player ${sender.uniqueId} with discord tag ${args[0]}")
                 Main.serverLogger.info("User ${serverMember.discriminatedName} found with user ID ${serverMember.id}")
                 Main.serverConfig.botCommandChannel.forEach { cmdChannnelId ->
                     Main.discordBot.discordServer.getChannelById(cmdChannnelId).ifPresent { commandChannel ->
@@ -80,9 +92,9 @@ class Verify: CommandExecutor {
                         })
                     }
                 }
-            }, {
-                sender.sendMessage("§cERROR: User ${args[0]} not found!")
-            })
+            } else {
+                sender.sendMessage("§cERROR: User ${args[0]} not found! If you are sure that what you typed is correct, try using your Discord User ID. You can get it by enabling Developer Mode (Settings > Advanced > Developer Mode) then right clicking on your username and clicking \"Copy ID\".")
+            }
             return true
          } else {
             
