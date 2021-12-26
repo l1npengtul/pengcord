@@ -1,6 +1,6 @@
 name: "pengcord"
 main: net.pengtul.pengcord.main.Main
-version: 0.4.0-RC1
+version: 0.4.0-RC2
 author: l1npengtul <l1npengtul@protonmail.com>
 depend:
   - Vault
