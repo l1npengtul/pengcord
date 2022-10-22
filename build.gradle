@@ -1,11 +1,11 @@
 plugins {
     id 'idea'
     id 'java'
-    id 'org.jetbrains.kotlin.jvm' version '1.6.0'
-    id 'com.github.johnrengelman.shadow' version '7.1.0'
+    id 'org.jetbrains.kotlin.jvm' version '1.7.20'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
-group 'net.pengtul.pengcord'
+group 'dev.l1npengtul.pengcord'
 version '0.4.0-RC2'
 
 repositories {
@@ -18,10 +18,10 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.6.0'
-    implementation 'org.javacord:javacord:3.3.2'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.7.20'
+    implementation 'org.javacord:javacord:3.6.0'
     implementation 'com.github.SparklingComet:java-mojang-api:592fabf3e2'
-    implementation "club.minnced:discord-webhooks:0.7.3"
+    implementation 'club.minnced:discord-webhooks:0.8.2'
     implementation 'com.h2database:h2:1.4.200'
     implementation 'org.jetbrains.exposed:exposed-core:0.36.1'
     implementation 'org.jetbrains.exposed:exposed-dao:0.36.1'

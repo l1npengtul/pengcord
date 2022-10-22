@@ -38,7 +38,20 @@ class Verify: CommandExecutor {
         if (sender is Player && Main.serverConfig.enableVerify && sender.hasPermission("pengcord.verify.command")){
             var user: User? = null;
 
-            Main.discordBot.discordServer.getMemberByDiscriminatedName(args[0]).ifPresentOrElse ({ serverMember ->
+            val discriminatedBuilder = StringBuilder()
+
+            args.forEach { argpart ->
+                discriminatedBuilder.append(argpart)
+                discriminatedBuilder.append(" ")
+            }
+
+            if (discriminatedBuilder[discriminatedBuilder.length - 1] == ' ') {
+                discriminatedBuilder.deleteCharAt(discriminatedBuilder.length - 1)
+            }
+
+            Main.serverLogger.info(discriminatedBuilder.toString())
+
+            Main.discordBot.discordServer.getMemberByDiscriminatedName(discriminatedBuilder.toString()).ifPresentOrElse ({ serverMember ->
                 user = serverMember
             }, {
                 Main.discordBot.discordServer.getMemberById(args[0]).ifPresent {

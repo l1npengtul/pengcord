@@ -141,45 +141,33 @@ class Event : Listener{
                 event.isCancelled = true
                 return
             } else if (Main.serverConfig.enableSync && !Main.silentSet.contains(event.player.uniqueId)) {
-                if (Main.serverConfig.enableLiterallyNineteenEightyFour) {
-                    if (!Main.discordBot.chatFilterRegex.containsMatchIn(message.lowercase())){
-                        var prefix = Main.vaultChatApi.getPlayerPrefix(event.player)
-                        prefix = if (prefix.isEmpty()) {
-                            ""
-                        } else {
-                            "[$prefix] "
-                        }
+                if (Main.serverConfig.enableLiterallyNineteenEightyFour && Main.discordBot.chatFilterRegex.containsMatchIn(message.lowercase()) && Main.serverConfig.bannedWords.isNotEmpty()) {
+                    event.player.sendMessage(Main.serverConfig.filteredMessage)
 
-                        Main.discordBot.sendMessagetoWebhook(
-                            message,
-                            "$prefix${event.player.name}",
-                            event.player
-                        )
-                        
-                    } else if (Main.serverConfig.bannedWords.isNotEmpty()){
-                        event.player.sendMessage(Main.serverConfig.filteredMessage)
-                        
-                        val matchedWords = Main.discordBot.chatFilterRegex.findAll(message.lowercase()).map {
-                            it.value
-                        }.joinToString()
-                        Main.database.addFilterAlertToPlayer(player = event.player.uniqueId, w = matchedWords, message).onFailure { exception ->
-                            Main.serverLogger.warn("[ChatFilter] [SQLError]: Failed to add filter alert to ${event.player.name} (${event.player.uniqueId }) due to error: $exception")
-                        }
-                        event.isCancelled = true
+                    val matchedWords = Main.discordBot.chatFilterRegex.findAll(message.lowercase()).map {
+                        it.value
+                    }.joinToString()
+                    Main.database.addFilterAlertToPlayer(player = event.player.uniqueId, w = matchedWords, message).onFailure { exception ->
+                        Main.serverLogger.warn("[ChatFilter] [SQLError]: Failed to add filter alert to ${event.player.name} (${event.player.uniqueId }) due to error: $exception")
                     }
+                    event.isCancelled = true
+                }
+                var prefix = Main.vaultChatApi.getPlayerPrefix(event.player)
+                prefix = if (prefix.isEmpty()) {
+                    ""
                 } else {
-                    var prefix = Main.vaultChatApi.getPlayerPrefix(event.player)
-                    prefix = if (prefix.isEmpty()) {
-                        ""
-                    } else {
-                        "[$prefix] "
-                    }
+                    "[$prefix] "
+                }
+
+                val discordOfUser = Main.database.playerGetByUUID(event.player.uniqueId)!!
+
+                Main.discordBot.discordApi.getUserById(discordOfUser.discordUUID).thenAccept { user ->
+                    val display = Main.discordBot.discordServer.getDisplayName(user)
                     Main.discordBot.sendMessagetoWebhook(
                         message,
-                        "$prefix${event.player.name}",
-                        event.player
+                        "$prefix $display (${event.player.name})",
+                        discordOfUser
                     )
-                    
                 }
             }
         } else {

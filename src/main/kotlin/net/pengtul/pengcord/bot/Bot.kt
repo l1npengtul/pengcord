@@ -78,20 +78,35 @@ class Bot {
 
     init {
         this.onSucessfulConnect()
-
         try {
             webhook = JavacordWebhookClient.withUrl(Main.serverConfig.webhookURL.toString())
+            Main.serverConfig.botChatSyncChannel?.let { channelId ->
+                if (discordApi.getServerThreadChannelById(channelId).isPresent) {
+                    webhook = webhook.onThread(channelId)
+                }
+            }
         } catch (_: Exception) {
             Main.serverConfig.botChatSyncChannel?.let { channelId ->
                 discordApi.getServerTextChannelById(channelId).ifPresentOrElse({ channel ->
-                webhook = JavacordWebhookClient.from(
-                    WebhookBuilder(channel)
-                        .setName("DSC-SYNC")
-                        .create()
-                        .join()
-                )
+                    webhook = JavacordWebhookClient.from(
+                        WebhookBuilder(channel)
+                            .setName("DSC-SYNC")
+                            .create()
+                            .join()
+                    )
                 }, {
-                    throw DiscordLoginFailException("Sync Channel Cannot be null!")
+                    discordApi.getServerThreadChannelById(channelId).ifPresentOrElse({ channel ->
+                        val serverRegular = channel.parent.asServerTextChannel().orElseThrow()
+                        webhook = JavacordWebhookClient.from(
+                            WebhookBuilder(serverRegular)
+                                .setName("DSC-SYNC")
+                                .create()
+                                .join()
+                        )
+                            .onThread(channel.id)
+                    }, {
+                        throw DiscordLoginFailException("Invalid Server Sync")
+                    })
                 })
             }
         }
@@ -188,11 +203,13 @@ class Bot {
             val permissions = PermissionsBuilder()
                 .setAllowed(PermissionType.CREATE_INSTANT_INVITE)
                 .setAllowed(PermissionType.SEND_MESSAGES)
-                .setAllowed(PermissionType.READ_MESSAGES)
+                .setAllowed(PermissionType.READ_MESSAGE_HISTORY)
                 .setAllowed(PermissionType.READ_MESSAGE_HISTORY)
                 .setAllowed(PermissionType.MANAGE_WEBHOOKS)
                 .setAllowed(PermissionType.EMBED_LINKS)
                 .setAllowed(PermissionType.ADD_REACTIONS)
+                .setAllowed(PermissionType.MANAGE_CHANNELS)
+                .setAllowed(PermissionType.MANAGE_THREADS)
 
             if (Main.serverConfig.enableCrossMinecraftDiscordModeration) {
                 permissions.setAllowed(PermissionType.BAN_MEMBERS)
@@ -219,11 +236,13 @@ class Bot {
                     val permissions = PermissionsBuilder()
                         .setAllowed(PermissionType.CREATE_INSTANT_INVITE)
                         .setAllowed(PermissionType.SEND_MESSAGES)
-                        .setAllowed(PermissionType.READ_MESSAGES)
+                        .setAllowed(PermissionType.READ_MESSAGE_HISTORY)
                         .setAllowed(PermissionType.READ_MESSAGE_HISTORY)
                         .setAllowed(PermissionType.MANAGE_WEBHOOKS)
                         .setAllowed(PermissionType.EMBED_LINKS)
                         .setAllowed(PermissionType.ADD_REACTIONS)
+                        .setAllowed(PermissionType.MANAGE_CHANNELS)
+                        .setAllowed(PermissionType.MANAGE_THREADS)
 
                     if (Main.serverConfig.enableCrossMinecraftDiscordModeration) {
                         permissions.setAllowed(PermissionType.BAN_MEMBERS)
@@ -373,17 +392,19 @@ class Bot {
         }
     }
 
-    fun sendMessagetoWebhook(message: String, usrname: String, player: Player){
+    fun sendMessagetoWebhook(message: String, usrname: String, player: net.pengtul.pengcord.data.schema.Player){
         val fmt = formatMessage(message)
         if (this::webhook.isInitialized && fmt.isNotBlank() && usrname.isNotBlank()) {
             Main.scheduler.runTaskAsynchronously(Main.pengcord, Runnable {
                 val senderUsername = if (usrname.lowercase() != "clyde") usrname else "BlydE"
                 val webhookMessage = WebhookMessageBuilder()
                     .setUsername(senderUsername)
-                    .setAvatarUrl(Main.getDownloadSkinURL(player.uniqueId))
                     .setContent(fmt)
-                    .build()
-                webhook.send(webhookMessage)
+
+                val discordUser = discordApi.getUserById(player.discordUUID).get()
+                val effective = discordUser.getEffectiveAvatar(discordServer)
+                webhookMessage.setAvatarUrl(effective.url.toString())
+                webhook.send(webhookMessage.build())
             })
         }
     }
